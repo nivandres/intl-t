@@ -16,7 +16,7 @@
     "test": "bun test",
     "test:watch": "bun test --watch",
     "lint": "bunx tsc --noEmit",
-    "prepare": "husky",
+    "prepare": "bunx husky",
     "prepublishOnly": "rm -rf dist && bun test && bunx tsc"
   },
   "keywords": [
