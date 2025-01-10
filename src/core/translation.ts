@@ -23,7 +23,7 @@ function createTranslationNode<N extends TranslationNode>(context: {
     key,
     path = (key ? [...(parent?.path ?? []), key] : []) as N["path"],
     children = typeof node === "object"
-      ? ((node as Partial<N>).children ??= Object.keys(node).filter(
+      ? (Object.keys(node).filter(
           key => !invalidKeys.includes(key as any) && (typeof node === "string" ? isNaN(key as any) : true)
         ) as N["children"])
       : [],

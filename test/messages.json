@@ -1,0 +1,16 @@
+{
+  "hello": "hello world",
+  "bye": "goodbye world",
+  "common": {
+    "yes": "yes",
+    "no": "no"
+  },
+  "pages": {
+    "landing": {
+      "title": "Welcome",
+      "hero": {
+        "paragraph": "content"
+      }
+    }
+  }
+}

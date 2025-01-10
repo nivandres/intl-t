@@ -1,7 +1,8 @@
 import { createTranslation } from "../src/core";
 import { describe, it, expect } from "bun:test";
+import * as en from "./messages.json";
 
-describe("Core", () => {
+describe("Core", async () => {
   it("should run correctly nested", () => {
     const t = createTranslation({});
     expect(t).toBeInstanceOf(Object);
@@ -104,5 +105,14 @@ describe("Core", () => {
     expect(t.hello.raw).toBe("hello");
     expect(t.hello.o1.type).toBe("base");
     expect(t.hello.o2.type).toBe("list");
+  });
+  it("should support json directly imported", () => {
+    const t = createTranslation({ locales: { en } });
+    expect(t.pages("landing.hero").parent.hero.paragraph.toString()).toBe("content");
+    expect(t.common.yes.g("common.yes").base).toBe("yes");
+  });
+  it("should work with diferent params", () => {
+    let t = createTranslation({ locales: { en }, ps: "/" });
+    expect(t.common.yes.id).toBe("common/yes");
   });
 });
