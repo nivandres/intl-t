@@ -1,0 +1,10 @@
+.DS_Store
+.github
+.gitignore
+.husky
+.npmignore
+.vscode
+*rc
+bun.lockb
+node_modules
+test

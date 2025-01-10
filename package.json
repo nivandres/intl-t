@@ -1,0 +1,50 @@
+{
+  "name": "intl-t",
+  "description": "A Fully-Typed Node-Based i18n Translation Library",
+  "version": "0.1.0",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "homepage": "https://github.com/nivandres/intl-t.git",
+  "repository": {
+    "url": "https://github.com/nivandres/intl-t",
+    "type": "git"
+  },
+  "scripts": {
+    "start": "bunx tsc --watch",
+    "dev": "bun test --watch && bunx tsc --watch",
+    "build": "bunx tsc",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "lint": "bunx tsc --noEmit",
+    "prepare": "husky",
+    "prepublishOnly": "rm -rf dist && bun test && bunx tsc"
+  },
+  "keywords": [
+    "translation",
+    "i18n",
+    "intl",
+    "typescript",
+    "nodes",
+    "node-based",
+    "tree"
+  ],
+  "author": "Ivan Vargas <nivnnd@gmail.com>",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./locales": {
+      "default": "./dist/locales/index.js",
+      "types": "./dist/locales/index.d.ts"
+    }
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "husky": "^9"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

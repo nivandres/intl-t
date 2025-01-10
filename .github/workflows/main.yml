@@ -1,0 +1,17 @@
+name: CI
+on: [push]
+jobs:
+  build:
+    name: Build, lint, and test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: oven-sh/setup-bun@v2
+      - name: Install deps
+        run: bun install
+      - name: Test
+        run: bun test
+      - name: Build
+        run: bun build
