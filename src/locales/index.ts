@@ -1,1 +1,1 @@
-export type Locale = string;
+export type Locale = Intl.UnicodeBCP47LocaleIdentifier;

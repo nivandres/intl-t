@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
     "declaration": true,
+    "jsx": "react",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "outDir": "dist",
     "skipLibCheck": true,
     "strict": true,
-    "target": "ESNext"
+    "target": "ESNext",
   },
   "exclude": ["node_modules", "test"],
   "include": ["src"]

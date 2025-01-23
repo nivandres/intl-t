@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
-  "homepage": "https://github.com/nivandres/intl-t.git",
+  "homepage": "https://github.com/nivandres/intl-t",
   "repository": {
     "url": "https://github.com/nivandres/intl-t",
     "type": "git"
@@ -24,9 +24,17 @@
     "i18n",
     "intl",
     "typescript",
+    "react",
+    "node",
     "nodes",
     "node-based",
-    "tree"
+    "translate",
+    "formatting",
+    "tree",
+    "next",
+    "next.js",
+    "javascript",
+    "browser"
   ],
   "author": "Ivan Vargas <nivnnd@gmail.com>",
   "license": "MIT",
@@ -35,16 +43,34 @@
       "default": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
+    "./core": {
+      "default": "./dist/core/index.js",
+      "types": "./dist/core/index.d.ts"
+    },
+    "./types": {
+      "types": "./dist/core/types.d.ts"
+    },
+    "./react": {
+      "default": "./dist/react/index.js",
+      "types": "./dist/react/index.d.ts"
+    },
     "./locales": {
       "default": "./dist/locales/index.js",
       "types": "./dist/locales/index.d.ts"
     }
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "husky": "^9"
+    "@types/bun": "^1.2.0",
+    "@types/react": "^19.0.7",
+    "husky": "^9.1.7"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "react": ">=18 <20",
+    "typescript": "^5.7.3"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   }
 }
