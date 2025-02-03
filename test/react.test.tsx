@@ -1,13 +1,20 @@
 import React from "react";
 import { injectReactChunks as ir, createTranslation as ct } from "../src/react";
+import * as en from "./messages.json";
 import { describe, it, expect } from "bun:test";
 
 describe("react plugin", () => {
   it("should work", () => {
-    const t = ct({ locales: { en: { hello: "hello" } } });
-    expect(t.hello.base).toBe("hello");
+    const t = ct({ locales: { en } });
+    expect(t.hello.base).toBe("hello world");
     expect(t.Translation).toBeFunction();
     expect(t.useTranslation).toBeFunction();
+  });
+  it("hooks should work", () => {
+    const t = ct({ locales: { en } });
+    const fn = () => {};
+    t.setLang = fn;
+    expect(t("pages.landing.hero").setLang).toBeFunction();
   });
 });
 
@@ -18,7 +25,7 @@ describe("variable injection", () => {
     expect(
       ir("<a /> <a />", {
         a: ({ children }) => children,
-      })
+      }),
     ).toEqual(["", " ", ""]);
     expect(ir("hola <b/> que <a/> tal <b/> amigo <b/> como <a/>", { a: "a", b: "b" })).toEqual([
       "hola ",
@@ -38,11 +45,11 @@ describe("variable injection", () => {
       ir('hello <div className="mx-2 pl-2" ><a>a</a></div>', {
         div: ({ children }) => children,
         a: ({ children }) => children,
-      })
+      }),
     ).toEqual(["hello ", "a"]);
     expect(ir("<div>hello</div>")).toEqual((<div key={0}>hello</div>) as any);
     expect(ir("<juan>hello</juan>", { juan: ({ children }) => <div>{children}</div> })).toEqual(
-      (<div>hello</div>) as any
+      (<div>hello</div>) as any,
     );
     const a = ir("icons <globe /> icon", { globe: () => "🌎" });
     expect(a).toEqual(["icons ", "🌎", " icon"]);
@@ -55,13 +62,13 @@ describe("variable injection", () => {
   });
   it("should work integrated", () => {
     const t = ct({ locales: { en: { hello: `hello <div className="mx-2 pl-2" ><a>a</a></div>` } } });
-    expect(t.hello.use({ a: "hola" }).base).toEqual([
+    expect(t.hello.use({ a: "hola" })).toEqual([
       "hello ",
       <div key={0} className="mx-2 pl-2">
         hola
       </div>,
     ] as any);
-    expect(t.hello.use({ div: ({ children }) => children, a: ({ children }) => children }).base).toEqual([
+    expect(t.hello.use({ div: ({ children }) => children, a: ({ children }) => children })).toEqual([
       "hello ",
       "a",
     ] as any);

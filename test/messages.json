@@ -3,7 +3,11 @@
   "bye": "goodbye world",
   "common": {
     "yes": "yes",
-    "no": "no"
+    "no": "no",
+    "hello": "Hello {name}",
+    "values": {
+      "name": "John"
+    }
   },
   "pages": {
     "landing": {

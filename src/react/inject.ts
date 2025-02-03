@@ -2,8 +2,8 @@ import React from "react";
 import { Values, Base } from "../core";
 import { ReactChunkProps, ReactChunk } from "./types";
 
-const regex = /<\s*(\w+)([^>\/]+)?(?:\/\s*>|>(.*)<\s*\/?\s*\1\s*>)/g;
-const attributesRegex = /(\w+)(?:=(\w+|"[^"]*"|'[^']'|{(\w+)}))?/g;
+const regex = /<(\w+)([^<>\/]+)?(?:\/\s*>|>(?:(.*)<\s*\/\s*\1\s*>)?)/gm;
+const attributesRegex = /(\w+)(?:=(\w+|".*?"|'.*?'|{(.+?)}))?/g;
 
 export const Chunk: ReactChunk = ({ children, tagName, tagAttributes, tagContent, value, key, ...props }) => {
   if (value) return String(value);

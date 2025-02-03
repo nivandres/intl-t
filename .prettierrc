@@ -2,5 +2,5 @@
   "printWidth": 120,
   "bracketSpacing": true,
   "arrowParens": "avoid",
-  "importOrder": ["^[^\\.](.*)$", "^\\.(.*)$"]
+  "trailingComma": "all"
 }

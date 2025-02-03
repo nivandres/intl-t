@@ -5,6 +5,6 @@
 .npmignore
 .vscode
 *rc
-bun.lockb
+bun.lock*
 node_modules
 test
