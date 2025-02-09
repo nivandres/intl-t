@@ -1,7 +1,7 @@
 {
   "name": "intl-t",
   "description": "A Fully-Typed Node-Based i18n Translation Library",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "homepage": "https://github.com/nivandres/intl-t",

@@ -17,14 +17,16 @@ export function nested(content: string) {
 const variableRegex =
   /{{?(\w+|(?:\(.*?\)|[=+!><\-&|%*/?:#\w]|{\w+}|".*?"|'.*?')+)\s*(?:[,\.;]+\s*(\w+)\s*)?(?:[,\.;]+(.*))?}}?/s;
 const instructionsRegex =
-  /(?:(?<t>(?<k>\w+))|(?<kn>'|")(?<k>.*?)(?<!`)\k<kn>|(?<k>(?:[=+!><\-&|%*/?:]*(?:#|\(.*?\)|\w+|{\w+}|(?<kn>'|").*?(?<!`)\k<kn>|\[.*?\]))+))(?:[\s=>]|:(?!:\w))*(?:(?<=[\s:=>])(?<t_>(?<v>[\w\#]+))(?=$|[,\s;])|(?<vn>'|")(?<v>.*?)(?<!`)\k<vn>|(?<v>{.*(?<!`)(?<vn>})))|:?:?(?<t>(?<k>\w+))(?:[\\/](?<t_>(?<v>\w+))|\((?:(?<t_>(?<v>\w+))|(?<vn>'|")(?<v>.*?)(?<!`)\k<vn>)\))?/s;
+  /(?:(?<t1>(?<k1>\w+))|(?<kn1>'|")(?<k2>.*?)(?<!`)\k<kn1>|(?<k3>(?:[=+!><\-&|%*/?:]*(?:#|\(.*?\)|\w+|{\w+}|(?<kn2>'|").*?(?<!`)\k<kn2>|\[.*?\]))+))(?:[\s=>]|:(?!:\w))*(?:(?<=[\s:=>])(?<tn1>(?<v1>[\w\#]+))(?=$|[,\s;])|(?<vn1>'|")(?<v2>.*?)(?<!`)\k<vn1>|(?<v3>{.*(?<!`)(?<vn2>})))|:?:?(?<t2>(?<k4>\w+))(?:[\\/](?<tn2>(?<v4>\w+))|\((?:(?<tn3>(?<v5>\w+))|(?<vn3>'|")(?<v6>.*?)(?<!`)\k<vn3>)\))?/s;
 const instructionRegex = /{(.*)}/s;
 
 export function instructionsMatch(content: string) {
   const instructions = [] as RegExpMatchArray[];
   let match: RegExpMatchArray | null;
   while ((match = content.match(instructionsRegex))) {
-    const { groups, index = 0 } = match;
+    const { groups = {}, index = 0 } = match;
+    for (let k of ["k", "v", "t", "kn", "vn", "tn"])
+      for (let i = 1; !groups[k] && i <= 6; i++) groups[k] ??= groups[k + i];
     if (groups?.vn == "}") {
       const { value, offset } = nested(groups.v) as { value: string; offset: number };
       content = content.slice(match[0].indexOf(groups.v) + index + offset);
@@ -59,8 +61,8 @@ export function injectVariables(content: string = "", variables: Values = {}, st
     else if (typeof variable === "string" && !isNaN(variable as any)) variable = Number(variable);
     const options = { ...formatOptions } as Record<string, any>;
     const instructions = instructionsMatch(instruction).map(({ groups = {} }) => {
-      const { k: name, v: val, t, t_ } = groups;
-      action += "\n" + (t || "") + "\n" + (t_ || "");
+      const { k: name, v: val, t, tn } = groups;
+      action += "\n" + (t || "") + "\n" + (tn || "");
       options[name] = val;
       return { name, val };
     });
