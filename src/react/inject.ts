@@ -10,8 +10,8 @@ export const Chunk: ReactChunk = ({ children, tagName, tagAttributes, tagContent
   return React.createElement(tagName, { key, ...props }, children);
 };
 
-export function injectReactChunks(content: string = "", variables: Values = {}) {
-  if (!content.includes("<")) return content;
+export function injectReactChunks(content: string = "", variables: Values = {}, state?: any) {
+  if (!content || !content.includes("<")) return content;
   const matches = [...content.matchAll(regex)];
   if (!matches.length) return content;
   const elements = [] as React.ReactNode[];

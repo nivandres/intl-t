@@ -1,7 +1,7 @@
 {
   "name": "intl-t",
   "description": "A Fully-Typed Node-Based i18n Translation Library",
-  "version": "0.9.1",
+  "version": "1.0.0-beta.0",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "homepage": "https://github.com/nivandres/intl-t",
@@ -47,6 +47,14 @@
     "./core": {
       "default": "./dist/core/index.js",
       "types": "./dist/core/index.d.ts"
+    },
+    "./next": {
+      "default": "./dist/next/index.js",
+      "types": "./dist/next/index.d.ts"
+    },
+    "./link": {
+      "default": "./dist/next/link.js",
+      "types": "./dist/next/link.d.ts"
     },
     "./react": {
       "default": "./dist/react/index.js",

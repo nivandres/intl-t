@@ -17,7 +17,7 @@ export function nested(content: string) {
 const variableRegex =
   /{{?(\w+|(?:\(.*?\)|[=+!><\-&|%*/?:#\w]|{\w+}|".*?"|'.*?')+)\s*(?:[,\.;]+\s*(\w+)\s*)?(?:[,\.;]+(.*))?}}?/s;
 const instructionsRegex =
-  /(?:(?<t1>(?<k1>\w+))|(?<kn1>'|")(?<k2>.*?)(?<!`)\k<kn1>|(?<k3>(?:[=+!><\-&|%*/?:]*(?:#|\(.*?\)|\w+|{\w+}|(?<kn2>'|").*?(?<!`)\k<kn2>|\[.*?\]))+))(?:[\s=>]|:(?!:\w))*(?:(?<=[\s:=>])(?<tn1>(?<v1>[\w\#]+))(?=$|[,\s;])|(?<vn1>'|")(?<v2>.*?)(?<!`)\k<vn1>|(?<v3>{.*(?<!`)(?<vn2>})))|:?:?(?<t2>(?<k4>\w+))(?:[\\/](?<tn2>(?<v4>\w+))|\((?:(?<tn3>(?<v5>\w+))|(?<vn3>'|")(?<v6>.*?)(?<!`)\k<vn3>)\))?/s;
+  /(?:(?<t1>(?<k1>\w+))|(?<kn1>'|")(?<k2>.*?)(?<!`)\k<kn1>|(?<k3>(?:[=+!><\-&|%*/?:]*(?:#|\(.*?\)|\w+|{\w+}|(?<kn2>'|").*?(?<!`)\k<kn2>|\[.*?\]))+))(?:[\s=>]|:(?!:\w))*(?:(?<=[\s:=>])(?<t_1>(?<v1>[\w\#]+))(?=$|[,\s;])|(?<vn1>'|")(?<v2>.*?)(?<!`)\k<vn1>|(?<v3>{.*(?<!`)(?<vn2>})))|:?:?(?<t2>(?<k4>\w+))(?:[\\/](?<t_2>(?<v4>\w+))|\((?:(?<t_3>(?<v5>\w+))|(?<vn3>'|")(?<v6>.*?)(?<!`)\k<vn3>)\))?/s;
 const instructionRegex = /{(.*)}/s;
 
 export function instructionsMatch(content: string) {
@@ -39,6 +39,7 @@ export function instructionsMatch(content: string) {
 
 // @ts-ignore
 export function injectVariables(content: string = "", variables: Values = {}, state: State = this || {}) {
+  if (!content || !variables) return content;
   const { formatFallback = "", formatOptions } = state;
   let match: RegExpMatchArray | null | undefined;
   const matches = new Set();
@@ -61,8 +62,8 @@ export function injectVariables(content: string = "", variables: Values = {}, st
     else if (typeof variable === "string" && !isNaN(variable as any)) variable = Number(variable);
     const options = { ...formatOptions } as Record<string, any>;
     const instructions = instructionsMatch(instruction).map(({ groups = {} }) => {
-      const { k: name, v: val, t, tn } = groups;
-      action += "\n" + (t || "") + "\n" + (tn || "");
+      const { k: name, v: val, t, t_ } = groups;
+      action += "\n" + (t || "") + "\n" + (t_ || "");
       options[name] = val;
       return { name, val };
     });

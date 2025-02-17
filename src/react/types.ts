@@ -1,5 +1,5 @@
 import type { Key, ReactNode } from "react";
-import { Base, Translation } from "../core/types";
+import { Base } from "../core/types";
 
 export type { ReactNode };
 

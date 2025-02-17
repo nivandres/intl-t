@@ -10,6 +10,10 @@ export function defineProperty(obj: any, key: string, value: () => any, isFn = t
       Object.defineProperty(obj, key, { configurable: true, writable: true, enumerable: true, value });
       return value;
     },
+    set(valiue) {
+      delete obj[key];
+      obj[key] = value;
+    },
   });
 }
 

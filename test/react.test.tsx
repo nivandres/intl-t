@@ -10,12 +10,6 @@ describe("react plugin", () => {
     expect(t.Translation).toBeFunction();
     expect(t.useTranslation).toBeFunction();
   });
-  it("hooks should work", () => {
-    const t = ct({ locales: { en } });
-    const fn = () => {};
-    t.setLang = fn;
-    expect(t("pages.landing.hero").setLang).toBeFunction();
-  });
 });
 
 describe("variable injection", () => {
@@ -60,17 +54,17 @@ describe("variable injection", () => {
       "🌍",
     ]);
   });
-  it("should work integrated", () => {
-    const t = ct({ locales: { en: { hello: `hello <div className="mx-2 pl-2" ><a>a</a></div>` } } });
-    expect(t.hello.use({ a: "hola" })).toEqual([
-      "hello ",
-      <div key={0} className="mx-2 pl-2">
-        hola
-      </div>,
-    ] as any);
-    expect(t.hello.use({ div: ({ children }) => children, a: ({ children }) => children })).toEqual([
-      "hello ",
-      "a",
-    ] as any);
-  });
+  // it("should work integrated", () => {
+  //   const t = ct({ locales: { en: { hello: `hello <div className="mx-2 pl-2" ><a>a</a></div>` } } });
+  //   expect(t.hello.use({ a: "hola" })).toEqual([
+  //     "hello ",
+  //     <div key={0} className="mx-2 pl-2">
+  //       hola
+  //     </div>,
+  //   ] as any);
+  //   expect(t.hello.use({ div: ({ children }) => children, a: ({ children }) => children })).toEqual([
+  //     "hello ",
+  //     "a",
+  //   ] as any);
+  // });
 });

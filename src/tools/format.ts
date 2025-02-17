@@ -22,7 +22,7 @@ export function date(value: Date = new Date(), options?: Intl.DateTimeFormatOpti
   return new Intl.DateTimeFormat(locale, options).format(value);
 }
 
-export const r = {
+export const re = {
   se: [1000, "conds"],
   mi: [60000, "nutes"],
   ho: [3600000, "urs"],
@@ -43,8 +43,8 @@ export function relative(
   if (value instanceof Date) {
     value = value.getTime() - now.getTime();
     unit
-      ? (value = Math.floor(value / r[`${unit[0]}${unit[1]}` as "se"][0]))
-      : Object.entries(r).find(([k1, [v, k2]]) =>
+      ? (value = Math.floor(value / re[`${unit[0]}${unit[1]}` as "se"][0]))
+      : Object.entries(re).find(([k1, [v, k2]]) =>
           (value as number) >= v ? ((value = Math.floor((value as number) / v)), (options.unit = k1 + k2)) : false,
         );
   }
