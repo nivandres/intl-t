@@ -431,6 +431,10 @@ export default function Providers({ children }) {
 }
 ```
 
+Also Translation component can be used as `{t("key")}` like `<Translation path="key" />`
+
+Each node has its Translation component, `const { Translation } = t.es.key`;
+
 ### `useTranslation` Hook
 
 React hook for accessing translations within components.
@@ -467,6 +471,11 @@ const Welcome = () => (
 ## Next.js
 
 intl-t offers special integration with Next.js for server-side rendering and routing:
+
+For Static Rendering you will need to generate static params and in each layout implement setRequestLocale to cache the current locale.
+
+In dynamic pages with just `await getTranslation()` you can get the translation with current locale.
+
 
 ### Navigation
 
