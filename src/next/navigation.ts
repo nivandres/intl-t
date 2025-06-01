@@ -23,7 +23,7 @@ export function resolvedPermanentRedirect(href?: string, type?: RedirectType) {
 export const redirect: typeof r = resolvedRedirect;
 export const permanentRedirect: typeof pr = resolvedPermanentRedirect;
 
-export interface intlConfig<L extends Locale = Locale, T extends React.FC<any> = NL>
+export interface IntlConfig<L extends Locale = Locale, T extends React.FC<any> = NL>
   extends ResolveConfig<L>,
     StaticParamsConfig<L>,
     MiddlewareConfig<L>,
@@ -34,14 +34,13 @@ export interface intlConfig<L extends Locale = Locale, T extends React.FC<any> =
 
 export function createNavigation<L extends Locale, LC extends React.FC<any>>(
   // @ts-ignore
-  config: intlConfig<L, LC> = this?.ts || this || {},
+  config: IntlConfig<L, LC> = this?.ts || this || {},
 ) {
   if (!config.allowedLocales && Array.isArray(config.locales)) config.allowedLocales = config.locales;
   config.pathPrefix ||= config.strategy == "domain" ? "hidden" : "default";
   config.pathBase ||= config.pathPrefix == "hidden" ? "detect-latest" : "detect-default";
   config.defaultLocale ||= config.allowedLocales?.[0];
   config.redirectPath ||= "r";
-  globalThis.ts = config as any;
   return {
     config,
     useRouter: useRouter.bind(config),

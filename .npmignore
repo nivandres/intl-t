@@ -4,7 +4,7 @@
 .husky
 .npmignore
 .vscode
-*rc
+.prettierrc
 bun.lock*
 node_modules
 test

@@ -1,7 +1,8 @@
 {
   "name": "intl-t",
   "description": "A Fully-Typed Node-Based i18n Translation Library",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-rc.0",
+  "type": "module",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "homepage": "https://github.com/nivandres/intl-t",
@@ -18,7 +19,7 @@
     "format": "bunx prettier --write .",
     "lint": "bunx tsc --noEmit",
     "prepare": "bunx husky",
-    "prepublishOnly": "rm -rf dist && bun test && bunx tsc"
+    "prepublishOnly": "bun run test && bun run build"
   },
   "keywords": [
     "translation",
@@ -69,21 +70,29 @@
       "types": "./dist/locales/index.d.ts"
     }
   },
+  "bin": {
+    "json-const": "scripts/json-const.js"
+  },
   "devDependencies": {
     "@types/bun": "^1.2.0",
-    "@types/react": "^19.0.7",
-    "husky": "^9.1.7"
+    "@types/react": "^19",
+    "husky": "^9"
   },
   "peerDependencies": {
+    "typescript": "^5",
     "react": ">=18 <20",
-    "typescript": "^5"
+    "next": ">=14"
   },
   "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    },
     "react": {
       "optional": true
     },
     "next": {
       "optional": true
     }
-  }
+  },
+  "packageManager": "bun@1.2.0"
 }

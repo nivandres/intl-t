@@ -1,4 +1,4 @@
-import { FormatOptions, Locale, TimeZone } from "./locales";
+import { FormatOptions, Locale, TimeZone } from "./locales/types";
 
 export interface State<L extends Locale = Locale> {
   timeZone: TimeZone;
@@ -11,7 +11,7 @@ export interface State<L extends Locale = Locale> {
 
 export const isClient = "window" in globalThis;
 export const options = Intl.DateTimeFormat().resolvedOptions();
-export const locale = isClient ? navigator.language.split(",") : [options.locale];
+export const locale = isClient && "language" in navigator ? (navigator.language as string)?.split(",") : [options.locale];
 export const timeZone = options.timeZone;
 export const now = new Date();
 export let hidratation: boolean;

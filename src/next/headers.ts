@@ -13,7 +13,9 @@ export const getHeaders = cache(async () => {
 });
 
 export async function getHeadersRequestLocale(key = LOCALE_HEADERS_KEY) {
-  return (await getHeaders()).get(key);
+  const locale = (await getHeaders()).get(key);
+  // @ts-ignore
+  this?.settings.locale = locale;
 }
 
 export async function getHeadersRequestPathname(key = PATH_HEADERS_KEY) {

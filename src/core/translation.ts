@@ -1,252 +1,431 @@
-import { Locale } from "../locales";
-import { format } from "../tools/format";
+import type { Locale } from "../locales/types";
+import type {
+  Node,
+  Values,
+  Key,
+  Variables,
+  Content,
+  LastKey,
+  TranslationSettings,
+  TranslationType,
+  TranslationData,
+  TranslationDataAdapter,
+  PartialTree,
+  Children,
+  FollowWay,
+  Join,
+  TranslationFC,
+  TranslationNodeFC,
+} from "./types";
 import { injectVariables } from "../tools/inject";
-import { match } from "../tools/match";
-import { timeZone, now, hidratation } from "../state";
-import { Translation, TranslationSettings, Node, Values, TranslationNode } from "../types";
-import { defineProperty, getChildren, getSource } from "./source";
+import { hidratation } from "../state";
 
-declare global {
-  var t: Translation;
-  var ts: Translation["settings"];
-}
+abstract class TranslationProxy extends Function {
+  public name = "Translation";
 
-export function* flattenString(this: string) {
-  yield this.toString();
-}
-
-export function createTranslation<L extends Locale, M extends L, T extends Node, V extends Values, P extends string>(
-  settings: Partial<TranslationSettings<L, M, T, V, P>> = (globalThis.ts || {}) as {},
-): Translation<TranslationSettings<L, M, T, V, string extends P ? "." : P>> {
-  const t = (settings.origin ||= { settings } as any);
-  createTranslationSettings(settings);
-  if (t.settings && t.settings !== settings)
-    Object.assign(t.settings, settings, {
-      locales: { ...(t.settings as any).locales, ...settings.locales },
+  constructor(protected __call__: Function) {
+    super("...args", "return this.__call__(...args)");
+    return new Proxy(this.bind(this), {
+      get(target, p, receiver) {
+        let val = Reflect.get(target, p, receiver);
+        let src;
+        if (val) {
+          if (typeof val !== "function" || !(p in TranslationNode.prototype)) return val;
+          src = target;
+        } else {
+          src = Array.isArray(target.node) ? [...target.children.map((c: string) => target[c])] : target.base;
+          val = src[p];
+        }
+        if (typeof val === "function") val = val.bind(src);
+        return val;
+      },
+      ownKeys(target) {
+        return target.children;
+      },
     });
-  settings.allowedLocales?.forEach((lang: L) => {
-    if (t[lang]) return;
-    const fn = (_?: Node, node = (settings.locales as any)[lang] || _) =>
-      node ? createTranslationNode({ node, settings, lang } as any) : void 0;
-    !fn() &&
-      Object.defineProperty(t, lang, {
-        configurable: true,
-        get() {
-          delete t[lang];
-          const node = (settings.locales as any)[lang] || (settings.getSource?.(lang) as any);
-          if (node instanceof Promise) {
-            new Promise(async r => r(fn(await node)));
-            return createTranslationNode({ settings, lang });
-          } else return fn(node);
-        },
-      });
-  });
-  return (globalThis.t = t[settings.currentLocale] || createTranslationNode({ t, settings }));
+  }
 }
 
-export function createTranslationSettings<S extends TranslationSettings>(
-  settings: Partial<S> = globalThis.ts as {},
-): S {
-  if (Array.isArray(settings.locales)) {
-    settings.allowedLocales = settings.locales;
-    settings.locales = undefined;
+export class TranslationNode<
+  S extends TranslationSettings = TranslationSettings,
+  N = S["tree"][S["allowedLocale"]],
+  V extends Values = S["variables"],
+  L extends S["allowedLocale"] = S["allowedLocale"],
+  R extends Key[] = [],
+> extends TranslationProxy {
+  settings: S;
+
+  t = this;
+  tr = this;
+  translation = this;
+  node: N;
+  variables: Variables<N>;
+  locale: L;
+  path: [] extends R ? Key[] : R;
+  key: LastKey<R>;
+  children: Children<N>[];
+
+  global: TranslationType<S, S["tree"][L], S["variables"], L>;
+  g: typeof this.global;
+  private parent: TranslationNode;
+
+  use = this;
+  get = this;
+
+  static Node = TranslationNode;
+  static createTranslation = createTranslation;
+  static createTranslationSettings = createTranslationSettings;
+  static injectVariables = injectVariables;
+  static getChildren = getChildren;
+  static Proxy = TranslationProxy;
+
+  static Provider = function (this: any, ...args: any[]) {
+    return this[this.settings.locale](...args);
+  } as unknown as TranslationFC;
+
+  T = new Proxy(this, {
+    apply(target, thisArg, args) {
+      return TranslationNode.Provider.apply(target, args as any);
+    },
+    get(target, p, receiver) {
+      return (Reflect.get(target, p, receiver) as TranslationNode)?.T;
+    },
+  }) as unknown as TranslationNodeFC<S, N, V>;
+
+  Tr = this.T;
+  Trans = this.T;
+  Translation = this.T;
+  TranslationProvider = this.T;
+
+  static hook = function (this: any, ...args: any[]) {
+    return this[this.settings.locale](...args);
+  };
+
+  hook = new Proxy(this, {
+    apply(target, thisArg, args) {
+      return TranslationNode.hook.apply(target, args as any);
+    },
+    get(target, p, receiver) {
+      const t = Reflect.get(target, p, receiver) as unknown;
+      return (t as any)?.hook || t;
+    },
+  });
+
+  useTranslation = this.hook;
+  getTranslation = this.hook;
+  useLocale = this.hook;
+
+  [x: symbol]: any;
+
+  constructor(params: TranslationData<S, N, V, L, R>) {
+    super((...args: any[]) => this.call(...args));
+
+    this.settings = params.settings ??= createTranslationSettings(params) as S;
+
+    const {
+      settings = params.settings,
+      node = settings.tree[settings.locale] as N,
+      locale = settings.locale as L,
+      variables = (node as any)?.values || settings.variables,
+      path = [] as unknown as R,
+      key = (path.at(-1) || locale) as LastKey<R>,
+      parent = {} as unknown as TranslationNode,
+    } = params;
+
+    this.node = node;
+    this.variables = variables;
+    this.locale = locale;
+    this.path = path;
+    this.key = key;
+    this.parent = parent;
+    this.children = getChildren(node);
+
+    this.global = parent.global || this;
+    this.g = this.global;
+
+    const descriptors: PropertyDescriptorMap = {};
+    const t = this;
+
+    if (node instanceof Promise) node.then(this.setSource);
+    else this.setChildren(t.children);
+
+    settings.allowedLocales.forEach(locale => {
+      if (locale === t.locale) {
+        t[locale as any] = t;
+        (settings as any)[locale] ??= t;
+        return;
+      }
+      descriptors[locale] = {
+        get() {
+          let value: TranslationNode;
+          let node = parent[locale as any]?.[key] || (settings as any)[locale];
+          value =
+            node instanceof TranslationNode
+              ? (node as any)
+              : new Translation.Node({
+                  settings,
+                  locale,
+                  variables,
+                  parent,
+                  node: settings.tree[locale] || settings.getLocaleSource?.(locale),
+                });
+          Object.defineProperty(t, locale, { value, configurable: true, enumerable: false });
+          return value;
+        },
+        configurable: true,
+        enumerable: false,
+      };
+    });
+    Object.defineProperties(this, descriptors);
+    settings.onTranslationNode?.(this);
   }
-  settings.locales ??=
-    settings.allowedLocales?.reduce((o, l) => (((o as any)[l] = undefined), o), {}) ||
-    ({
-      en: undefined,
-    } as any);
-  settings.allowedLocales ??= Object.keys(settings.locales as object);
-  settings.mainLocale ??= (settings.defaultLocale as S["mainLocale"]) ?? settings.locale ?? settings.allowedLocales[0];
+  call(...path: any[]): any {
+    const variables = path.at(-1)?.__proto__ === Object.prototype ? (path.pop() as Values) : undefined;
+    if (typeof path[0] === "object") path = path[0];
+    else if (path.length === 1) path = (path[0] as string).trim().split(this.settings.ps);
+    if (variables) Object.assign(this.variables || {}, variables);
+    path = path?.filter?.(Boolean);
+    if (!path.length) return this.t;
+    return path.reduce(
+      (o: TranslationNode, key, index) =>
+        o[key] ??
+        (() => {
+          const value = new Translation.Node({
+            node:
+              this.settings.getNodeSource?.({ path: [...o.path, key], locale: this.locale }) ||
+              (o as any)[this.settings.mainLocale].node[key] ||
+              path.slice(0, index + 1).join(o.settings.ps),
+            settings: o.settings,
+            locale: o.locale,
+            parent: o,
+            path: [...o.path, key],
+          });
+          Object.defineProperty(o, key, { value, configurable: true, enumerable: false });
+          return value;
+        })(),
+      this,
+    );
+  }
+  set<VV extends Values>(variables: Partial<V & Variables<N>> & VV = {} as any) {
+    Object.assign(this.variables as {}, variables);
+    return this as TranslationType<S, N, V & VV, L, R>;
+  }
+  setSource(node: N) {
+    this.node = node;
+    const parentNode = this.parent.node;
+    if (parentNode) parentNode[this.key] = node;
+    this.setChildren();
+  }
+  addChildren(children: Children<N>[] = []) {
+    const t = this;
+    const settings = t.settings;
+    const locale = t.locale;
+    const descriptors: PropertyDescriptorMap = {};
+    children.forEach(child => {
+      const path = [...t.path, child];
+      descriptors[child] = {
+        get() {
+          const value = new Translation.Node({
+            node: t.node[child] || settings.getNodeSource?.({ path, locale }) || null,
+            settings,
+            locale,
+            parent: t,
+            path,
+          });
+          Object.defineProperty(t, child, { value, configurable: true, enumerable: false });
+          return value;
+        },
+        configurable: true,
+        enumerable: false,
+      };
+    });
+    Object.defineProperties(t, descriptors);
+    return children;
+  }
+  setChildren(children = getChildren(this.node)) {
+    this.children = children;
+    return this.addChildren(children);
+  }
+  addSource<NN extends N, II extends keyof N | (Key & {})>(
+    src: NN | TranslationNode,
+    key?: II,
+    path?: Key[],
+  ): TranslationType<S, (N & NN extends never ? N : N & NN) & { [K in II]: NN }, V, L, R> {
+    if (src instanceof TranslationNode) src = src.source;
+    path ||= ((src as any).path?.join?.(this.settings.ps) || key || "")
+      .replace(this.id, "")
+      .split(this.settings.ps)
+      .filter(Boolean) as any[];
+    if (!path.length) return this.setSource(src as NN), this as any;
+    key = path[0] as any;
+    const t = this[key as keyof this];
+    if (t instanceof TranslationNode) return t.addSource(src, key, path.slice(1)) as any, this as any;
+    this.node ||= {} as N;
+    this.node[key as keyof N] = src as any;
+    if (!this.children.includes(key as any)) this.children.push(key as any);
+    this.addChildren([key as any]);
+    return this as any;
+  }
+  getSource(deep = 1): PartialTree<N> {
+    return getSource(this.node, deep, this.path);
+  }
+  get base() {
+    return this.settings.injectVariables(
+      !this.node || typeof this.node !== "object" ? this.node : (this.node as any).base || this.path.join(this.settings.ps),
+      this.values,
+    ) as Content<N>;
+  }
+  getChildren() {
+    return getChildren(this.node);
+  }
+  getLocale() {
+    return this.settings.locale as S["allowedLocale"];
+  }
+  setLocale<LL extends S["allowedLocale"] = L>(
+    locale: LL | (string & {}) | ((p: L) => LL) = this.settings.locale,
+  ): TranslationType<S, FollowWay<S["tree"][LL], R>, V, LL, R> {
+    if (typeof locale === "function") locale = locale(this.settings.locale as L);
+    this.settings.setLocale?.(locale);
+    return this[locale as any];
+  }
+  get values(): V & Variables<N> {
+    return { ...this.parent.values, ...this.variables };
+  }
+  get child(): Children<N> {
+    return this.children[0];
+  }
+  get currentLocale() {
+    return this.settings.locale as S["allowedLocale"];
+  }
+  get current(): TranslationType<S, FollowWay<S["tree"][S["allowedLocale"]], R>, V, L, R> {
+    return this[this.currentLocale as any];
+  }
+  get mainLocale() {
+    return this.settings.mainLocale as S["mainLocale"];
+  }
+  get allowedLocales() {
+    return this.settings.allowedLocales as S["allowedLocale"][];
+  }
+  get index() {
+    return this.key;
+  }
+  get id() {
+    return (this[Symbol.for("id")] ??= this.path.join(this.settings.ps) as Join<R extends string[] ? R : string[], S["ps"]>);
+  }
+  get src() {
+    return (this[Symbol.for("source")] ||= this.getSource(1));
+  }
+  get source() {
+    return this.src;
+  }
+  [Symbol.toStringTag]() {
+    return "Translation";
+  }
+  toString() {
+    return String(this.base);
+  }
+  get promise(): Promise<this> {
+    return (this[Symbol.for("promise")] ||= new Promise((r, c) => {
+      this.then(r).catch(c);
+    }));
+  }
+  then(cb: (value: typeof this) => void) {
+    this.node instanceof Promise ? this.node.then(() => cb(this)) : cb(this);
+    return this;
+  }
+  catch(cb: (reason: any) => void) {
+    this.node instanceof Promise && this.node.catch(cb);
+    return this;
+  }
+  finally(cb: () => void) {
+    this.node instanceof Promise ? this.node.finally(cb) : cb();
+    return this;
+  }
+  *[Symbol.iterator]() {
+    if (Array.isArray(this.node)) {
+      return yield* this.children.map(child => this[child as any]);
+    }
+    yield this.base;
+  }
+}
+
+export type Translation<T extends TranslationData = TranslationData> = TranslationDataAdapter<T>;
+export const Translation = TranslationNode as unknown as {
+  new <
+    AllowedLocale extends Locale = Locale,
+    MainLocale extends AllowedLocale = AllowedLocale,
+    const Tree extends Record<AllowedLocale, any> = Record<AllowedLocale, any>,
+    Variables extends Values = Values,
+    PathSeparator extends string = ".",
+    N = Node,
+  >(
+    settings: Partial<TranslationSettings<AllowedLocale, MainLocale, Tree, Variables, PathSeparator, N>>,
+  ): TranslationType<TranslationSettings<AllowedLocale, MainLocale, Tree, Variables, PathSeparator>>;
+  new <const T extends TranslationData>(data: T): Translation<T>;
+} & typeof TranslationNode;
+
+export function createTranslationSettings<
+  L extends Locale = Locale,
+  M extends L = L,
+  const T extends Record<L, any> = Record<L, any>,
+  V extends Values = Values,
+  PS extends string = ".",
+  N = Node,
+>(settings: Partial<TranslationSettings<L, M, T, V, PS, N>> = {}) {
+  type S = TranslationSettings<L, M, T, V, PS>;
+  settings.locales ??= {} as T;
+  settings.allowedLocales ??= Object.keys(settings.locales as object) as L[];
+  settings.mainLocale ??= settings.defaultLocale ??= settings.allowedLocales[0] as M;
   settings.defaultLocale ??= settings.mainLocale;
   settings.currentLocale ??= settings.defaultLocale;
   settings.allowedLocale ??= settings.mainLocale;
-  settings.tree = (settings.locales as any)[settings.mainLocale];
-  settings.injectVariables ??= injectVariables;
-  settings.matchLocale ??= match.bind(settings);
+  settings.locale ??= settings.currentLocale;
+  settings.setLocale ??= locale => (settings.locale = locale as L);
+  settings.tree ??= settings.locales as T;
   settings.hidratation ??= hidratation;
-  settings.now ??= now;
-  settings.timeZone ??= timeZone;
-  settings.formatOptions ??= {};
-  settings.format = { ...format, now: settings.now, timeZone: settings.timeZone };
-  settings.ps ??= ".";
-  settings.getSource ??= settings.getLocale;
-  settings.settings = settings as TranslationSettings;
-  settings.origin ??= {} as any;
-  return (globalThis.ts = settings as S);
+  settings.injectVariables ??= TranslationNode.injectVariables;
+  settings.variables ??= {} as unknown as V;
+  settings.ps ??= settings.pathSeparator ??= "." as PS;
+  settings.getLocaleSource ??= settings.getNodeSource && (locale => settings.getNodeSource?.({ locale, path: [] }) as S["tree"][L]);
+  settings.getNodeSource ??=
+    settings.getLocaleSource &&
+    (async ({ locale, path, deep }) =>
+      getSource(
+        path.reduce((o, key) => o && (o as any)[key], await settings.getLocaleSource?.(locale as L)),
+        deep,
+        path,
+      ) as Node);
+  settings.tree[settings.locale] ??= settings.getLocaleSource?.(settings.locale as L) as T[L];
+  return (settings.settings = settings as S);
 }
 
-function createTranslationNode<N extends TranslationNode>({
-  t = void 0 as any,
-  node = {},
-  global: g,
-  parent,
-  settings = parent?.settings ?? t?.settings ?? ({} as N["settings"]),
-  origin = parent || settings.origin || settings,
-  lang = parent?.lang ?? settings?.mainLocale,
-  key,
-  path = (key ? [...(parent?.path ?? []), key] : []) as N["path"],
-  children = getChildren(node as Node) as [],
-}: {
-  node?: N["node"];
-  settings?: N["settings"];
-  children?: N["children"];
-  global?: N["global"];
-  parent?: N["parent"];
-  origin?: any;
-  lang?: N["lang"];
-  key?: N["key"];
-  path?: N["path"];
-  t?: N & Record<`__${string}`, any>;
-}): N {
-  t ??= typeof node !== "object" ? Object(node) : get;
-  t.children ??= children;
-  t.__children__ = children;
-  t.t = t;
-  t.tr = t;
-  t.g = g ?? t;
-  t.global = t.g;
-  t.settings = settings;
-  t.origin = origin;
-  t.lang = lang;
-  t.path = path;
-  t.key = key ?? lang ?? "en";
-  t.id = path.join(settings.ps) as N["id"];
-  t.child = t.children?.[0] as N["child"];
-  t.node = node as Node;
-  t.locales = settings.allowedLocales;
-  t.locale = lang;
-  t.mainLocale = settings.mainLocale;
-  t.main = settings.mainLocale;
-  t.__isGlobal__ = t.g === t;
-  t.__obj__ = t;
-  t.__values__ = (node as N)?.values ?? {};
-  t.__tree__ = {};
-  t.__lang__ = { [lang]: node && t };
-  t.__source__ = new Set();
-  t.use = use as any;
-  t.useTranslation = get as any;
-  t.get = get as any;
-  t.getTranslation = get as any;
-  t.addChild = addChild as any;
-  t.search = get as any;
-  t.parent = parent ?? (lang === t.main ? t : origin[settings.mainLocale]);
-  t.p = t.parent;
-  t.dir = t.parent?.dir ?? "ltr";
-  t.setLocale = (l: any) => origin?.setLang?.(l);
-  t.getSource = getSource.bind(t, t as Node);
-  t.useLocale = () => [t.lang, t.setLang] as any;
-  t.Translation = () => t.base;
-  t.Tr = t.Translation;
-  t.format = { ...settings.format, locale: lang };
-  t.toString = () => t.base as string;
-  Object.defineProperty(t, "src", {
-    configurable: true,
-    get() {
-      return t.getSource();
-    },
-  });
-  if (typeof node !== "object") {
-    t.type = "base";
-    t.base = node || t.id;
-    t.raw = node as string;
-    t.__base__ = node as string;
-  } else if (Array.isArray(node)) {
-    t.type = "list";
-    t.keys = t.children as N["keys"];
-  } else {
-    t.type = "tree";
-    t.__base__ = (node as any).base;
-    t.raw = t.__base__;
-    if (t.__base__)
-      Object.defineProperty(t, "base", {
-        configurable: true,
-        get() {
-          return t.use().__base__;
-        },
-        set(base: string) {
-          t.__base__ = base;
-        },
-      });
-  }
-  if (t.__isGlobal__) {
-    t.values = Object.assign(t.__values__, settings.variables);
-    t.variables = t.values as any;
-    origin[lang] = t;
-  } else {
-    const v = {
-      configurable: true,
-      enumerable: true,
-      get() {
-        return { ...t.parent?.values, ...t.__values__ };
-      },
-      set(newValues: Values) {
-        Object.assign(t.__values__, newValues);
-      },
-    } as PropertyDescriptor;
-    Object.defineProperties(t, { values: v, variables: v });
-  }
-  settings.allowedLocales.forEach(locale => {
-    const o = t.__isGlobal__ ? origin?.[locale] : origin?.__lang__?.[locale]?.[key];
-    if (o?.node) {
-      t.__lang__[locale] ??= o;
-      t.node && (o.__lang__[lang] ??= t);
-      o.p ??= o.parent ??= origin[settings.mainLocale];
-    }
-    t.__lang__[locale]
-      ? (t[locale] = t.__lang__[locale])
-      : defineProperty(t, locale, () => {
-          return (t.__lang__[locale] ||=
-            (t.__isGlobal__ ? origin?.[locale] : origin?.[locale]?.[key as any])?.use?.(t.values) || t);
-        });
-  });
-  function use(values?: Values): any {
-    values && Object.assign(t.__values__ || t.values, values);
-    if (!(t.__base__ || t.base)) return t;
-    values = t.values || t.__values__;
-    settings.locale = lang;
-    t.base = settings.injectVariables(t.raw as string, values, settings) as string;
-    t.t = Object.defineProperties(
-      Object(t.base || t.__base__),
-      Object.entries(Object.getOwnPropertyDescriptors(t)).reduce(
-        (obj, [key, value]) => (value.writable === false ? null : (obj[key] = value), obj),
-        {} as Record<string, PropertyDescriptor>,
-      ),
-    );
-    // @ts-ignore
-    t.t[Symbol.iterator] = flattenString;
-    return (t.tr = t.t);
-  }
+export function createTranslation<
+  AllowedLocale extends Locale = Locale,
+  MainLocale extends AllowedLocale = AllowedLocale,
+  const Tree extends Record<AllowedLocale, any> = Record<AllowedLocale, any>,
+  Variables extends Values = Values,
+  PathSeparator extends string = ".",
+  N = Node,
+>(settings: Partial<TranslationSettings<AllowedLocale, MainLocale, Tree, Variables, PathSeparator, N>> = {}) {
+  type Settings = TranslationSettings<AllowedLocale, MainLocale, Tree, Variables, PathSeparator>;
+  return new Translation(createTranslationSettings(settings)) as TranslationType<Settings>;
+}
 
-  // @ts-ignore
-  t[Symbol.iterator] = flattenString.bind(t.base);
-  function get(...path: any[]) {
-    const variables = path.at(-1)?.__proto__ === Object.prototype ? (path.pop() as Values) : undefined;
-    if (typeof path[0] === "object") path = path[0];
-    else if (path.length === 1) path = (path[0] as string).trim().split(settings.ps);
-    return path.reduce((o, key) => o[key] ?? o, variables ? t.use(variables) : t);
-  }
-  settings.plugins?.forEach(plugin => plugin(t));
-  function addChild(child: keyof N["node"], src: Node, arr?: any[]) {
-    const childNode = createTranslationNode({
-      node: arr ? (node?.[child] as Node) : src,
-      settings,
-      parent: t,
-      key: child,
-      global: t.g,
-    });
-    t.__tree__[child] = childNode.node && childNode;
-    if (t[child]) delete t[child];
-    if (childNode.base)
-      Object.defineProperty(t, child, {
-        configurable: true,
-        get() {
-          childNode.use();
-          return childNode.t;
-        },
-      });
-    else t[child] = childNode as any;
-  }
-  children?.forEach(addChild);
-  return t as N;
+export const invalidKeys = ["base", "values", "children", "parent", "node", "path", "settings", "key", "locale", "catch", "then"] as const;
+
+export function getChildren<N>(node: N) {
+  return ((node as any)?.children ||
+    (typeof node === "object" ? Object.keys(node as object).filter(key => !invalidKeys.includes(key as any)) : [])) as Children<N>[];
+}
+
+export function getSource<N>(node: N, deep: number = Infinity, path: Key[] = []): PartialTree<N> {
+  if (typeof node !== "object" || !node) return node as any;
+  const sourceNode: any = {};
+  sourceNode.children = getChildren(node);
+  if (deep--)
+    sourceNode.children.forEach((child: string) => (sourceNode[child] = getSource(node[child as keyof N], deep, [...path, child])));
+  if ("values" in node && !("values" in (node as any).__proto__)) sourceNode.values = node.values;
+  if ("base" in node) sourceNode.base = String(node.base);
+  if (path.length) sourceNode.path = path;
+  return sourceNode;
 }

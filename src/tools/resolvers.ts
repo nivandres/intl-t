@@ -1,9 +1,10 @@
-import { Promisable } from "../types";
-import { Locale } from "../locales";
+import { Awaitable } from "../types";
+import { Locale } from "../locales/types";
 import { locale as l } from "../state";
 import { match } from "./match";
 
-export function resolveLocale<L extends Locale>(path: string = "", locales?: L[]) {
+// @ts-ignore-error optional binding
+export function resolveLocale<L extends Locale>(path: string = "", locales: L[] = this.allowedLocales) {
   const locale = path.match(/^\/([a-z]{2})(?:$|\/)/)?.[1] as L;
   if (!locale || !locales) return locale;
   return locales.includes(locale) ? locale : undefined;
@@ -13,7 +14,7 @@ type LL<L extends string = string> = L | null | undefined | "" | `/${string}` | 
 
 export interface ResolveConfig<L extends Locale = Locale> {
   pathPrefix?: "always" | "default" | "optional" | "hidden";
-  allowedLocales?: L[];
+  allowedLocales?: L[] | readonly L[];
   redirectPath?: string;
   defaultLocale?: string;
 }
@@ -31,15 +32,15 @@ export function resolveHref<L extends Locale>(
     locale = resolveLocale<L>(href),
     currentLocale,
     redirectPath,
-    // @ts-ignore
+    // @ts-ignore-error optional binding
     config = this?.ts || this || {},
     allowedLocales = config.allowedLocales,
     pathPrefix = config.pathPrefix || "always",
     defaultLocale = config.defaultLocale,
     getLocale = () => match(l, allowedLocales, undefined),
-  }: // @ts-ignore
+  }: // @ts-ignore-error optional binding
   LocalizedHref<L> = this?.ts || this || {},
-): Promisable<`/${L | ""}${string}`> {
+): Awaitable<`/${L | ""}${string}`> {
   if (href[0] != "/") return href as any;
   if (pathPrefix == "hidden" && locale) pathPrefix = "always";
   if (pathPrefix == "hidden") locale = "";
@@ -49,7 +50,7 @@ export function resolveHref<L extends Locale>(
     locale &&= `/${locale}`;
     return locale + href;
   };
-  return locale instanceof Promise ? new Promise(async r => r(fn(await locale) as any)) : (fn(locale) as any);
+  return locale instanceof Promise ? (new Promise(async r => r(fn(await locale) as any)) as any) : (fn(locale) as any);
 }
 
 export function resolvePath(pathname: string, locales: string[] = []) {

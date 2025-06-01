@@ -6,12 +6,16 @@ export interface Cache {
   t: Translation;
 }
 
-export const getCache = cache(() => ({}) as Partial<Cache>);
+export const getCache = cache(() => ({} as Partial<Cache>));
 
 export function getCachedRequestLocale() {
-  return getCache().locale;
+  const locale = getCache().locale;
+  // @ts-ignore
+  this?.settings.locale = locale;
 }
 
 export function setCachedRequestLocale(locale?: string) {
   getCache().locale = locale;
+  // @ts-ignore
+  this?.setLocale(locale);
 }

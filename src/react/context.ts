@@ -1,81 +1,72 @@
 "use client";
 
-import React from "react";
-import { TranslationNode, TranslationProps as TP, TranslationSettings } from "../types";
-import { createTranslation } from "./translation";
+import { createContext, useContext } from "react";
+import { createElement } from "./patch";
+import { TranslationNode, TranslationProps as TP, isArray, SearchWays, ArrayToString, TranslationType, State, ReactState } from "../types";
 import { useClientState, useLocale } from "./hooks";
-import { Locale } from "../locales";
-import { setClientLocale } from "./client";
+import { Locale } from "../locales/types";
+import { createTranslation } from "./translation";
 
 type TranslationContext = null | {
-  t: any;
-  locale: Locale;
-  setLocale: React.Dispatch<React.SetStateAction<Locale>>;
+  t?: TranslationType;
+  localeState?: ReactState<Locale>;
+  clientState?: State;
 };
 
-export const TranslationContext = React.createContext<TranslationContext>(null);
+export const TranslationContext = createContext<TranslationContext>(null);
 
-export interface TranslationProps<
-  S extends TranslationSettings = TranslationSettings,
-  L_ extends string = string,
-  A_ extends string[] = string[],
-  D_ extends string = string,
-> extends TP<S, S["tree"], S["variables"], S["allowedLocale"], any, L_, A_, D_> {}
+export interface TranslationProps<T extends TranslationNode, A extends string[] = string[], D extends string = string>
+  extends TP<T["settings"], T["node"], T["values"], A, D> {
+  t?: T;
+}
 
 export function TranslationProvider<
-  S extends TranslationSettings,
-  L_ extends string,
-  A_ extends string[],
-  D_ extends string,
+  T extends TranslationNode,
+  A extends isArray<SearchWays<T>>,
+  D extends ArrayToString<A, T["settings"]["ps"]>,
 >({
-  // @ts-ignore
-  t = this?.__obj__,
-  isolatedLocale,
-  lang: _lang,
-  setLang: _setLang,
-  onLangChange = _setLang,
-  locale = typeof isolatedLocale === "string" ? isolatedLocale : _lang,
+  // @ts-ignore-error optional binding
+  t = this,
+  onLocaleChange,
+  locale,
   children,
   path,
   variables,
   source,
   settings,
+  stateless,
   hidratation,
   ...state
-}: TranslationProps<S, L_, A_, D_>) {
-  const context = React.useContext(TranslationContext);
+}: TranslationProps<T, A, D>) {
+  const context = useContext(TranslationContext) || {};
   typeof settings === "string" && (settings = JSON.parse(settings));
-  t ||= context?.t || globalThis.t || createTranslation(settings);
+  context.t ??= t || createTranslation(settings);
+  t ??= context.t;
   if (settings && t.settings !== settings) Object.assign(t.settings, settings, state);
-  hidratation ??= t.settings.hidratation;
-  const { now, timeZone } = useClientState(state, hidratation && t.settings.fullHidratation);
-  t.settings.now = now;
-  t.settings.timeZone = timeZone;
-  const [lang, setLocale] =
-    (context && !isolatedLocale) || (locale && onLangChange)
-      ? ([locale || context?.locale, onLangChange || context?.setLocale || t.setLocale] as any)
-      : useLocale(locale, {
-          hidratation,
-          preventHidratation: !t.settings.fullHidratation,
-          path: isolatedLocale ? t.id : undefined,
-        });
-  t.setLocale = setLocale;
-  t = t[lang as keyof typeof t] || (t as any);
   source && t.addSource(source);
-  (variables || path) && t.get(path || [], (variables as any) || undefined);
-  if (!children) return t.base;
-  return React.createElement(
-    TranslationContext.Provider,
-    { value: { t, locale: setClientLocale(lang), setLocale } },
-    children,
-  );
+  hidratation ??= t.settings.hidratation;
+  context.clientState ??= useClientState.call(t, state, hidratation && !stateless);
+  if (locale && onLocaleChange) context.localeState = [locale, onLocaleChange];
+  context.localeState ??= useLocale.call(t, locale, { hidratation, stateless });
+  t = t[context.localeState[0] as any](path, variables);
+  return children ? createElement(TranslationContext, { value: context }, children) : t.base;
 }
-export const Translation = TranslationProvider;
+
+export default TranslationProvider;
+
 export const T = TranslationProvider;
 
-export const useTranslation: TranslationNode["get"] = (...args: any[]) => {
-  let context = React.useContext(TranslationContext);
-  if (!context) context = useLocale() as TranslationContext;
-  let t = (this as any)?.__obj__ || context?.t || globalThis.t;
-  return (t[context?.locale as string] || t).get?.(...args);
-};
+export const Translation = T;
+export const Trans = T;
+export const Tr = T;
+
+export function useTranslation(...args: any[]) {
+  const context = useContext(TranslationContext) || {};
+  // @ts-ignore-error optional binding
+  const t = this || context.t;
+  if (!t) throw new Error("Translation not found");
+  context.t ??= t;
+  context.localeState ??= useLocale.call(t);
+  context.clientState ??= useClientState.call(t);
+  return t[context.localeState[0]](...args);
+}

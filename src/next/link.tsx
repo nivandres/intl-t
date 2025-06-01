@@ -2,7 +2,7 @@ import { default as NL, LinkProps as LP } from "next/link";
 import { LC } from "./link_client";
 import { getPathname, isRSC } from "./state";
 import { ResolveConfig, resolveHref } from "../tools/resolvers";
-import { Locale } from "../locales";
+import { Locale } from "../locales/types";
 import { getRequestLocale } from "./request";
 import React from "react";
 

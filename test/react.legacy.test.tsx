@@ -10,6 +10,10 @@ describe("react plugin", () => {
     expect(t.Translation).toBeFunction();
     expect(t.useTranslation).toBeFunction();
   });
+  it("translation strings should be rendered correctly", () => {
+    const t = ct({ locales: { en } });
+    expect([...t.hello][0]).toBe("hello world");
+  });
 });
 
 describe("variable injection", () => {
@@ -42,17 +46,10 @@ describe("variable injection", () => {
       }),
     ).toEqual(["hello ", "a"]);
     expect(ir("<div>hello</div>")).toEqual((<div key={0}>hello</div>) as any);
-    expect(ir("<juan>hello</juan>", { juan: ({ children }) => <div>{children}</div> })).toEqual(
-      (<div>hello</div>) as any,
-    );
+    expect(ir("<juan>hello</juan>", { juan: ({ children }) => <div>{children}</div> })).toEqual((<div>hello</div>) as any);
     const a = ir("icons <globe /> icon", { globe: () => "🌎" });
     expect(a).toEqual(["icons ", "🌎", " icon"]);
-    expect(ir("more items <globe>content</globe> o <globe />", { globe: () => "🌍" })).toEqual([
-      "more items ",
-      "🌍",
-      " o ",
-      "🌍",
-    ]);
+    expect(ir("more items <globe>content</globe> o <globe />", { globe: () => "🌍" })).toEqual(["more items ", "🌍", " o ", "🌍"]);
   });
   // it("should work integrated", () => {
   //   const t = ct({ locales: { en: { hello: `hello <div className="mx-2 pl-2" ><a>a</a></div>` } } });

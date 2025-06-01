@@ -1,29 +1,12 @@
+import "../react/translation";
+import { TranslationNode } from "../core/translation";
 import { Translation, getTranslation } from "./rsc";
-import { createTranslation as ct } from "../core";
-import { injectVariables, reactPlugin } from "../react";
-import { getRequestLocale } from "./request";
-import { isClient, isRSC } from "./state";
+import { isRSC } from "./state";
+import { TranslationFC } from "../types";
 
-export { getTranslation };
-
-export function nextPlugin(n: any) {
-  if (isRSC) {
-    n.Translation = Translation.bind(n);
-    n.Tr = n.Translation;
-    n.getTranslation = getTranslation.bind(n);
-    n.useTranslation = n.getTranslation;
-    n.getLocale = getRequestLocale;
-    n.useLocale = n.getLocale;
-  } else reactPlugin(n);
-  return n;
+if (isRSC) {
+  TranslationNode.Provider = Translation as TranslationFC;
+  TranslationNode.hook = getTranslation;
 }
 
-export const createTranslation: typeof ct = settings => {
-  return ct({
-    hidratation: true,
-    injectVariables,
-    origin: isClient ? globalThis.t?.settings.origin : undefined,
-    ...settings,
-    plugins: [nextPlugin, ...(settings?.plugins ?? [])],
-  });
-};
+export { createTranslation, TranslationNode } from "../core/translation";

@@ -1,11 +1,11 @@
 "use client";
 
 import NL from "next/link";
-import { Locale } from "../locales";
+import { Locale } from "../locales/types";
 import { resolveHref } from "../tools/resolvers";
 import { LinkProps } from "./link";
 import { useLocale, usePathname } from "./router";
-import React, { type ComponentProps } from "react";
+import { type ComponentProps } from "react";
 
 type NL = typeof NL;
 

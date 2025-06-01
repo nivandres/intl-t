@@ -1,28 +1,15 @@
-import { createTranslation as ct, TranslationPlugin } from "../core";
-import { useTranslation, TranslationProvider } from "./context";
+import "./patch";
+import { TranslationNode } from "../core/translation";
 import { injectVariables as iv } from "../tools/inject";
 import { injectReactChunks as ir } from "./inject";
-import { getClientLocale } from "./client";
-import { hidratation } from "../state";
+import { TranslationProvider, useTranslation } from "./context";
 import { useLocale } from "./hooks";
+import { TranslationFC } from "./types";
 
-export const reactPlugin: TranslationPlugin = (n: any) => {
-  n.Translation = TranslationProvider.bind(n);
-  n.Tr = n.Translation;
-  n.useTranslation = useTranslation.bind(n);
-  n.getTranslation = n.useTranslation;
-  n.useLocale = useLocale.bind(n);
-  n.getLocale = getClientLocale;
-  return n;
-};
+export const injectVariables = ((str: string, ...args: any[]) => ir(iv(str, ...args), ...args)) as typeof iv;
 
-export const injectVariables = (str: string, ...args: any[]) => ir(iv(str, ...args), ...args);
+TranslationNode.injectVariables = injectVariables;
+TranslationNode.Provider = TranslationProvider as TranslationFC;
+TranslationNode.hook = useTranslation;
 
-export const createTranslation: typeof ct = settings => {
-  return ct({
-    hidratation,
-    injectVariables,
-    ...settings,
-    plugins: [reactPlugin, ...(settings?.plugins ?? [])],
-  });
-};
+export { createTranslation, Translation } from "../core/translation";

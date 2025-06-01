@@ -1,13 +1,13 @@
 import React from "react";
-import { Values, Base } from "../core";
-import { ReactChunkProps, ReactChunk } from "./types";
+import type { Values, Base, ReactChunk, ReactChunkProps } from "../types";
+import { createElement } from "./patch";
 
 const regex = /<(\w+)([^<>\/]+)?(?:\/\s*>|>(?:(.*)<\s*\/\s*\1\s*>)?)/gm;
 const attributesRegex = /(\w+)(?:=(\w+|".*?"|'.*?'|{(.+?)}))?/g;
 
 export const Chunk: ReactChunk = ({ children, tagName, tagAttributes, tagContent, value, key, ...props }) => {
   if (value) return String(value);
-  return React.createElement(tagName, { key, ...props }, children);
+  return createElement(tagName, { key, ...props }, children);
 };
 
 export function injectReactChunks(content: string = "", variables: Values = {}, state?: any) {

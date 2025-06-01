@@ -1,73 +1,73 @@
 "use client";
 
 import { useState, useEffect, useContext } from "react";
-import { Locale } from "../locales";
-import { State, hidratation as h, locale, now, timeZone } from "../state";
+import { Locale } from "../locales/types";
+import { State, hidratation as h, locale as l, now, timeZone } from "../state";
 import { TranslationContext } from "./context";
 import { getClientLocale, setClientLocale, LOCALE_CLIENT_KEY } from "./client";
 import { resolveLocale } from "../tools";
+import { ReactState, ReactSetState } from "./types";
 
-export function useTimeZone(defaultTimeZone?: string, hidratation = h) {
-  if (!hidratation) return timeZone;
-  const [tz, setTimeZone] = useState(defaultTimeZone);
-  useEffect(() => {
-    setTimeZone(timeZone);
-  }, []);
-  return tz;
-}
+export { useTranslation } from "./context";
 
 export interface UseLocale {
   preventHidratation?: boolean;
   hidratation?: boolean;
-  noDefault?: boolean;
+  stateless?: boolean;
   path?: string;
 }
 
-export function useLocale<L extends Locale = Locale, M extends L = L>(
-  // @ts-ignore
-  defaultLocale: M | undefined | null = (this?.ts || this)?.defaultLocale,
-  { hidratation = h, preventHidratation, path }: UseLocale = {},
+export function useLocale<L extends Locale = Locale>(
+  // @ts-ignore-error optional binding
+  defaultLocale: L | undefined | null = this?.locale,
+  // @ts-ignore-error optional binding
+  { hidratation = h, stateless, preventHidratation, path }: UseLocale = this?.settings,
 ) {
   path &&= `${LOCALE_CLIENT_KEY}${path}`;
-  defaultLocale ??= useContext(TranslationContext)?.locale as M;
-  const state = useState(defaultLocale || (!hidratation && getClientLocale(path))) as any;
+  // @ts-ignore-error optional binding
+  const settings = this?.settings || {};
+  const state =
+    (!defaultLocale && useContext(TranslationContext)?.localeState) ||
+    (stateless ? [defaultLocale, () => {}] : (useState((!hidratation && getClientLocale(path)) || defaultLocale) as any));
+  settings.locale = state[0];
   const setState = state[1];
-  if (hidratation && (!preventHidratation || !defaultLocale))
+  if (hidratation && !stateless && (!preventHidratation || !defaultLocale))
     useEffect(() => {
-      const locale = getClientLocale(path) || resolveLocale(location.pathname);
+      const r = resolveLocale.bind(settings);
+      // @ts-expect-error location type from browser
+      const locale = getClientLocale(path) || r(location.pathname) || r(l);
       if (locale) setState(locale);
     }, []);
   state[1] = (l: any) => {
     setClientLocale(l, path);
-    return setState(l);
+    settings.locale = l;
+    setState(l);
+    return l;
   };
+  settings.setLocale = state[1];
   state.setLocale = state[1];
   state.locale = state[0];
   state.toString = () => state[0];
-  return state as L & [L, (lang: L) => void] & { locale: L; setLocale: (lang: L) => void; t: undefined };
+  return state as L & ReactState<L> & { locale: L; setLocale: ReactSetState<L> };
 }
 
-export function useNow(initialNow?: Date, hidratation: boolean = Boolean(initialNow)) {
-  if (!hidratation) return now;
-  const [n, setNow] = useState(initialNow);
-  useEffect(() => {
-    setNow(now);
-  }, []);
-  return n;
-}
-
-export function useClientState(defaultState: Partial<State> = {}, hidratation = h): State {
-  const initialState = { now, timeZone, locale, hidratation, ...defaultState };
+export function useClientState(defaultState: Partial<State> = {}, hidratation = h) {
+  const initialState = { now, timeZone, hidratation, ...defaultState };
+  // @ts-ignore-error optional binding
+  const settings = this?.settings || {};
+  Object.assign(settings, initialState);
   if (!hidratation) return initialState;
   const [state, setState] = useState(initialState);
   useEffect(() => {
-    if (now !== state.now)
-      setState({
+    if (now !== state.now) {
+      const state = {
         timeZone,
-        locale,
         now,
         hidratation,
-      });
+      };
+      Object.assign(settings, state);
+      setState(state);
+    }
   }, []);
   return state;
 }
