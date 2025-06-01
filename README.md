@@ -39,22 +39,22 @@ export default function Component() {
       <h1>{t.title}</h1>
 
       {/* Use variables in your translations */}
-      <h2>{t.welcome.use({ user: "Ivan" })}</h2>
+      <h2>{t.welcome({ user: "Ivan" })}</h2>
 
       {/* Flexible syntax */}
       <p>{t("main", { now: Date.now() })}</p>
       <ul>
         <li>{t.features[0]}</li>
-        <li>{t.features[1].use({ name: "Ivan V" })}</li>
-        <li>{t.features("2").use({ name: "Ivan V" })}</li>
-        <li>{t.use({ name: "Ivan V" })("features.3")}</li>
+        <li>{t.features[1]({ name: "Ivan V" })}</li>
+        <li>{t.features("2")({ name: "Ivan V" })}</li>
+        <li>{t({ name: "Ivan V" })("features.3")}</li>
       </ul>
 
       {/* Node-based translations */}
       <p>{t.page1.section1.article1.title}</p>
       <p>{t("page1/section1").article1("title")}</p>
       {/* Full typesafe with completion for variables */}
-      <p>{t.use({ day: "Monday" }).account.use(UserVariables).settings.change}</p>
+      <p>{t({ day: "Monday" }).account(UserVariables).options.change}</p>
     </>
   );
 }
@@ -74,7 +74,7 @@ export default function Component() {
     }
   },
   "account": {
-    "settings": {
+    "options": {
       "change": "Change your account settings. Your account id is {accountId}"
     },
     "values": {
@@ -254,7 +254,7 @@ t("public/page1");
 Remember that you can nest many mutation methods as you want.
 
 ```ts
-t.use(v1).p1.get("s4.a2").n3.use(v2);
+t(v1).p1("s4.a2").n3(v2);
 ```
 
 Remember that default value for nodes will be string if it has base defined, o get function if it doesn't. Also if you want to access the string with no node methods, you can use the .base property, it is only string | null in case the node doesn't have children.
@@ -487,4 +487,4 @@ export const { middleware, Link } = createNavigation({ allowedLocales: ["en", "e
 
 ## Hello there 👋
 
-This translation lib was built for my own projects, so at least for me I consider the best translation frontend library. I mean best Developer Experience, performance, ultra lightweight, full customizable, auto-complete everywhere with typescript, Translation node based, and super flexible syntax integrating the best parts of other i18n libraries. It also has its own ICU message format, and everything included with zero dependencies. And I have still many ideas to enhance it. Also supports everything from React, Next.js, to static rendering. But at the moment is still in beta (from docs, readme, tests, example, everything), for complex things it could be a little buggy, but I will still working on it, to make it better. I aim this lib to be the best option. Feel free to use it, contribute to it or contact me. Thank you.
+This translation lib was built for my own projects, so at least for me I consider the best way to handle translations. I mean nice Developer Experience, performance, ultra lightweight, full customizable, auto-complete everywhere with typescript, Translation node based, and super flexible syntax integrating the best parts of other i18n libraries. It also has its own ICU message format, and everything included with zero dependencies. And I have still many ideas to enhance it. Also supports everything from React, Next.js, to static rendering. But at the moment it is still in beta (from docs, readme, tests, example, core, everything), so it could not be totally recommended for large production projects, but I will keep working on it, to make it better. Feel free to use it, contribute to it or contact me. Thank you.
