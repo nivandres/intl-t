@@ -76,12 +76,14 @@
   "devDependencies": {
     "@types/bun": "^1.2.0",
     "@types/react": "^19",
-    "husky": "^9"
+    "husky": "^9",
+    "next": "^15",
+    "react": "^19"
   },
   "peerDependencies": {
-    "typescript": "^5",
+    "next": ">=14",
     "react": ">=18 <20",
-    "next": ">=14"
+    "typescript": "^5"
   },
   "peerDependenciesMeta": {
     "typescript": {
