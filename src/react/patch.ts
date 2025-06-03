@@ -3,7 +3,7 @@ import jsx from "react/jsx-runtime";
 import jsxDEV from "react/jsx-dev-runtime";
 import { isArray } from "../misc";
 
-import { Translation } from "../core/translation";
+import { TranslationNode } from "../core/translation";
 
 const createElement_ = React.createElement;
 const jsx_ = jsx.jsx;
@@ -12,7 +12,7 @@ const jsxDEV_ = jsxDEV.jsxDEV;
 
 export { createElement_ as createElement, jsx_ as jsx, jsxs_ as jsxs, jsxDEV_ as jsxDEV };
 
-const check = (child: any) => (typeof child === "function" && child instanceof Translation ? child.base : child);
+const check = (child: any) => (typeof child === "function" && child instanceof TranslationNode ? child.base : child);
 
 React.createElement = function createElement(type: any, props: any, ...children: any[]) {
   return createElement_(type, props, ...children.map(check));

@@ -4,7 +4,6 @@ import type {
   Node,
   Base,
   Values,
-  Key,
   isArray,
   SearchWays,
   ArrayToString,
@@ -41,11 +40,12 @@ export interface TranslationProps<
 > extends Partial<State<S["allowedLocale"]>> {
   children?: Content<N> | (ReactNode & {});
   key?: D;
+  id?: D | A;
+  i18nKey?: D | A;
   path?: D | A;
   variables?: Partial<FollowWayWithValues<N, A, V>> & Values;
   locale?: S["allowedLocale"];
-  stateless?: boolean;
-  source?: Node;
+  source?: Node | TranslationNode;
   deep?: number;
   sourceDefault?: boolean;
   preventDynamic?: boolean;

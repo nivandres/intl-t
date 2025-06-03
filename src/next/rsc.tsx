@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { TranslationProvider, TranslationProps } from "../react/context";
+import { TranslationProvider, TranslationProviderProps } from "../react/context";
 import { TranslationNode } from "../core/translation";
 import { isArray, SearchWays, ArrayToString } from "../types";
 import { getCache, setCachedRequestLocale } from "./cache";
@@ -11,7 +11,7 @@ export async function Translation<
   A extends isArray<SearchWays<T>>,
   D extends ArrayToString<A, T["settings"]["ps"]>,
   // @ts-ignore-error optional binding
->({ children, t = this, deep = Infinity, sourceDefault, preventDynamic, ...props }: TranslationProps<T, A, D>) {
+>({ children, t = this, deep = Infinity, sourceDefault, preventDynamic, ...props }: TranslationProviderProps<T, A, D>) {
   const cache = getCache();
   t ||= cache.t || createTranslation(props.settings);
   props.locale ||= cache.locale;
@@ -29,7 +29,7 @@ export async function Translation<
     Object.assign((props.settings ||= {}), {
       locales: sourceDefault ? { [props.locale as any]: (t.settings.locales as any)[props.locale as any] } : undefined,
       allowedLocales: t?.settings.allowedLocales,
-      currentLocale: props.locale,
+      locale: props.locale,
     } as Partial<(typeof t & object)["settings"]>);
     props.settings = JSON.stringify(props.settings) as any;
   }

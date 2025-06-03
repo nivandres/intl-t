@@ -1,4 +1,3 @@
-import React from "react";
 import { injectReactChunks as ir, createTranslation as ct } from "../src/react";
 import * as en from "./messages.json";
 import { describe, it, expect } from "bun:test";

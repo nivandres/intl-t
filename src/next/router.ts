@@ -4,6 +4,7 @@ import { useRouter as ur, usePathname as up } from "next/navigation";
 import { resolvePath, resolveHref, ResolveConfig } from "../tools/resolvers";
 import { useLocale } from "../react/hooks";
 import { Locale } from "../locales/types";
+import { ReactState } from "src/types";
 
 export interface Options {
   locale?: Locale;
@@ -44,8 +45,8 @@ function useResolvedRouter({ useRouter = ur, ...config }: RouterConfig = this?.t
       return (path ||= state.path());
     },
     get locale() {
-      state.locale ||= useLocale;
-      return (locale ||= state.locale())[0];
+      state.locale ||= () => useLocale()[0];
+      return (locale ||= state.locale());
     },
   };
 }

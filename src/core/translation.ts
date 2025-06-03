@@ -78,6 +78,7 @@ export class TranslationNode<
   static injectVariables = injectVariables;
   static getChildren = getChildren;
   static Proxy = TranslationProxy;
+  static setLocale = undefined;
 
   static Provider = function (this: any, ...args: any[]) {
     return this[this.settings.locale](...args);
@@ -182,10 +183,10 @@ export class TranslationNode<
   call(...path: any[]): any {
     const variables = path.at(-1)?.__proto__ === Object.prototype ? (path.pop() as Values) : undefined;
     if (typeof path[0] === "object") path = path[0];
-    else if (path.length === 1) path = (path[0] as string).trim().split(this.settings.ps);
+    else if (path.length === 1) path = (path[0] as string)?.trim().split(this.settings.ps);
     if (variables) Object.assign(this.variables || {}, variables);
     path = path?.filter?.(Boolean);
-    if (!path.length) return this.t;
+    if (!path?.length) return this.t;
     return path.reduce(
       (o: TranslationNode, key, index) =>
         o[key] ??
@@ -273,6 +274,7 @@ export class TranslationNode<
     return this.settings.injectVariables(
       !this.node || typeof this.node !== "object" ? this.node : (this.node as any).base || this.path.join(this.settings.ps),
       this.values,
+      this.settings,
     ) as Content<N>;
   }
   getChildren() {
@@ -284,8 +286,8 @@ export class TranslationNode<
   setLocale<LL extends S["allowedLocale"] = L>(
     locale: LL | (string & {}) | ((p: L) => LL) = this.settings.locale,
   ): TranslationType<S, FollowWay<S["tree"][LL], R>, V, LL, R> {
-    if (typeof locale === "function") locale = locale(this.settings.locale as L);
-    this.settings.setLocale?.(locale);
+    if (typeof locale === "function") locale = locale(this.currentLocale as L);
+    this.settings.setLocale?.(locale) || (this.settings.locale = locale);
     return this[locale as any];
   }
   get values(): V & Variables<N> {
@@ -380,7 +382,7 @@ export function createTranslationSettings<
   settings.currentLocale ??= settings.defaultLocale;
   settings.allowedLocale ??= settings.mainLocale;
   settings.locale ??= settings.currentLocale;
-  settings.setLocale ??= locale => (settings.locale = locale as L);
+  settings.setLocale ??= TranslationNode.setLocale;
   settings.tree ??= settings.locales as T;
   settings.hidratation ??= hidratation;
   settings.injectVariables ??= TranslationNode.injectVariables;

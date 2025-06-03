@@ -1,5 +1,5 @@
 import type { TranslationNode, invalidKeys } from "./translation";
-import type { ReactChunk } from "../types";
+import type { ReactChunk, ReactState } from "../types";
 import type { Locale } from "../locales/types";
 import type { State } from "../state";
 
@@ -131,7 +131,7 @@ export interface TranslationSettings<
   Variables extends Values = Values,
   PathSeparator extends string = string,
   N = Node,
-> extends State {
+> extends State<AllowedLocale> {
   locales: Record<AllowedLocale, Keep<N>> & Partial<Tree>;
   mainLocale: MainLocale;
   defaultLocale: MainLocale;
@@ -145,10 +145,8 @@ export interface TranslationSettings<
   proxy: boolean;
   settings: this;
   Translation: any;
-  locale: AllowedLocale;
-  hidratation: boolean;
   preventDynamic: boolean;
-  setLocale: (locale: Locale) => Locale;
+  setLocale?: (locale: Locale) => Locale | void;
   getLocaleSource?: <L extends AllowedLocale>(locale: L, deep?: number) => Promisable<Tree[L] | undefined>;
   getNodeSource?: (params: { path: Key[]; locale?: Locale; deep?: number }) => Promisable<Node> | undefined;
   injectVariables: <T extends string>(content: T, variables?: Values, state?: State) => T | (string & {});
