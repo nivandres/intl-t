@@ -1,5 +1,4 @@
-import { Awaitable } from "../types";
-import { Locale } from "../locales/types";
+import type { Locale, Awaitable } from "../types";
 import { locale as l } from "../state";
 import { match } from "./match";
 

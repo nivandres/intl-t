@@ -1,4 +1,4 @@
-import { State, state } from "../state";
+import { type State, state } from "../state";
 
 // @ts-ignore
 export function list(value: string[] = [], options?: Intl.ListFormatOptions, { locale }: State = this) {

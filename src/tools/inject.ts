@@ -1,4 +1,4 @@
-import { Values } from "../types";
+import type { Values } from "../types";
 import { format } from "./format";
 
 export function nested(content: string) {

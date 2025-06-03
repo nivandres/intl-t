@@ -1,4 +1,4 @@
-import { FormatOptions, Locale, TimeZone } from "./locales/types";
+import type { FormatOptions, Locale, TimeZone } from "./locales";
 
 export interface State<L extends Locale = Locale> {
   timeZone: TimeZone;

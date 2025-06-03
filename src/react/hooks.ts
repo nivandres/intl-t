@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useMemo } from "react";
 import { Locale } from "../locales/types";
 import { hidratation as h } from "../state";
 import { TranslationContext } from "./context";
@@ -39,7 +39,14 @@ export function useLocale<L extends Locale = Locale>(
     setState(l);
     return l;
   };
-  t.settings.setLocale ??= state[1];
+  t &&
+    useMemo(() => {
+      const { settings } = t;
+      if (settings.setLocale) {
+        const { setLocale } = settings;
+        settings.setLocale = (l: any) => (setState(l), setLocale(l));
+      } else settings.setLocale = state[1];
+    }, [t.settings]);
   state.setLocale = state[1];
   state.locale = state[0];
   state.toString = () => state[0];

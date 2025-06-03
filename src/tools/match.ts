@@ -1,4 +1,4 @@
-import { Locale } from "../locales/types";
+import type { Locale } from "../locales/types";
 
 export function match<L extends Locale>(
   requestLocales?: Locale[] | Locale | null,
