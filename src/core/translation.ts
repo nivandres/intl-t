@@ -89,7 +89,7 @@ export class TranslationNode<
   } as unknown as TranslationFC;
 
   T = new Proxy(this, {
-    apply(target, thisArg, args) {
+    apply(target, _, args) {
       return TranslationNode.Provider.apply(target, args as any);
     },
     get(target, p, receiver) {
@@ -107,7 +107,7 @@ export class TranslationNode<
   };
 
   hook = new Proxy(this, {
-    apply(target, thisArg, args) {
+    apply(target, _, args) {
       return TranslationNode.hook.apply(target, args as any);
     },
     get(target, p, receiver) {
@@ -331,13 +331,13 @@ export class TranslationNode<
     return String(this.base);
   }
   get promise(): Promise<this> {
-    return (this[Symbol.for("promise")] ||= new Promise((r, c) => {
-      this.then(r).catch(c);
-    }));
+    return new Promise((r, c) => {
+      this.then?.(r).catch(c);
+    });
   }
-  then(cb: (value: typeof this) => void) {
-    this.node instanceof Promise ? this.node.then(() => cb(this)) : cb(this);
-    return this;
+  get then(): Promise<this>["then"] | undefined {
+    const node = this.node;
+    return node instanceof Promise ? cb => new Promise((r, c) => node.then(() => r(cb?.(this)!)).catch(c)) : undefined;
   }
   catch(cb: (reason: any) => void) {
     this.node instanceof Promise && this.node.catch(cb);

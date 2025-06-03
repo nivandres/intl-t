@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { TranslationProvider, TranslationProviderProps } from "../react/context";
 import { TranslationNode } from "../core/translation";
 import { isArray, SearchWays, ArrayToString } from "../types";
-import { getCache, setCachedRequestLocale } from "./cache";
+import { getCache } from "./cache";
 import { getRequestLocale } from "./request";
 import { createTranslation } from "./translation";
 
@@ -60,7 +60,7 @@ export function getTranslation(...args: any[]) {
   if (locale instanceof Promise) {
     let tp: any, tc: any;
     return new Proxy(t, {
-      get(target, p, receiver) {
+      get(_, p, receiver) {
         return p in Promise.prototype
           ? (cb: Function) => ((locale as any)[p](() => ((tp ||= tc = t.current(...args)), cb(tp))), tp || tc || receiver)
           : Reflect.get((tc ||= t(...args)), p, receiver);

@@ -16,6 +16,7 @@ export async function getHeadersRequestLocale(key = LOCALE_HEADERS_KEY) {
   const locale = (await getHeaders()).get(key);
   // @ts-ignore
   if (this?.settings) this.settings.locale = locale;
+  return locale;
 }
 
 export async function getHeadersRequestPathname(key = PATH_HEADERS_KEY) {
