@@ -11,7 +11,7 @@ export const getCache = cache(() => ({} as Partial<Cache>));
 export function getCachedRequestLocale() {
   const locale = getCache().locale;
   // @ts-ignore
-  this?.settings.locale = locale;
+  if (this?.settings) this.settings.locale = locale;
 }
 
 export function setCachedRequestLocale(locale?: string) {

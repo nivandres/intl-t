@@ -15,7 +15,7 @@ export interface ResolveConfig<L extends Locale = Locale> {
   pathPrefix?: "always" | "default" | "optional" | "hidden";
   allowedLocales?: L[] | readonly L[];
   redirectPath?: string;
-  defaultLocale?: string;
+  defaultLocale?: L;
 }
 
 export interface LocalizedHref<L extends Locale = Locale> extends ResolveConfig<L> {
