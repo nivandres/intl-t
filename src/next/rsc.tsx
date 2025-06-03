@@ -45,21 +45,16 @@ export const Trans = T;
 
 export const TranslationDynamicRendering: typeof Translation = async ({ children, ...props }) => {
   props.locale ||= (await getRequestLocale.call(props.t)) as string;
-  setCachedRequestLocale(props.locale);
   return <Translation {...props}>{children}</Translation>;
 };
 
 export function getTranslation(...args: any[]) {
   const cache = getCache();
   // @ts-ignore-error optional binding
-  let t = this || cache.t;
+  const t = this || cache.t;
   if (!t) throw new Error("Translation not found");
   if (cache.locale) return t[cache.locale];
   const locale = getRequestLocale.call(t);
-  if (locale instanceof Promise) {
-    t.then = (cb: Function) => (locale.then(locale => cb(t[(cache.locale = locale || t.locale)])), t);
-    return t[t.settings.locale];
-  }
-  cache.locale = locale || t.settings.locale;
-  return t[cache.locale!];
+  if (locale instanceof Promise) t.then = (cb: Function) => (locale.then(() => cb(t.current(...args))), t);
+  return t.current(...args);
 }

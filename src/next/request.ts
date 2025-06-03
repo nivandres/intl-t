@@ -1,5 +1,5 @@
 import { getHeadersRequestLocale, getHeadersRequestPathname } from "./headers";
-import { getCachedRequestLocale } from "./cache";
+import { getCachedRequestLocale, setCachedRequestLocale } from "./cache";
 import { Locale } from "../locales/types";
 
 export { setCachedRequestLocale as setRequestLocale } from "./cache";
@@ -8,8 +8,13 @@ export function getRequestLocale<L extends Locale>(preventDynamic: true): L | un
 export function getRequestLocale<L extends Locale>(preventDynamic?: boolean): Promise<L | null> | L | undefined;
 // @ts-ignore
 export function getRequestLocale(preventDynamic: boolean = this?.settings.preventDynamic || false) {
-  // @ts-ignore
-  return getCachedRequestLocale.call(this) || (!preventDynamic && getHeadersRequestLocale.call(this)) || (undefined as any);
+  return (
+    // @ts-ignore
+    getCachedRequestLocale.call(this) ||
+    // @ts-ignore
+    (!preventDynamic && getHeadersRequestLocale.call(this).then(setCachedRequestLocale)) ||
+    undefined
+  );
 }
 
 export const getRequestPathname = getHeadersRequestPathname;

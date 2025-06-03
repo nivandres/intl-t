@@ -1,5 +1,5 @@
 import type { TranslationNode, invalidKeys } from "./translation";
-import type { ReactChunk, ReactState } from "../types";
+import type { ReactChunk } from "../types";
 import type { Locale } from "../locales/types";
 import type { State } from "../state";
 
@@ -94,28 +94,30 @@ export type Translation<
   L extends S["allowedLocale"] = S["allowedLocale"],
   R extends Key[] = [],
 > = {
-  <VV extends Values>(variables?: (Partial<V & Variables<N>> | Values) & VV): Translation<S, N, V & VV, L, R>;
+  <VV extends Values>(variables?: (Partial<V & Variables<N>> | Values) & VV): Awaitable<Translation<S, N, V & VV, L, R>>;
   <LL extends S["allowedLocale"], VV extends Values = Values>(
     locale: `${LL}${"" & {}}`,
     variables?: Partial<V & Variables<N>> & VV,
-  ): Translation<S, FollowWay<S["tree"][LL], R>, V & VV, LL, R>;
+  ): Awaitable<Translation<S, FollowWay<S["tree"][LL], R>, V & VV, LL, R>>;
   <D extends ArrayToString<isArray<SearchWays<N>>, S["ps"]> | (string & {}), VV extends Values = Values>(
     path?: D,
     variables?: Partial<FollowWayWithValues<N, StringToArray<D, S["ps"]>, V & Variables<N>>> & VV,
-  ): Translation<
-    S,
-    FollowWay<N, StringToArray<D, S["ps"]>>,
-    FollowWayWithValues<N, StringToArray<D, S["ps"]>, V & Variables<N> & VV>,
-    L,
-    [...R, ...StringToArray<D, S["ps"]>]
+  ): Awaitable<
+    Translation<
+      S,
+      FollowWay<N, StringToArray<D, S["ps"]>>,
+      FollowWayWithValues<N, StringToArray<D, S["ps"]>, V & Variables<N> & VV>,
+      L,
+      [...R, ...StringToArray<D, S["ps"]>]
+    >
   >;
   <A extends isArray<SearchWays<N>>, A_ extends string[] = A, VV extends Values = Values>(
     path?: A | A_ | TemplateStringsArray[],
     variables?: Partial<FollowWayWithValues<N, A_, V & Variables<N>>> & VV,
-  ): Translation<S, FollowWay<N, A_>, FollowWayWithValues<N, A_, V & Variables<N> & VV>, L, [...R, ...A_]>;
+  ): Awaitable<Translation<S, FollowWay<N, A_>, FollowWayWithValues<N, A_, V & Variables<N> & VV>, L, [...R, ...A_]>>;
   <A extends isArray<SearchWays<N>>, A_ extends string[] = A, VV extends Values = Values>(
     ...path: A | A_ | [...(A | A_), (Partial<FollowWayWithValues<N, A_, V>> & Variables<N> & VV)?]
-  ): Translation<S, FollowWay<N, A_>, FollowWayWithValues<N, A_, V & Variables<N> & VV>, L, [...R, ...A_]>;
+  ): Awaitable<Translation<S, FollowWay<N, A_>, FollowWayWithValues<N, A_, V & Variables<N> & VV>, L, [...R, ...A_]>>;
 } & TranslationNode<S, N, V, L, R> & {
     [C in Children<N>]: Translation<S, N[C], V & Variables<N>, L, [...R, C]>;
   } & {

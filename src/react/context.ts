@@ -51,8 +51,7 @@ export function TranslationProvider<
   if (locale && onLocaleChange) return (context.localeState = [locale, onLocaleChange]), locale;
   context.localeState ??= useLocale.call(t, locale);
   variables && t.set(variables);
-  t = t[context.localeState[0] as any](path);
-  return children ? createElement(TranslationContext, { value: context }, children) : t.base;
+  return children ? createElement(TranslationContext, { value: context }, children) : t.current(path).base;
 }
 
 export default TranslationProvider;
@@ -67,6 +66,6 @@ export function useTranslation(...args: any[]) {
   // @ts-ignore-error optional binding
   const t = this || context.t;
   if (!t) throw new Error("Translation not found");
-  const locale = (context?.localeState || useLocale.call(t))[0];
-  return t[locale](...args);
+  context?.localeState || useLocale.call(t);
+  return t.current(...args);
 }

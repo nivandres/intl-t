@@ -300,7 +300,7 @@ export class TranslationNode<
     return this.settings.locale as S["allowedLocale"];
   }
   get current(): TranslationType<S, FollowWay<S["tree"][S["allowedLocale"]], R>, V, L, R> {
-    return this[this.currentLocale as any];
+    return this[this.currentLocale as any] || this;
   }
   get mainLocale() {
     return this.settings.mainLocale as S["mainLocale"];
