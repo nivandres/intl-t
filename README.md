@@ -199,13 +199,16 @@ Create a custom setup file for importing your JSON translation files. `./i18n/tr
 import en from "@/public/locales/en.json";
 import es from "@/public/locales/es.json";
 
-import { createTranslation } from "intl-t";
+import { createTranslation } from "intl-t"; // intl-t/core | intl-t/react | intl-t/next. Default is core
 
 const translation = createTranslation({
   locales: { en, es }, // It will be notify an Error in case of any difference between translation structure
   mainLocale: "en",
   // other settings like default variables, replacement placeholder strings, preferences, etc...
 });
+
+// or
+// const translation = new Translation({ locales: { en, es }, mainLocale: "en" }); // both are same and support types
 
 // T object is the core of the library.
 
@@ -424,7 +427,9 @@ const MyComponent = () => {
 Use provider to sync current locale across your application:
 
 ```jsx
-export const { Translation } = createTranslation({ locales: { en, es } });
+import { createTranslation } from "intl-t/react";
+
+export const { Translation, useTranslation } = createTranslation({ locales: { en, es } });
 
 export default function Providers({ children }) {
   return <Translation locale="en">{children}</Translation>;
