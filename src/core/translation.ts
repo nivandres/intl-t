@@ -26,6 +26,10 @@ abstract class TranslationProxy extends Function {
   constructor(protected __call__: Function) {
     super("...args", "return this.__call__(...args)");
     return new Proxy(this.bind(this), {
+      construct(target, [settings]) {
+        settings.settings = { ...settings.settings, ...target.settings };
+        return new TranslationNode(settings);
+      },
       get(target, p, receiver) {
         let val = Reflect.get(target, p, receiver);
         let src;

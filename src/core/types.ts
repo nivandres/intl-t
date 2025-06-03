@@ -118,6 +118,7 @@ export type Translation<
   <A extends isArray<SearchWays<N>>, A_ extends string[] = A, VV extends Values = Values>(
     ...path: A | A_ | [...(A | A_), (Partial<FollowWayWithValues<N, A_, V>> & Variables<N> & VV)?]
   ): Awaitable<Translation<S, FollowWay<N, A_>, FollowWayWithValues<N, A_, V & Variables<N> & VV>, L, [...R, ...A_]>>;
+  new <const T extends TranslationData>(data: T): TranslationDataAdapter<T>;
 } & TranslationNode<S, N, V, L, R> & {
     [C in Children<N>]: Translation<S, N[C], V & Variables<N>, L, [...R, C]>;
   } & {

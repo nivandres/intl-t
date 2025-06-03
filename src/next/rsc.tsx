@@ -34,6 +34,8 @@ export async function Translation<
     props.settings = JSON.stringify(props.settings) as any;
   }
   cache.locale = props.locale;
+  t.settings.locale = props.locale!;
+  if (!children) return t.current.base;
   // @ts-ignore
   return (<TranslationProvider {...props}>{children}</TranslationProvider>) as never;
 }
@@ -51,10 +53,19 @@ export const TranslationDynamicRendering: typeof Translation = async ({ children
 export function getTranslation(...args: any[]) {
   const cache = getCache();
   // @ts-ignore-error optional binding
-  const t = this || cache.t;
+  let t = this || cache.t;
   if (!t) throw new Error("Translation not found");
   if (cache.locale) return t[cache.locale];
   const locale = getRequestLocale.call(t);
-  if (locale instanceof Promise) t.then = (cb: Function) => (locale.then(() => cb(t.current(...args))), t);
+  if (locale instanceof Promise) {
+    let tp: any, tc: any;
+    return new Proxy(t, {
+      get(target, p, receiver) {
+        return p in Promise.prototype
+          ? (cb: Function) => ((locale as any)[p](() => ((tp ||= tc = t.current(...args)), cb(tp))), tp || tc || receiver)
+          : Reflect.get((tc ||= t(...args)), p, receiver);
+      },
+    });
+  }
   return t.current(...args);
 }
