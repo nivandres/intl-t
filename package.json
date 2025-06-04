@@ -1,7 +1,7 @@
 {
   "name": "intl-t",
   "description": "A Fully-Typed Node-Based i18n Translation Library",
-  "version": "1.0.0-rc.10",
+  "version": "1.0.0-rc.11",
   "type": "module",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -69,9 +69,6 @@
       "default": "./dist/locales/index.js",
       "types": "./dist/locales/index.d.ts"
     }
-  },
-  "bin": {
-    "json-const": "scripts/json-const.js"
   },
   "devDependencies": {
     "@types/bun": "^1.2.0",

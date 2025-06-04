@@ -55,7 +55,7 @@ export function getTranslation(...args: any[]) {
   // @ts-ignore-error optional binding
   let t = this || cache.t;
   if (!t) throw new Error("Translation not found");
-  if (cache.locale) return t[cache.locale];
+  if (cache.locale) return t[cache.locale] || t;
   const locale = getRequestLocale.call(t);
   if (locale instanceof Promise) {
     let tp: any, tc: any;
