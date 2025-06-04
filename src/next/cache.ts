@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { Translation } from "../types";
+import type { Translation } from "../types";
 
 export interface Cache {
   locale: string;

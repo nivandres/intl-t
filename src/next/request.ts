@@ -1,6 +1,6 @@
 import { getHeadersRequestLocale, getHeadersRequestPathname } from "./headers";
 import { getCachedRequestLocale, setCachedRequestLocale } from "./cache";
-import { Locale } from "../locales/types";
+import type { Locale } from "../locales/types";
 
 export { setCachedRequestLocale as setRequestLocale } from "./cache";
 

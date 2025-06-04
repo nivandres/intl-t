@@ -1,4 +1,4 @@
-import { Locale } from "../locales/types";
+import type { Locale } from "../locales/types";
 
 export interface StaticParamsConfig<L extends Locale = Locale, S extends string = string> {
   locales?: L[];

@@ -2,14 +2,20 @@ import { createMiddleware, MiddlewareConfig } from "./middleware";
 import { redirect as r, permanentRedirect as pr, RedirectType } from "next/navigation";
 import { ResolveConfig, resolveHref, resolveLocale, resolvePath } from "../tools/resolvers";
 import { RouterConfig, useRouter, useLocale, usePathname } from "./router";
-import { Locale, TranslationSettings } from "../types";
+import type { Locale, TranslationSettings } from "../types";
 import { Link, LinkConfig, NL } from "./link";
 import { getLocale, getPathname } from "./state";
 import { createStaticParams, StaticParamsConfig } from "./params";
-import React from "react";
+import type { FC } from "react";
 
+export * from "../tools/match";
+export * from "../tools/negotiator";
 export * from "../tools/resolvers";
+export * from "./link";
+export * from "./middleware";
+export * from "./params";
 export * from "./router";
+export * from "./state";
 
 export function resolvedRedirect(href?: string, type?: RedirectType) {
   // @ts-ignore
@@ -23,7 +29,7 @@ export function resolvedPermanentRedirect(href?: string, type?: RedirectType) {
 export const redirect: typeof r = resolvedRedirect;
 export const permanentRedirect: typeof pr = resolvedPermanentRedirect;
 
-export interface IntlConfig<L extends Locale = Locale, T extends React.FC<any> = NL>
+export interface IntlConfig<L extends Locale = Locale, T extends FC<any> = NL>
   extends ResolveConfig<L>,
     StaticParamsConfig<L>,
     MiddlewareConfig<L>,
@@ -32,7 +38,7 @@ export interface IntlConfig<L extends Locale = Locale, T extends React.FC<any> =
   settings?: Partial<TranslationSettings<L>>;
 }
 
-export function createNavigation<L extends Locale, LC extends React.FC<any>>(
+export function createNavigation<L extends Locale, LC extends FC<any>>(
   // @ts-ignore
   config: IntlConfig<L, LC> = this?.ts || this || {},
 ) {

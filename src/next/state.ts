@@ -1,6 +1,6 @@
 import { getRequestLocale, getRequestPathname } from "./request";
 import { useLocale, usePathname } from "./router";
-import { Locale } from "../locales/types";
+import type { Locale } from "../locales/types";
 import React from "react";
 
 export { isClient } from "../state";

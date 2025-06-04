@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { TranslationProvider, TranslationProviderProps } from "../react/context";
 import { TranslationNode } from "../core/translation";
-import { isArray, SearchWays, ArrayToString } from "../types";
+import type { isArray, SearchWays, ArrayToString } from "../types";
 import { getCache } from "./cache";
 import { getRequestLocale } from "./request";
 import { createTranslation } from "./translation";

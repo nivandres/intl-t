@@ -35,21 +35,30 @@ export default function Component() {
 
   return (
     <>
-      {/* Get translations as an object */}
-      <h1>{t.title}</h1>
+      <h1>{t("title")}</h1>
+      {/* Get translations as an object or function */}
+      <h2>{t.title}</h2>
 
       {/* Use variables in your translations */}
-      <h2>{t.welcome({ user: "Ivan" })}</h2>
-
+      <span>{t("welcome", { user: "Ivan" })}</span>
+      <span>{t.summary(data)}</span>
       {/* Flexible syntax */}
+
       <p>{t("main", { now: Date.now() })}</p>
       <ul>
-        <li>{t.features[0]}</li>
-        <li>{t.features[1]({ name: "Ivan V" })}</li>
-        <li>{t.features("2")({ name: "Ivan V" })}</li>
-        <li>{t({ name: "Ivan V" })("features.3")}</li>
+        {/* Array of translations */}
+        {t.features.map(t => (
+          <li key={t.id} title={t("title")}>
+            {t}
+          </li>
+        ))}
       </ul>
-
+      <ul>
+        <li>{t.features[0]}</li>
+        <li>{t("features.1", { name: "Ivan V" })}</li>
+        <li>{t("features")[2]({ name: "Ivan V" })}</li>
+        <li>{t({ name: "Ivan V" }).features("3")}</li>
+      </ul>
       {/* Node-based translations */}
       <p>{t.page1.section1.article1.title}</p>
       <p>{t("page1/section1").article1("title")}</p>
@@ -60,12 +69,21 @@ export default function Component() {
 }
 ```
 
-```json
+```jsonc
 {
   "title": "Homepage",
-  "welcome": "Welcome, {user}!",
+  "welcome": "Welcome, {user}!", // support ICU message format
+  "summary": "{count, plural, =0 {no items} one {# item} other {# items}}",
   "main": "It is {now, date, sm}",
-  "features": ["Hi {name}. This is Feature 1", "Hi {name}. This is Feature 2", "Hi {name}. This is Feature 3"],
+  "features": [
+    "Hi {name}. This is Feature 1",
+    "Hi {name}. This is Feature 2",
+    "Hi {name}. This is Feature 3",
+    {
+      "base": "Hi {name}. This is Feature 4 with html title", // base is default text for objects
+      "title": "Feature 4"
+    }
+  ],
   "page1": {
     "section1": {
       "article1": {
@@ -78,10 +96,12 @@ export default function Component() {
       "change": "Change your account settings. Your account id is {accountId}"
     },
     "values": {
+      // local node values
       "accountId": 0
     }
   },
   "values": {
+    // default values
     "user": "World",
     "name": "{user}",
     "now": "{(Date.now())}"
@@ -98,6 +118,14 @@ npm i intl-t
 # or
 bun i intl-t
 ```
+
+## Guide
+
+- [Basic Usage](#basic-usage)
+- [React](#react)
+- [Next.js](#nextjs)
+- [Static Rendering](#static-rendering)
+- [Dynamic Rendering](#dynamic-rendering)
 
 ## Basic Usage
 
@@ -383,12 +411,7 @@ t.use(variables: Values): TranslationNode
 The core interface representing a node in the translation tree.
 
 ```typescript
-interface TranslationNode<
-  S extends TranslationSettings,
-  N extends Node,
-  V extends Values,
-  L extends S["allowedLocale"],
-> {
+interface TranslationNode<S extends TranslationSettings, N extends Node, V extends Values, L extends S["allowedLocale"]> {
   t: TranslationNode<S, N, V, L>;
   tr: TranslationNode<S, N, V, L>;
   parent: TranslationNode<S, N, V, L>;
@@ -481,13 +504,47 @@ For Static Rendering you will need to generate static params and in each layout 
 
 In dynamic pages with just `await getTranslation()` you can get the translation with current locale.
 
-
 ### Navigation
 
 ```js
-import { createNavigation } from "intl-t/next";
+//i18n/navigation.ts
+import { createNavigation } from "intl-t/navigation";
 
 export const { middleware, Link } = createNavigation({ allowedLocales: ["en", "es"], defaultLocale: "en" });
+```
+
+### Static Rendering
+
+```ts
+//i18n/translation.ts
+import { Translation } from "intl-t/next";
+
+export const { getTranslation, setLocale } = new Translation({ locales: { en: "Hello world" } });
+```
+
+```jsx
+import { getTranslation, setLocale } from "@/i18n/translation";
+import { setRequestLocale } from "intl-t/next";
+
+export default function Page({ params }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  // or
+  // setLocale(locale); Same as setRequestLocale but typed with available locales
+  const { t } = getTranslation();
+  return <div>{t}</div>; // hello world
+}
+```
+
+### Dynamic Rendering
+
+Same configuration. Just middleware, no need any more to set locale in dynamic pages.
+
+```tsx
+export default async function Page() {
+  const { t } = await getTranslation(); // Get locale from headers through middleware
+  return <div>{t}</div>; // hello world
+}
 ```
 
 ## Hello there 👋

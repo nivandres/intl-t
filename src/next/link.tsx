@@ -2,30 +2,28 @@ import { default as NL, LinkProps as LP } from "next/link";
 import { LC } from "./link_client";
 import { getPathname, isRSC } from "./state";
 import { ResolveConfig, resolveHref } from "../tools/resolvers";
-import { Locale } from "../locales/types";
+import type { Locale } from "../locales/types";
 import { getRequestLocale } from "./request";
-import React from "react";
+import type { FC, ReactNode, ComponentProps } from "react";
 
 export type NL = typeof NL;
 
-export interface LinkConfig<LC extends React.FC<any> = NL> {
+export interface LinkConfig<LC extends FC<any> = NL> {
   Link?: LC;
   preventDynamic?: boolean;
 }
 
-export interface LinkProps<L extends Locale = Locale, LC extends React.FC<any> = NL>
-  extends LinkConfig<LC>,
-    Omit<LP, "href"> {
+export interface LinkProps<L extends Locale = Locale, LC extends FC<any> = NL> extends LinkConfig<LC>, Omit<LP, "href"> {
   href?: string;
   locale?: L;
   currentLocale?: L;
   config?: ResolveConfig<L> & LinkConfig<LC>;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 export { LC };
 
-export async function LS<L extends Locale, L_ extends string, LC extends React.FC<any>>({
+export async function LS<L extends Locale, L_ extends string, LC extends FC<any>>({
   href = "",
   locale,
   currentLocale,
@@ -34,7 +32,7 @@ export async function LS<L extends Locale, L_ extends string, LC extends React.F
   Link = config.Link || (NL as unknown as LC),
   preventDynamic = config.preventDynamic ?? true,
   ...props
-}: LinkProps<L | L_, LC> & Omit<React.ComponentProps<LC>, keyof LinkProps>) {
+}: LinkProps<L | L_, LC> & Omit<ComponentProps<LC>, keyof LinkProps>) {
   if (!href && locale)
     if (preventDynamic) {
       const { allowedLocales, defaultLocale, pathPrefix, redirectPath } = config;

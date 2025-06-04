@@ -4,7 +4,7 @@ import { I18NDomains } from "next/dist/server/config-shared";
 import { match } from "../tools/match";
 import { ResolveConfig } from "../tools/resolvers";
 import { LOCALE_HEADERS_KEY, PATH_HEADERS_KEY } from "./headers";
-import { Locale } from "../locales/types";
+import type { Locale } from "../locales/types";
 
 export const LOCALE_COOKIE_KEY = "locale";
 
