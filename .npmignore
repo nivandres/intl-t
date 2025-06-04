@@ -10,3 +10,4 @@ node_modules
 scripts
 src
 test
+tsconfig.json

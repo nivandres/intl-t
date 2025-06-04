@@ -11,5 +11,6 @@
     "target": "ESNext",
     "baseUrl": "."
   },
-  "exclude": ["node_modules", "test", "dist", "examples"]
+  "exclude": ["node_modules", "test", "dist", "examples"],
+  "include": ["src"]
 }

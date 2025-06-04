@@ -1,3 +1,4 @@
+// @ts-nocheck
 import _React from "react";
 import _jsx from "react/jsx-runtime";
 import _jsxDEV from "react/jsx-dev-runtime";
@@ -28,17 +29,13 @@ export function jsxDEV(type, props, key, isStatic, source) {
   return jsxDEV_(type, props, key, isStatic, source);
 }
 
-export function patch({
-  React = _React,
-  jsx = _jsx,
-  jsxDEV = _jsxDEV,
-} = {}) {
+export function patch({ React = _React, jsx = _jsx, jsxDEV = _jsxDEV } = {}) {
   try {
     React.createElement = createElement;
     jsx.jsx = jsx;
     jsx.jsxs = jsxs;
     jsxDEV.jsxDEV = jsxDEV;
-  } catch { }
+  } catch {}
 }
 
 patch();
