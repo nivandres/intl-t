@@ -7,5 +7,6 @@
 .prettierrc
 bun.lock*
 node_modules
+scripts
 src
 test

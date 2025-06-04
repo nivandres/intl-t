@@ -1,6 +1,5 @@
-import React from "react";
+import { createElement, type ReactNode } from "react";
 import type { Values, Base, ReactChunk, ReactChunkProps } from "../types";
-import { createElement } from "./patch";
 
 const regex = /<(\w+)([^<>\/]+)?(?:\/\s*>|>(?:(.*)<\s*\/\s*\1\s*>)?)/gm;
 const attributesRegex = /(\w+)(?:=(\w+|".*?"|'.*?'|{(.+?)}))?/g;
@@ -14,7 +13,7 @@ export function injectReactChunks(content: string = "", variables: Values = {}, 
   if (!content || !content.includes("<")) return content;
   const matches = [...content.matchAll(regex)];
   if (!matches.length) return content;
-  const elements = [] as React.ReactNode[];
+  const elements = [] as ReactNode[];
   matches.forEach(match => {
     const [tag, tagName, tagAttributes, tagContent] = match;
     const props = {
@@ -33,7 +32,7 @@ export function injectReactChunks(content: string = "", variables: Values = {}, 
           props[key] = value;
         }
       });
-    let element: React.ReactNode;
+    let element: ReactNode;
     try {
       element = ((variables[tagName] as ReactChunk) || Chunk)(props) ?? null;
     } catch {

@@ -1,7 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo } from "react";
-import { createElement } from "./patch";
+import { createElement, createContext, useContext, useMemo } from "react";
 import { isArray, SearchWays, ArrayToString, ReactState, Locale, TranslationProps as TP } from "../types";
 import { useLocale } from "./hooks";
 import { createTranslation, TranslationNode } from "./translation";
