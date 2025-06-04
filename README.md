@@ -254,31 +254,25 @@ const { t } = useTranslation();
 
 Translation will be based on translation nodes, each translation node have its base value, default variables, children, parent, etc. The translation core object is the tree of all these nodes. The root of the object will be the default locale tree with properties for all locale tree. All in this tree are nodes, so all of them have the same methods. But for typescript, depending if is root o has base text the methods will differ.
 
-There are two main methods for the nodes, the use method and the get method (the get can be used as use); The use will mutate of the branches downward starting from itself, It will return the same node with its children but with the new default variables modified.
+Each node can be callable and usable directly. They work like a function, object and string as needed.
 
 ```ts
 {
   base: "hello";
-} // nodes with base value, will have its node as default value.
-{
   child: "hello";
-} // nodes with children, will have its get function as default value
-
+} // nodes can have base value and children
 "hello"["hello"][ // nodes can be only text too // or lists
-  // You can put this raw values when createTranslation, but strings are not recommended.
+  // You can put this raw values when createTranslation
   [[["hello"]]]
 ]; // You can make it as complex as you want
 t[0][0][0][0];
 ```
 
-The get function will receive a path where you can get into a downward node. Also you can add variables and use both, use and get. Get function will have full auto completion with all possible string ways in that point of the tree, and it will return the corresponding types for the way.
-
 ```ts
 // Type-safe
 t.public.page1.section1.article1.lines[0].htmltitle[0];
-t.get("public.page1.section1.lines.0.htmltitle.0");
-t("public.page1");
-t.settings.ps = "/";
+t("public.page1.section1.lines.0.htmltitle.0");
+t.settings.ps = "/"; // You can change the path separator
 t("public/page1");
 ```
 
@@ -288,14 +282,12 @@ Remember that you can nest many mutation methods as you want.
 t(v1).p1("s4.a2").n3(v2);
 ```
 
-Remember that default value for nodes will be string if it has base defined, o get function if it doesn't. Also if you want to access the string with no node methods, you can use the .base property, it is only string | null in case the node doesn't have children.
+Also the nodes in its properties have some general data, like its current variables, locale details, its locale, its children property names, its keyname in parent property, the main locale, parent reference access, global reference access, etc.
 
 ```ts
-t.basetext; // string with node methods
-t.page1(); // get function with node methods
+const { global: { pages: { title } } } = t;
+title === t.g("pages.title"); // true
 ```
-
-Also the nodes in its properties have some general data, like its current variables, locale details, its locale, its children property names, its keyname in parent property, the main locale, parent reference access, global reference access, etc.
 
 ### 3. Use translations in your code
 
@@ -404,7 +396,7 @@ t.use(variables: Values): TranslationNode
 
 - `t(key, variables?)`: Translates the given key with optional variables.
 - `t[locale](key, variables?)`: Translates using a specific locale.
-- `t.use(variables)`: Creates a new translation instance with the given variables.
+- `t(variables)`: Creates a new translation instance with the given variables.
 
 ### [TranslationNode Interface](https://tsdocs.dev/docs/intl-t/types/TranslationNode.html)
 
@@ -421,8 +413,6 @@ interface TranslationNode<S extends TranslationSettings, N extends Node, V exten
   id: string;
   node: N;
   settings: S;
-  use(variables: Partial<V>): TranslationNode<S, N, V & typeof variables, L>;
-  get(...path: string[]): TranslationNode<S, N, V, L>;
   // ... other properties and methods
 }
 ```
@@ -433,13 +423,13 @@ intl-t provides seamless integration with React through the `useTranslation` hoo
 
 ```jsx
 const MyComponent = () => {
-  const { t, lang, setLang } = useTranslation("common");
+  const { t, locale, setLocale } = useTranslation("common");
 
   return (
     <div>
       <h1>{t("title")}</h1>
       <p>{t("welcome", { name: "User" })}</p>
-      <button onClick={() => setLang("es")}>Switch to Spanish</button>
+      <button onClick={() => setLocale("es")}>Switch to Spanish</button>
     </div>
   );
 };
@@ -468,14 +458,14 @@ Each node has its Translation component, `const { Translation } = t.es.key`;
 React hook for accessing translations within components.
 
 ```ts
-const { t, lang, setLang } = useTranslation(path?: string);
+const { t, locale, setLocale } = useTranslation(path?: string);
 ```
 
 #### Returns:
 
 - `t`: The translation function for the current locale.
-- `lang`: The current language code.
-- `setLang`: A function to change the current language.
+- `locale`: The current language code.
+- `setLocale`: A function to change the current language.
 
 ### React Component Injection out of the box
 
@@ -494,6 +484,29 @@ const Welcome = () => (
     })}
   </div>
 );
+```
+
+## Patch React
+
+If you are using React, in some frameworks you may need to patch React to support translation objects. (Farmfe and Next.js builds)
+You can do it by importing the patch function and passing the React, jsx and jsxDEV modules directly to it.
+
+```ts
+//i18n/patch.ts
+import React from "react";
+import jsx from "react/jsx-runtime";
+import jsxDEV from "react/jsx-dev-runtime";
+import patch from "intl-t/patch";
+
+patch(React, jsx, jsxDEV);
+```
+
+And then import it at the top of your translation file
+
+```ts
+//i18n/translation.ts
+import "./patch";
+// ...
 ```
 
 ## Next.js
@@ -545,6 +558,17 @@ export default async function Page() {
   const { t } = await getTranslation(); // Get locale from headers through middleware
   return <div>{t}</div>; // hello world
 }
+```
+
+### Next.js React patch
+
+```ts
+import React from "react";
+import jsx from "react/jsx-runtime";
+import jsxDEV from "react/jsx-dev-runtime";
+import patch from "intl-t/react";
+
+process.env.NODE_ENV !== "development" && patch(React, jsx, jsxDEV);
 ```
 
 ## Hello there 👋

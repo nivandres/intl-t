@@ -13,29 +13,25 @@ const jsxDEV_ = _jsxDEV.jsxDEV;
 const isArray = Array.isArray;
 const check = child => (typeof child === "function" && child instanceof TranslationNode ? child.base : child);
 
-export function createElement(type, props, ...children) {
-  return createElement_(type, props, ...children.map(check));
-}
-export function jsx(type, props, key) {
-  props.children = isArray(props.children) ? props.children.map(check) : check(props.children);
-  return jsx_(type, props, key);
-}
-export function jsxs(type, props, key) {
-  props.children = isArray(props.children) ? props.children.map(check) : check(props.children);
-  return jsxs_(type, props, key);
-}
-export function jsxDEV(type, props, key, isStatic, source) {
-  props.children = isArray(props.children) ? props.children.map(check) : check(props.children);
-  return jsxDEV_(type, props, key, isStatic, source);
-}
-
-export function patch({ React = _React, jsx = _jsx, jsxDEV = _jsxDEV } = {}) {
+export function patch(React = _React, jsx = _jsx, jsxDEV = _jsxDEV) {
   try {
-    React.createElement = createElement;
-    jsx.jsx = jsx;
-    jsx.jsxs = jsxs;
-    jsxDEV.jsxDEV = jsxDEV;
+    React.createElement = function createElement(type, props, ...children) {
+      return createElement_(type, props, ...children.map(check));
+    };
+    jsx.jsx = function jsx(type, props, key) {
+      props.children = isArray(props.children) ? props.children.map(check) : check(props.children);
+      return jsx_(type, props, key);
+    };
+    jsx.jsxs = function jsxs(type, props, key) {
+      props.children = isArray(props.children) ? props.children.map(check) : check(props.children);
+      return jsxs_(type, props, key);
+    };
+    jsxDEV.jsxDEV = function jsxDEV(type, props, key, isStatic, source) {
+      props.children = isArray(props.children) ? props.children.map(check) : check(props.children);
+      return jsxDEV_(type, props, key, isStatic, source);
+    };
   } catch {}
 }
+export default patch;
 
 patch();
