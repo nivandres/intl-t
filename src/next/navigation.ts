@@ -42,10 +42,11 @@ export function createNavigation<L extends Locale, LC extends FC<any>>(
   // @ts-ignore
   config: IntlConfig<L, LC> = this?.ts || this || {},
 ) {
-  if (!config.allowedLocales && Array.isArray(config.locales)) config.allowedLocales = config.locales;
+  const { allowedLocales } = config;
+  if (!allowedLocales && Array.isArray(config.locales)) config.allowedLocales = config.locales;
   config.pathPrefix ||= config.strategy == "domain" ? "hidden" : "default";
   config.pathBase ||= config.pathPrefix == "hidden" ? "detect-latest" : "detect-default";
-  config.defaultLocale ||= config.allowedLocales?.[0];
+  config.defaultLocale ||= allowedLocales?.[0];
   config.redirectPath ||= "r";
   return {
     config,
@@ -63,5 +64,8 @@ export function createNavigation<L extends Locale, LC extends FC<any>>(
     usePathname,
     getPathname,
     settings: Object.assign(config, config.settings),
+    allowedLocales,
+    locales: allowedLocales,
+    locale: allowedLocales?.[0],
   };
 }

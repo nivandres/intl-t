@@ -1,6 +1,6 @@
 import { createTranslation as ct, getChildren as gc, getSource as gs } from "../src";
 import { describe, it, expect } from "bun:test";
-import * as en from "./messages.json";
+import en from "./messages.json";
 
 describe("Translation object", () => {
   it("should run correctly nested", () => {
@@ -142,29 +142,6 @@ describe("Translation object", () => {
   //   expect(t["test" as any]).toBe("test2");
   //   expect(t.hello["test" as any]).toBe("test2");
   // });
-  it("should work with dynamic get locale", () => {
-    let t = ct({
-      allowedLocales: ["en", "es"],
-      getLocaleSource(locale) {
-        return { hello: locale === "es" ? "hola mundo" : "hello world" };
-      },
-    });
-    expect(t.en.hello.base).toBe("hello world");
-    expect(t.es.hello.base).toBe("hola mundo");
-    t = ct({
-      locales: {
-        en: {
-          hello: "hello world",
-        },
-      } as any,
-      allowedLocales: ["en", "es"],
-      getLocaleSource() {
-        return { hello: "hola mundo" };
-      },
-    });
-    expect(t.hello.base).toBe("hello world");
-    expect(t.hello.es.base).toBe("hola mundo");
-  });
   it("should preserve input when no keys are found", async () => {
     const t = ct({ locales: { en: { title: "This is the title" } } });
     expect(t("Hello world. How are you?").base).toBe("Hello world. How are you?");
@@ -211,5 +188,45 @@ describe("variable injection", () => {
     expect(String(t.hello.use({ name: "ivan" }).base)).toBe("hello ivan");
     expect(String(t.age.use({ age: 1 }).base)).toBe("you are 1 year old");
     expect(String(t.age.use({ age: 2 }).base)).toBe("you are 2 years old");
+  });
+});
+
+describe("dynamic import", () => {
+  it("should work with dynamic get locale", () => {
+    let t = ct({
+      allowedLocales: ["en", "es"],
+      getLocaleSource(locale) {
+        return { hello: locale === "es" ? "hola mundo" : "hello world" };
+      },
+    });
+    expect(t.en.hello.base).toBe("hello world");
+    expect(t.es.hello.base).toBe("hola mundo");
+    t = ct({
+      locales: {
+        en: {
+          hello: "hello world",
+        },
+      } as any,
+      allowedLocales: ["en", "es"],
+      getLocaleSource() {
+        return { hello: "hola mundo" };
+      },
+    });
+    expect(t.hello.base).toBe("hello world");
+    expect(t.hello.es.base).toBe("hola mundo");
+  });
+  it("should work", async () => {
+    const t = await ct({
+      locales: {} as {
+        en: typeof en;
+        es: typeof en;
+      },
+      allowedLocales: ["en", "es"],
+      getLocaleSource(locale) {
+        console.log(`importing ${locale}`);
+        return import("./messages.json");
+      },
+    });
+    expect(t.en.common.base).toBeString();
   });
 });

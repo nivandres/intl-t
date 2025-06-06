@@ -145,15 +145,10 @@ export interface TranslationSettings<
   variables: Variables;
   tree: Tree;
   ps: PathSeparator;
-  proxy: boolean;
   settings: this;
-  Translation: any;
   preventDynamic: boolean;
   setLocale?: (locale: Locale) => Locale | void;
   getLocaleSource?: <L extends AllowedLocale>(locale: L, deep?: number) => Promisable<Tree[L] | undefined>;
-  getNodeSource?: (params: { path: Key[]; locale?: Locale; deep?: number }) => Promisable<Node> | undefined;
-  injectVariables: <T extends string>(content: T, variables?: Values, state?: State) => T | (string & {});
-  onTranslationNode?: (node: TranslationNode) => void;
 }
 
 export interface TranslationData<

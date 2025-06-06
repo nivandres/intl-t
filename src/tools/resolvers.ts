@@ -3,7 +3,7 @@ import { locale as l } from "../state";
 import { match } from "./match";
 
 // @ts-ignore-error optional binding
-export function resolveLocale<L extends Locale>(path: string = "", locales: L[] = this.allowedLocales) {
+export function resolveLocale<L extends Locale>(path: string = "", locales: L[] = this?.allowedLocales || []) {
   const locale = path.match(/^\/([a-z]{2})(?:$|\/)/)?.[1] as L;
   if (!locale || !locales) return locale;
   return locales.includes(locale) ? locale : undefined;

@@ -41,7 +41,7 @@ export async function LS<L extends Locale, L_ extends string, LC extends FC<any>
     } else href = (await getPathname()) || "";
   // @ts-ignore
   config.getLocale ||= getRequestLocale.bind(null, preventDynamic);
-  href = await resolveHref(href, { ...config, locale, currentLocale });
+  href = await resolveHref.call(config, href, { ...config, locale, currentLocale });
   return <Link href={href} {...(props as any)} />;
 }
 

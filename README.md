@@ -285,7 +285,11 @@ t(v1).p1("s4.a2").n3(v2);
 Also the nodes in its properties have some general data, like its current variables, locale details, its locale, its children property names, its keyname in parent property, the main locale, parent reference access, global reference access, etc.
 
 ```ts
-const { global: { pages: { title } } } = t;
+const {
+  global: {
+    pages: { title },
+  },
+} = t;
 title === t.g("pages.title"); // true
 ```
 
@@ -486,7 +490,7 @@ const Welcome = () => (
 );
 ```
 
-## Patch React
+## React Patch
 
 If you are using React, in some frameworks you may need to patch React to support translation objects. (Farmfe and Next.js builds)
 You can do it by importing the patch function and passing the React, jsx and jsxDEV modules directly to it.
@@ -569,6 +573,25 @@ import jsxDEV from "react/jsx-dev-runtime";
 import patch from "intl-t/react";
 
 process.env.NODE_ENV !== "development" && patch(React, jsx, jsxDEV);
+```
+
+## Dynamic Locales import
+
+```ts
+import { Translation } from "intl-t";
+
+export const t = new Translation({
+  locales: {} as {
+    // en: typeof en
+    // es: typeof es;
+  }, // For type safety
+  allowedLocales: ["en", "es"],
+  getLocaleSource(locale) {
+    return import(`./messages/${locale}.json`);
+  },
+});
+
+t; // Automatically imports the locale that is needed
 ```
 
 ## Hello there 👋

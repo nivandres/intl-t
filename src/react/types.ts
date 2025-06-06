@@ -8,7 +8,6 @@ import type {
   SearchWays,
   ArrayToString,
   FollowWayWithValues,
-  TranslationNode,
   State,
   Children,
   Content,
@@ -38,16 +37,14 @@ export interface TranslationProps<
   A extends string[] = isArray<SearchWays<N>>,
   D extends string = ArrayToString<A, S["ps"]>,
 > extends Partial<State<S["allowedLocale"]>> {
-  children?: Content<N> | (ReactNode & {});
+  children?: Content<N> | ReactNode;
   key?: D;
   id?: D | A;
   i18nKey?: D | A;
   path?: D | A;
   variables?: Partial<FollowWayWithValues<N, A, V>> & Values;
   locale?: S["allowedLocale"];
-  source?: Node | TranslationNode;
-  deep?: number;
-  sourceDefault?: boolean;
+  source?: Node;
   preventDynamic?: boolean;
   settings?: Partial<TranslationSettings>;
   onLocaleChange?: ReactSetState<S["allowedLocale"]>;

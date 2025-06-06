@@ -11,31 +11,32 @@ export async function Translation<
   A extends isArray<SearchWays<T>>,
   D extends ArrayToString<A, T["settings"]["ps"]>,
   // @ts-ignore-error optional binding
->({ children, t = this, deep = Infinity, sourceDefault, preventDynamic, ...props }: TranslationProviderProps<T, A, D>) {
+>({ children, t = this, preventDynamic, ...props }: TranslationProviderProps<T, A, D>) {
   const cache = getCache();
   t ||= cache.t || createTranslation(props.settings);
   props.locale ||= cache.locale;
   preventDynamic ??= t.settings.preventDynamic;
   if (!(props.locale || preventDynamic)) {
-    Object.assign(props, { t, deep, sourceDefault, preventDynamic: true });
+    Object.assign(props, { t, preventDynamic: true });
     return (
       <Suspense fallback={<Translation {...props}>{children}</Translation>}>
         <TranslationDynamicRendering {...props}>{children}</TranslationDynamicRendering>
       </Suspense>
     );
   }
-  props.source instanceof TranslationNode && (props.source = props.source.getSource(deep) as any);
-  if (props.settings || sourceDefault) {
-    Object.assign((props.settings ||= {}), {
-      locales: sourceDefault ? { [props.locale as any]: (t.settings.locales as any)[props.locale as any] } : undefined,
-      allowedLocales: t?.settings.allowedLocales,
-      locale: props.locale,
-    } as Partial<(typeof t & object)["settings"]>);
-    props.settings = JSON.stringify(props.settings) as any;
-  }
   cache.locale = props.locale;
   t.settings.locale = props.locale!;
-  if (!children) return t.current.base;
+  t = await t.current;
+  if (!children) return t.base;
+  if (props.settings)
+    props.settings = JSON.stringify(
+      Object.assign((props.settings ||= {}), {
+        locales: { [t.locale as any]: t.node },
+        allowedLocales: t?.settings.allowedLocales,
+        locale: props.locale,
+      } as Partial<(typeof t & object)["settings"]>),
+    ) as any;
+  props.source = props.source || t.node;
   // @ts-ignore
   return (<TranslationProvider {...props}>{children}</TranslationProvider>) as never;
 }
@@ -55,7 +56,8 @@ export function getTranslation(...args: any[]) {
   // @ts-ignore-error optional binding
   let t = this || cache.t;
   if (!t) throw new Error("Translation not found");
-  if (cache.locale) return t[cache.locale] || t;
+  t.settings.locale = cache.locale;
+  if (cache.locale) return t.current(...args);
   const locale = getRequestLocale.call(t);
   if (locale instanceof Promise) {
     let tp: any, tc: any;

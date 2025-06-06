@@ -18,7 +18,7 @@ export function getClientLocale(key = LOCALE_CLIENT_KEY) {
   const settings = this?.settings;
   const r = resolveLocale.bind(settings);
   // @ts-expect-error location type from browser
-  const locale = localStorage?.getItem(key) || r(location.pathname) || r(l) || settings?.locale;
+  const locale = localStorage?.getItem(key) || r(location.pathname) || r(l);
   if (settings) settings.locale = locale;
   return locale;
 }
