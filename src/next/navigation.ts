@@ -44,6 +44,8 @@ export function createNavigation<L extends Locale, LC extends FC<any>>(
 ) {
   const { allowedLocales } = config;
   if (!allowedLocales && Array.isArray(config.locales)) config.allowedLocales = config.locales;
+  config.locales ||= allowedLocales as L[];
+  config.param ||= "locale";
   config.pathPrefix ||= config.strategy == "domain" ? "hidden" : "default";
   config.pathBase ||= config.pathPrefix == "hidden" ? "detect-latest" : "detect-default";
   config.defaultLocale ||= allowedLocales?.[0];

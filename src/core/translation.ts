@@ -37,7 +37,9 @@ abstract class TranslationProxy extends Function {
           if (typeof val !== "function" || !(p in TranslationNode.prototype)) return val;
           src = target;
         } else {
-          src = Array.isArray(target.node) ? [...target.children.map((c: string) => target[c])] : target.base;
+          if (Array.isArray(target.node)) src = [...target.children.map((c: string) => target[c])];
+          else if (p in String.prototype) src = target.base;
+          else src = target.node;
           val = src[p];
         }
         if (typeof val === "function") val = val.bind(src);
@@ -82,7 +84,12 @@ export class TranslationNode<
   static injectVariables = injectVariables;
   static getChildren = getChildren;
   static Proxy = TranslationProxy;
+  static t = {} as any;
   static setLocale = undefined;
+
+  static getLocale = function (this: any) {
+    return this.defaultLocale;
+  };
 
   static Provider = function (this: any, ...args: any[]) {
     return this[this.settings.locale](...args);
@@ -193,6 +200,7 @@ export class TranslationNode<
       };
     });
     Object.defineProperties(this, descriptors);
+    TranslationNode.t ||= t;
   }
   call(...path: any[]): any {
     const variables = path.at(-1)?.__proto__ === Object.prototype ? (path.pop() as Values) : undefined;
@@ -267,6 +275,9 @@ export class TranslationNode<
     this.children = children;
     return this.addChildren(children);
   }
+  getSource(deep = Infinity) {
+    return getSource(this.node, deep, this.path);
+  }
   get base() {
     const node = this.getNode();
     return TranslationNode.injectVariables(
@@ -285,7 +296,8 @@ export class TranslationNode<
     locale: LL | (string & {}) | ((p: L) => LL) = this.settings.locale,
   ): TranslationType<S, FollowWay<S["tree"][LL], R>, V, LL, R> {
     if (typeof locale === "function") locale = locale(this.currentLocale as L);
-    this.settings.setLocale?.(locale) || (this.settings.locale = locale);
+    const sl = this.settings.setLocale;
+    this.then?.(() => sl?.(locale)) || sl?.(locale) || (this.settings.locale = locale);
     return this[locale as any];
   }
   get values(): V & Variables<N> {
@@ -372,12 +384,11 @@ export function createTranslationSettings<
   settings.allowedLocales ??= Object.keys(settings.locales as object) as L[];
   settings.mainLocale ??= settings.defaultLocale ??= settings.allowedLocales[0] as M;
   settings.defaultLocale ??= settings.mainLocale;
-  settings.currentLocale ??= settings.defaultLocale;
   settings.allowedLocale ??= settings.mainLocale;
+  settings.currentLocale ??= TranslationNode.getLocale.call(settings);
   settings.locale ??= settings.currentLocale;
   settings.setLocale ??= TranslationNode.setLocale;
   settings.tree ??= settings.locales as T;
-  settings.hidratation ??= hidratation;
   settings.variables ??= {} as unknown as V;
   settings.ps ??= settings.pathSeparator ??= "." as PS;
   const gls = settings.getLocaleSource;
@@ -385,7 +396,7 @@ export function createTranslationSettings<
     settings.getLocaleSource ??= function (locale: L) {
       return ((settings.locales as any)[locale] ??= gls.call(this, locale));
     };
-  settings.locales[settings.locale] ??= settings.getLocaleSource?.bind(settings, settings.locale) as any;
+  settings.locales[settings.locale as L] ??= settings.getLocaleSource?.bind(settings, settings.locale as L) as any;
   return (settings.settings = settings as S);
 }
 

@@ -523,12 +523,41 @@ In dynamic pages with just `await getTranslation()` you can get the translation 
 
 ### Navigation
 
-```js
+```ts
 //i18n/navigation.ts
 import { createNavigation } from "intl-t/navigation";
 
-export const { middleware, Link } = createNavigation({ allowedLocales: ["en", "es"], defaultLocale: "en" });
+export const { middleware, Link, generateStaticParams } = createNavigation({ allowedLocales: ["en", "es"], defaultLocale: "en" });
 ```
+
+```ts
+//app/layout.tsx
+export { generateStaticParams } from "@/i18n/navigation";
+```
+
+```ts
+//middleware.ts
+import { middleware } from "@/i18n/navigation";
+
+export default middleware;
+
+export const config = {
+  // middleware matcher config
+};
+```
+
+From `createNavigation` you can get:
+
+- `middleware`: Middleware function to be used in `middleware.ts`
+- `generateStaticParams`: Function to generate static params
+- `useRouter`: React hook to get router config with binded `locale` and `pathname` values
+- `Link`: React component to create links with binded `locale` and `pathname` values
+- `redirect`: Binded Next.js `redirect` function
+- `permanentRedirect`: Binded Next.js `permanentRedirect` function
+- `getLocale`: Function to get current locale at server
+- `useLocale`: React hook to get current locale
+- `usePathname`: React hook to get current pathname without locale prefix if exist
+- `getPathname`: Function to get current pathname without locale prefix if exist
 
 ### Static Rendering
 
@@ -581,17 +610,30 @@ process.env.NODE_ENV !== "development" && patch(React, jsx, jsxDEV);
 import { Translation } from "intl-t";
 
 export const t = new Translation({
+  locales: {
+    en: () => import("./messages/en.json"),
+    es: () => import("./messages/es.json"),
+  },
+});
+
+await t;
+```
+
+```ts
+import { Translation } from "intl-t";
+
+export const t = new Translation({
   locales: {} as {
     // en: typeof en
     // es: typeof es;
   }, // For type safety
-  allowedLocales: ["en", "es"],
+  allowedLocales: ["en", "es"], // IMPORTANT: You must define allowed locales with dynamic import
   getLocaleSource(locale) {
     return import(`./messages/${locale}.json`);
   },
 });
 
-t; // Automatically imports the locale that is needed
+await t; // Automatically imports the locale that is needed
 ```
 
 ## Hello there 👋

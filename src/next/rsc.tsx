@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { TranslationProvider, TranslationProviderProps } from "../react/context";
 import { TranslationNode } from "../core/translation";
-import type { isArray, SearchWays, ArrayToString } from "../types";
+import type { isArray, SearchWays, ArrayToString, Locale, Node } from "../types";
 import { getCache } from "./cache";
 import { getRequestLocale } from "./request";
 import { createTranslation } from "./translation";
@@ -24,18 +24,13 @@ export async function Translation<
       </Suspense>
     );
   }
-  cache.locale = props.locale;
-  t.settings.locale = props.locale!;
-  t = await t.current;
+  t = await (t as any)[(t.settings.locale = cache.locale = props.locale!)];
   if (!children) return t.base;
-  if (props.settings)
-    props.settings = JSON.stringify(
-      Object.assign((props.settings ||= {}), {
-        locales: { [t.locale as any]: t.node },
-        allowedLocales: t?.settings.allowedLocales,
-        locale: props.locale,
-      } as Partial<(typeof t & object)["settings"]>),
-    ) as any;
+  props.settings &&= Object.assign(props.settings, {
+    locales: { [t.locale as any]: t.node },
+    allowedLocales: t?.settings.allowedLocales,
+    locale: props.locale,
+  } as Partial<(typeof t & object)["settings"]>);
   props.source = props.source || t.node;
   // @ts-ignore
   return (<TranslationProvider {...props}>{children}</TranslationProvider>) as never;
@@ -57,6 +52,7 @@ export function getTranslation(...args: any[]) {
   let t = this || cache.t;
   if (!t) throw new Error("Translation not found");
   t.settings.locale = cache.locale;
+  t.then?.();
   if (cache.locale) return t.current(...args);
   const locale = getRequestLocale.call(t);
   if (locale instanceof Promise) {

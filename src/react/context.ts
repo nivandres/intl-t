@@ -1,12 +1,12 @@
 "use client";
 
 import { createElement, createContext, useContext, useMemo, useState, useEffect } from "react";
-import { isArray, SearchWays, ArrayToString, ReactState, Locale, TranslationProps as TP } from "../types";
+import { isArray, SearchWays, ArrayToString, ReactState, ReactSetState, Locale, TranslationProps as TP } from "../types";
 import { useLocale } from "./hooks";
-import { createTranslation, TranslationNode } from "./translation";
+import { TranslationNode } from "./translation";
 
 export type TranslationContext = null | {
-  reRender?: (arg: any) => void;
+  reRender?: ReactSetState<number>;
   localeState?: ReactState<Locale>;
   t?: TranslationNode;
 };
@@ -39,23 +39,23 @@ export function TranslationProvider<
   ...state
 }: TranslationProps<T, A, D>) {
   const context = useContext(TranslationContext) || {};
-  settings = useMemo(() => (typeof settings === "string" ? JSON.parse(settings) : settings), [settings]);
-  context.t ??= t || useMemo(() => createTranslation(settings), [settings]);
-  t ??= context.t as T;
+  context.t = t ??= context.t ??= TranslationNode.t as any;
   context.reRender ??= useState(0)[1];
-  useMemo(() => Object.assign(t.settings, settings, state), [settings, t, state]);
   if (locale || onLocaleChange) context.localeState = [locale!, onLocaleChange!];
-  else context.localeState ??= useLocale.call(t, locale);
-  t.settings.locale = context.localeState[0];
+  else (context.localeState ??= useLocale.call(t, locale)), (locale = context.localeState[0]!);
+  children &&= createElement(TranslationContext, { value: context }, children);
+  if (!t) return children;
+  t.settings.locale = locale!;
+  useMemo(() => Object.assign(t.settings, settings, state), [settings, t, state]);
   t = t.current(path);
   useMemo(() => {
     t.setSource(source);
-  }, [source]);
+  }, [t, source]);
   useEffect(() => {
-    t.then?.(context.reRender);
-  }, []);
+    t.then?.(() => context.reRender?.(p => p + 1));
+  }, [t, t.currentLocale]);
   variables && t.set(variables);
-  return children ? createElement(TranslationContext, { value: context }, children) : t.base;
+  return children || t.base;
 }
 
 export default TranslationProvider;
@@ -66,15 +66,16 @@ export const Trans = T;
 export const Tr = T;
 
 export function useTranslation(...args: any[]) {
-  const context = useContext(TranslationContext);
+  const context = useContext(TranslationContext) || {};
   // @ts-ignore-error optional binding
   let t = this || context.t;
   if (!t) throw new Error("Translation not found");
-  t.settings.locale = (context?.localeState || useLocale.call(t))[0];
+  context.t ||= t;
+  t.settings.locale = (context.localeState ||= useLocale.call(t))[0];
   t = t.current;
-  const reRender = context?.reRender || useState(0)[1];
+  context.reRender ||= useState(0)[1];
   useEffect(() => {
-    t.then?.(reRender);
+    t.then?.(() => context.reRender?.(p => p + 1));
   }, [t]);
   return t(...args);
 }
