@@ -237,6 +237,7 @@ export class TranslationNode<
     this.setNode(node);
   }
   protected setNode(node: N) {
+    if (!this) return;
     this.node = node;
     this.setChildren();
   }

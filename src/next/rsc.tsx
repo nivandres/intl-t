@@ -27,11 +27,11 @@ export async function TranslationProvider<
   t = await (t as any)[(t.settings.locale = cache.locale = props.locale!)];
   if (!children) return t(props.path || props.id || props.i18nKey).base;
   props.settings &&= Object.assign(props.settings, {
-    locales: { [t.locale as any]: t.node },
+    locales: { [t.locale as any]: { ...t.node } },
     allowedLocales: t?.settings.allowedLocales,
     locale: props.locale,
   } as Partial<(typeof t & object)["settings"]>);
-  props.source = props.source || t.node;
+  props.source = props.source || { ...t.node };
   // @ts-ignore
   return (<TranslationClientProvider {...props}>{children}</TranslationClientProvider>) as never;
 }
