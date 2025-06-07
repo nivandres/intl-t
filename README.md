@@ -610,7 +610,7 @@ process.env.NODE_ENV !== "development" && patch(React, jsx, jsxDEV);
 import { Translation } from "intl-t";
 
 export const t = new Translation({
-  locales: {
+  getLocales: {
     en: () => import("./messages/en.json"),
     es: () => import("./messages/es.json"),
   },
@@ -628,12 +628,38 @@ export const t = new Translation({
     // es: typeof es;
   }, // For type safety
   allowedLocales: ["en", "es"], // IMPORTANT: You must define allowed locales with dynamic import
-  getLocaleSource(locale) {
+  getLocale(locale) {
     return import(`./messages/${locale}.json`);
   },
 });
 
 await t; // Automatically imports the locale that is needed
+```
+
+```ts
+import { getLocales, createTranslation } from "intl-t/core";
+
+const locales = await getLocales({
+  en: () => import("./en.json"),
+  es: () => import("./es.json"),
+}); // preload locales at server and dynamically imported at client
+
+export const { t } = createTranslation({
+  locales,
+});
+```
+
+```ts
+import { createTranslation } from "intl-t/core";
+
+// use await at createTranslation to preload default locale
+export const { t } = await createTranslation({
+  getLocales: {
+    en: () => import("./en.json"),
+    es: () => import("./es.json"),
+  },
+  hidratation: false, // disable hidratation to automatically load the client locale
+});
 ```
 
 ## Hello there 👋

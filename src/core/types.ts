@@ -148,7 +148,10 @@ export interface TranslationSettings<
   settings: this;
   preventDynamic: boolean;
   setLocale?: (locale: Locale) => Locale | void;
-  getLocaleSource?: <L extends AllowedLocale>(locale: L, deep?: number) => Promisable<Tree[L] | undefined>;
+  getLocale?: <L extends AllowedLocale>(locale: L) => Promisable<Tree[L]>;
+  getLocales?: {
+    [L in AllowedLocale]?: () => Promisable<Tree[L]>;
+  };
 }
 
 export interface TranslationData<

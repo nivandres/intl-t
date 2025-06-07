@@ -15,3 +15,4 @@ TranslationNode.hook = useTranslation;
 !hidratation && (TranslationNode.getLocale = getClientLocale);
 
 export { createTranslation, Translation, TranslationNode } from "../core/translation";
+export { getLocales } from "../core/dynamic";

@@ -39,7 +39,7 @@ abstract class TranslationProxy extends Function {
         } else {
           if (Array.isArray(target.node)) src = [...target.children.map((c: string) => target[c])];
           else if (p in String.prototype) src = target.base;
-          else src = target.node;
+          else src = target.node || "";
           val = src[p];
         }
         if (typeof val === "function") val = val.bind(src);
@@ -84,7 +84,7 @@ export class TranslationNode<
   static injectVariables = injectVariables;
   static getChildren = getChildren;
   static Proxy = TranslationProxy;
-  static t = {} as any;
+  static t = null as any;
   static setLocale = undefined;
 
   static getLocale = function (this: any) {
@@ -190,7 +190,7 @@ export class TranslationNode<
                   locale,
                   variables,
                   parent,
-                  node: settings.tree[locale] || settings.getLocaleSource?.(locale),
+                  node: settings.tree[locale] || settings.getLocale?.(locale),
                 });
           Object.defineProperty(t, locale, { value, configurable: true, enumerable: false });
           return value;
@@ -337,7 +337,7 @@ export class TranslationNode<
   }
   get then(): Promise<this>["then"] | undefined {
     let node = this.node;
-    if (typeof node === "function") (this.node = node = node.call(this)).then?.(this.setNode);
+    if (typeof node === "function") (this.node = node = node.call(this))?.then?.(this.setNode);
     return node instanceof Promise ? cb => new Promise((r, c) => node.then(() => r(cb?.(this)!)).catch(c)) : undefined;
   }
   catch(cb: (reason: any) => void) {
@@ -380,7 +380,7 @@ export function createTranslationSettings<
   N = Node,
 >(settings: Partial<TranslationSettings<L, M, T, V, PS, N>> = {}) {
   type S = TranslationSettings<L, M, T, V, PS>;
-  settings.locales ??= {} as T;
+  settings.locales ??= (settings.getLocales || {}) as T;
   settings.allowedLocales ??= Object.keys(settings.locales as object) as L[];
   settings.mainLocale ??= settings.defaultLocale ??= settings.allowedLocales[0] as M;
   settings.defaultLocale ??= settings.mainLocale;
@@ -388,15 +388,16 @@ export function createTranslationSettings<
   settings.currentLocale ??= TranslationNode.getLocale.call(settings);
   settings.locale ??= settings.currentLocale;
   settings.setLocale ??= TranslationNode.setLocale;
+  settings.hidratation ??= hidratation;
   settings.tree ??= settings.locales as T;
   settings.variables ??= {} as unknown as V;
   settings.ps ??= settings.pathSeparator ??= "." as PS;
-  const gls = settings.getLocaleSource;
+  const gls = settings.getLocale;
   if (gls)
-    settings.getLocaleSource ??= function (locale: L) {
+    settings.getLocale ??= function (locale: L) {
       return ((settings.locales as any)[locale] ??= gls.call(this, locale));
     };
-  settings.locales[settings.locale as L] ??= settings.getLocaleSource?.bind(settings, settings.locale as L) as any;
+  settings.locales[settings.locale as L] ??= settings.getLocale?.bind(settings, settings.locale as L) as any;
   return (settings.settings = settings as S);
 }
 

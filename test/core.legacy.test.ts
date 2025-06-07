@@ -195,7 +195,7 @@ describe("dynamic import", () => {
   it("should work with dynamic get locale", () => {
     let t = ct({
       allowedLocales: ["en", "es"],
-      getLocaleSource(locale) {
+      getLocale(locale) {
         return { hello: locale === "es" ? "hola mundo" : "hello world" };
       },
     });
@@ -208,7 +208,7 @@ describe("dynamic import", () => {
         },
       } as any,
       allowedLocales: ["en", "es"],
-      getLocaleSource() {
+      getLocale() {
         return { hello: "hola mundo" };
       },
     });
@@ -222,7 +222,7 @@ describe("dynamic import", () => {
         es: typeof en;
       },
       allowedLocales: ["en", "es"],
-      getLocaleSource(locale) {
+      getLocale(locale) {
         console.log(`importing ${locale}`);
         return import("./messages.json");
       },
