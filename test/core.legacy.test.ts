@@ -1,4 +1,4 @@
-import { createTranslation as ct, getChildren as gc, getSource as gs } from "../src";
+import { createTranslation as ct, getChildren as gc, getSource as gs, getLocales } from "../src";
 import { describe, it, expect } from "bun:test";
 import en from "./messages.json";
 
@@ -222,9 +222,8 @@ describe("dynamic import", () => {
         es: typeof en;
       },
       allowedLocales: ["en", "es"],
-      getLocale(locale) {
-        console.log(`importing ${locale}`);
-        return import("./messages.json");
+      getLocale() {
+        return en;
       },
     });
     expect(t.en.common.base).toBeString();

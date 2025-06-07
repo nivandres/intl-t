@@ -148,9 +148,9 @@ export interface TranslationSettings<
   settings: this;
   preventDynamic: boolean;
   setLocale?: (locale: Locale) => Locale | void;
-  getLocale?: <L extends AllowedLocale>(locale: L) => Promisable<Tree[L]>;
+  getLocale?: <L extends AllowedLocale>(locale: L) => Promisable<Tree[L] | undefined>;
   getLocales?: {
-    [L in AllowedLocale]?: () => Promisable<Tree[L]>;
+    [L in AllowedLocale]?: () => Promisable<Tree[L] | undefined>;
   };
 }
 

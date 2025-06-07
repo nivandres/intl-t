@@ -624,8 +624,8 @@ import { Translation } from "intl-t";
 
 export const t = new Translation({
   locales: {} as {
-    // en: typeof en
-    // es: typeof es;
+    en: typeof en
+    es: typeof es;
   }, // For type safety
   allowedLocales: ["en", "es"], // IMPORTANT: You must define allowed locales with dynamic import
   getLocale(locale) {

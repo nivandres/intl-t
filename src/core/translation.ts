@@ -211,10 +211,10 @@ export class TranslationNode<
     if (!path?.length) return this.t;
     return path.reduce(
       (o: TranslationNode, key, index) =>
-        o[key] ??
+        o?.[key] ??
         (() => {
           const value = new Translation.Node({
-            node: (o as any)[this.settings.mainLocale].node[key] || path.slice(0, index + 1).join(o.settings.ps),
+            node: (o as any)?.[this.settings.mainLocale]?.node[key] || path.slice(0, index + 1).join(o.settings.ps),
             settings: o.settings,
             locale: o.locale,
             parent: o,
@@ -321,8 +321,8 @@ export class TranslationNode<
   get locales() {
     return this.allowedLocales;
   }
-  get id() {
-    return (this[Symbol.for("id")] ??= this.path.join(this.settings.ps) as Join<R extends string[] ? R : string[], S["ps"]>);
+  get id(): Join<R extends string[] ? R : string[], S["ps"]> {
+    return (this[Symbol.for("id")] ??= this.path.join(this.settings.ps)) as any;
   }
   [Symbol.toStringTag]() {
     return "Translation";
@@ -337,7 +337,11 @@ export class TranslationNode<
   }
   get then(): Promise<this>["then"] | undefined {
     let node = this.node;
-    if (typeof node === "function") (this.node = node = node.call(this))?.then?.(this.setNode);
+    if (typeof node === "function") {
+      this.node = node = node.call(this);
+      if (node instanceof Promise) node.then(this.setNode);
+      else this.setNode(node);
+    }
     return node instanceof Promise ? cb => new Promise((r, c) => node.then(() => r(cb?.(this)!)).catch(c)) : undefined;
   }
   catch(cb: (reason: any) => void) {
@@ -388,9 +392,9 @@ export function createTranslationSettings<
   settings.currentLocale ??= TranslationNode.getLocale.call(settings);
   settings.locale ??= settings.currentLocale;
   settings.setLocale ??= TranslationNode.setLocale;
-  settings.hidratation ??= hidratation;
   settings.tree ??= settings.locales as T;
   settings.variables ??= {} as unknown as V;
+  settings.hidratation ??= hidratation;
   settings.ps ??= settings.pathSeparator ??= "." as PS;
   const gls = settings.getLocale;
   if (gls)
