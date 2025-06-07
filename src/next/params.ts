@@ -10,6 +10,6 @@ export function createStaticParams<L extends Locale, S extends string>(config: S
 }
 
 export async function generateStaticParams<L extends Locale, S extends string>(this: StaticParamsConfig<L, S>) {
-  const { locales, param } = this;
-  return locales?.map(locale => [{ [param as string]: locale }]);
+  const { locales = [], param } = this;
+  return locales.map(locale => ({ [param as string]: locale })) satisfies any[];
 }
