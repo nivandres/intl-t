@@ -1,12 +1,14 @@
 # Intl-T
 
-### A Fully-Typed Node-Based i18n Translation Library. Object-Relational Mapping for your translations. ORM i18n.
+### A Fully-Typed Node-Based i18n Translation Library.
 
 [![npm version](https://img.shields.io/npm/v/intl-t.svg)](https://www.npmjs.com/package/intl-t)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=white&style=flat)](https://reactjs.org/)
 [![Next.js](https://img.shields.io/badge/-Next.js-000000?logo=next.js&logoColor=white&style=flat)](https://nextjs.org/)
+
+> Object-Relational Mapping for your translations. (ORM i18n)
 
 `Intl T,
 International Tree,
