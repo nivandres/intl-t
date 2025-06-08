@@ -564,6 +564,7 @@ export const { middleware, Link, generateStaticParams } = createNavigation({ all
 ```tsx
 //app/layout.tsx
 import { Translation } from "@/i18n/translation";
+import { setRequestLocale } from "intl-t/next";
 export { generateStaticParams } from "@/i18n/navigation";
 
 interface Props {
@@ -574,6 +575,7 @@ interface Props {
 export default async function RootLayout({ children, params }: Props) {
   const { locale } = await params;
   if (!Translation.locales.includes(locale)) return;
+  setRequestLocale(locale);
   return (
     <html lang={locale}>
       <body>

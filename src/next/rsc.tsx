@@ -24,7 +24,7 @@ export async function TranslationProvider<
       </Suspense>
     );
   }
-  t = await (t as any)[(t.settings.locale = cache.locale = props.locale!)];
+  t = await ((t as any)[(t.settings.locale = cache.locale = props.locale!)] || t);
   if (!children) return t(props.path || props.id || props.i18nKey).base;
   props.source = props.source || props.messages || { ...t.node };
   // @ts-ignore
