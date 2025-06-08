@@ -407,7 +407,7 @@ export function createTranslationSettings<
     settings.getLocale ??= function (locale: L) {
       return ((settings.locales as any)[locale] ??= gls.call(this, locale));
     };
-  if (TranslationNode.context?.source) settings.locales[settings.locale as L] ??= TranslationNode.context.source;
+  if (TranslationNode.context?.source) settings.locales[settings.locale as L] = TranslationNode.context.source;
   settings.locales[settings.locale as L] ??= settings.getLocale?.bind(settings, settings.locale as L) as any;
   return (settings.settings = settings as S);
 }
