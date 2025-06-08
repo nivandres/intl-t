@@ -395,8 +395,8 @@ export function createTranslationSettings<
   settings.mainLocale ??= settings.defaultLocale ??= settings.allowedLocales[0] as M;
   settings.defaultLocale ??= settings.mainLocale;
   settings.allowedLocale ??= settings.mainLocale;
-  settings.currentLocale ??= TranslationNode.getLocale.call(settings) || settings.defaultLocale;
-  settings.locale ??= TranslationNode.context?.locale || settings.currentLocale;
+  settings.currentLocale ??= TranslationNode.context?.locale || TranslationNode.getLocale.call(settings) || settings.defaultLocale;
+  settings.locale ??= settings.currentLocale;
   settings.setLocale ??= TranslationNode.setLocale;
   settings.tree ??= settings.locales as T;
   settings.variables ??= {} as unknown as V;
@@ -407,8 +407,8 @@ export function createTranslationSettings<
     settings.getLocale ??= function (locale: L) {
       return ((settings.locales as any)[locale] ??= gls.call(this, locale));
     };
-  settings.locales[settings.locale as L] ??=
-    TranslationNode.context?.source || (settings.getLocale?.bind(settings, settings.locale as L) as any);
+  if (TranslationNode.context?.source) settings.locales[settings.locale as L] ??= TranslationNode.context.source;
+  settings.locales[settings.locale as L] ??= settings.getLocale?.bind(settings, settings.locale as L) as any;
   return (settings.settings = settings as S);
 }
 
