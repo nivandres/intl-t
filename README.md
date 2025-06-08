@@ -1,6 +1,6 @@
 # Intl-T
 
-### A Fully-Typed Node-Based i18n Translation Library
+### A Fully-Typed Node-Based i18n Translation Library. Object-Relational Mapping for your translations. ORM i18n.
 
 [![npm version](https://img.shields.io/npm/v/intl-t.svg)](https://www.npmjs.com/package/intl-t)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -449,13 +449,40 @@ import { createTranslation } from "intl-t/react";
 export const { Translation, useTranslation } = createTranslation({ locales: { en, es } });
 
 export default function Providers({ children }) {
-  return <Translation locale="en">{children}</Translation>;
+  return <Translation>{children}</Translation>;
 }
 ```
 
-Also Translation component can be used as `{t("key")}` like `<Translation path="key" />`
+```jsx
+import { useLocale } from "intl-t/react";
+export default function Providers({ children }) {
+  const { locale, setLocale } = useLocale(); // handle locale state from client-side. From localStorage, cookie, navigator, etc...
+  return (
+    // Only use locale, and onLocaleChange when you want to handle locale manually.
+    <Translation locale={locale} onLocaleChange={setLocale}>
+      {children}
+    </Translation>
+  );
+  // When you don't specify locale or onLocaleChange, it already uses `useLocale` hook internally.
+  // So don't specify locale prop, if you want to set default locale, set it from createTranslation settings.
+}
+```
 
-Each node has its Translation component, `const { Translation } = t.es.key`;
+Also Translation component can be used as `{t("hello")}` like `<Translation path="hello" />` or `<Translation.hello />` will work too.
+
+Each node has its Translation component, `const { Translation } = t.hello;`
+
+TranslationProvider from translation node also have some other aliases, `Tr`, `Trans`, `TranslationProvider`
+
+```tsx
+<Translation path="hello" />
+<Translation.hello />
+<Trans.hello variables={{ name: "Ivan" }} />
+```
+
+If this component contains children it will work as provider, if not it will return the translation node text.
+
+> Note: This component works with Next.js and React Server Components
 
 ### `useTranslation` Hook
 
@@ -521,6 +548,8 @@ For Static Rendering you will need to generate static params and in each layout 
 
 In dynamic pages with just `await getTranslation()` you can get the translation with current locale.
 
+> Note: `intl-t/next` is for Next.js App with RSC. For Next.js Pages you should use `intl-t/react` instead, and `intl-t/navigation` for Next.js Navigation and Routing tools.
+
 ### Navigation
 
 ```ts
@@ -530,16 +559,36 @@ import { createNavigation } from "intl-t/navigation";
 export const { middleware, Link, generateStaticParams } = createNavigation({ allowedLocales: ["en", "es"], defaultLocale: "en" });
 ```
 
-```ts
+```tsx
 //app/layout.tsx
+import { Translation } from "@/i18n/translation";
 export { generateStaticParams } from "@/i18n/navigation";
+
+interface Props {
+  params: Promise<{ locale: typeof Translation.locale }>;
+  children: React.ReactNode;
+}
+
+export default async function RootLayout({ children, params }: Props) {
+  const { locale } = await params;
+  if (!Translation.locales.includes(locale)) return;
+  return (
+    <html lang={locale}>
+      <body>
+        <Translation>{children}</Translation>
+      </body>
+    </html>
+  );
+}
 ```
+
+That translation component is a React Server Component that handles the current locale and the corresponding translations to be sent to the client and its context.
+
+Also, `Translation` will work too as a client-side translation component.
 
 ```ts
 //middleware.ts
-import { middleware } from "@/i18n/navigation";
-
-export default middleware;
+export { middleware as default } from "@/i18n/navigation";
 
 export const config = {
   // middleware matcher config
@@ -624,7 +673,7 @@ import { Translation } from "intl-t";
 
 export const t = new Translation({
   locales: {} as {
-    en: typeof en
+    en: typeof en;
     es: typeof es;
   }, // For type safety
   allowedLocales: ["en", "es"], // IMPORTANT: You must define allowed locales with dynamic import

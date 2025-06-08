@@ -84,6 +84,7 @@ export class TranslationNode<
   static injectVariables = injectVariables;
   static getChildren = getChildren;
   static Proxy = TranslationProxy;
+  static context = null as any;
   static t = null as any;
   static setLocale = undefined;
 
@@ -100,7 +101,8 @@ export class TranslationNode<
       return TranslationNode.Provider.apply(target, args as any);
     },
     get(target, p, receiver) {
-      return (Reflect.get(target, p, receiver) as TranslationNode)?.T;
+      const t = Reflect.get(target, p, receiver) as any;
+      return t?.T || t;
     },
   }) as unknown as TranslationNodeFC<S, N, V>;
 
@@ -118,8 +120,8 @@ export class TranslationNode<
       return TranslationNode.hook.apply(target, args as any);
     },
     get(target, p, receiver) {
-      const t = Reflect.get(target, p, receiver) as unknown;
-      return (t as any)?.hook || t;
+      const t = Reflect.get(target, p, receiver) as any;
+      return t?.hook || t;
     },
   });
 
@@ -359,6 +361,9 @@ export class TranslationNode<
     }
     yield this.base;
   }
+  toJSON() {
+    return typeof this.node === "object" ? this.node : this.base;
+  }
 }
 
 export type Translation<T extends TranslationData = TranslationData> = TranslationDataAdapter<T>;
@@ -390,8 +395,8 @@ export function createTranslationSettings<
   settings.mainLocale ??= settings.defaultLocale ??= settings.allowedLocales[0] as M;
   settings.defaultLocale ??= settings.mainLocale;
   settings.allowedLocale ??= settings.mainLocale;
-  settings.currentLocale ??= TranslationNode.getLocale.call(settings);
-  settings.locale ??= settings.currentLocale;
+  settings.currentLocale ??= TranslationNode.getLocale.call(settings) || settings.defaultLocale;
+  settings.locale ??= TranslationNode.context?.locale || settings.currentLocale;
   settings.setLocale ??= TranslationNode.setLocale;
   settings.tree ??= settings.locales as T;
   settings.variables ??= {} as unknown as V;
@@ -402,7 +407,8 @@ export function createTranslationSettings<
     settings.getLocale ??= function (locale: L) {
       return ((settings.locales as any)[locale] ??= gls.call(this, locale));
     };
-  settings.locales[settings.locale as L] ??= settings.getLocale?.bind(settings, settings.locale as L) as any;
+  settings.locales[settings.locale as L] ??=
+    TranslationNode.context?.source || (settings.getLocale?.bind(settings, settings.locale as L) as any);
   return (settings.settings = settings as S);
 }
 

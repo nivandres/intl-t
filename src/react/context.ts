@@ -33,7 +33,8 @@ export function TranslationProvider<
   i18nKey,
   id = i18nKey,
   path = id,
-  source,
+  messages,
+  source = messages,
   variables,
   settings,
   ...state
@@ -44,7 +45,7 @@ export function TranslationProvider<
   if (locale || onLocaleChange) context.localeState = [locale!, onLocaleChange!];
   else (context.localeState ??= useLocale.call(t, locale)), (locale = context.localeState[0]!);
   children &&= createElement(TranslationContext, { value: context }, children);
-  if (!t) return children;
+  if (!t) return (TranslationNode.context = { locale, source }), children;
   t.settings.locale = locale!;
   useMemo(() => Object.assign(t.settings, settings, state), [settings, t, state]);
   t = t.current(path);

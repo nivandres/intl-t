@@ -45,6 +45,7 @@ export interface TranslationProps<
   variables?: Partial<FollowWayWithValues<N, A, V>> & Values;
   locale?: S["allowedLocale"];
   source?: Node;
+  messages?: Node;
   preventDynamic?: boolean;
   settings?: Partial<TranslationSettings>;
   onLocaleChange?: ReactSetState<S["allowedLocale"]>;
@@ -64,6 +65,11 @@ export type TranslationNodeFC<S extends TranslationSettings = TranslationSetting
 > & {
   g: TranslationNodeFC<S, S["tree"][S["allowedLocale"]], V>;
   global: TranslationNodeFC<S, S["tree"][S["allowedLocale"]], V>;
+  locale: S["allowedLocale"];
+  locales: S["allowedLocales"];
+  settings: S;
+  node: N;
+  values: V;
 } & {
   [L in S["allowedLocale"]]: TranslationNodeFC<S, N, V>;
 } & {
