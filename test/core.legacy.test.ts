@@ -131,17 +131,6 @@ describe("Translation object", () => {
     expect(t.common({ a: "a" }).g("common").yes.values.a).toBe("a");
     expect(t("common.yes", { b: "b" }).values.b).toBe("b");
   });
-  // it("should work with plugins", () => {
-  //   const plugin = (n: any) => {
-  //     type T = typeof n & { test: string } & { [key in (typeof n)["child"]]: (typeof n)[key] & { test: string } };
-  //     const t_ = n as T;
-  //     t_.test = "test2";
-  //     return t_;
-  //   };
-  //   let t = ct({ locales: { en }, plugins: [plugin] });
-  //   expect(t["test" as any]).toBe("test2");
-  //   expect(t.hello["test" as any]).toBe("test2");
-  // });
   it("should preserve input when no keys are found", async () => {
     const t = ct({ locales: { en: { title: "This is the title" } } });
     expect(t("Hello world. How are you?").base).toBe("Hello world. How are you?");
@@ -206,7 +195,7 @@ describe("dynamic import", () => {
         en: {
           hello: "hello world",
         },
-      } as any,
+      },
       allowedLocales: ["en", "es"],
       getLocale() {
         return { hello: "hola mundo" };
@@ -217,14 +206,7 @@ describe("dynamic import", () => {
   });
   it("should work", async () => {
     const t = await ct({
-      locales: {} as {
-        en: typeof en;
-        es: typeof en;
-      },
-      allowedLocales: ["en", "es"],
-      getLocale() {
-        return en;
-      },
+      locales: { en },
     });
     expect(t.en.common.base).toBeString();
   });

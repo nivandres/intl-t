@@ -24,13 +24,21 @@ export type Node =
       base?: Base;
     });
 
-export type Keep<T> = T extends Base
-  ? Base
-  : T extends [infer F, ...infer R]
-  ? readonly [Keep<F>, ...Keep<R>]
-  : {
-      readonly [K in keyof T]: T[K] extends object ? Keep<T[K]> : T[K] | Base;
-    };
+export type Keep<T> =
+  | (() => Promisable<Keep<T>>)
+  | Promise<Keep<T>>
+  | (T extends Base
+      ? Base
+      : T extends [infer F, ...infer R]
+      ? readonly [Keep<F>, ...isArray<Keep<R>>]
+      : {
+          readonly [K in keyof T]: T[K] extends object ? Keep<T[K]> : T[K] | Base;
+        });
+
+export type ResolveNode<T> = T extends infer N extends Node ? N : T extends () => Promisable<infer N extends Node> ? N : never;
+export type ResolveTree<T extends Record<string, any>> = {
+  [L in keyof T]: ResolveNode<T[L]>;
+};
 
 export type PartialTree<N> = {
   [K in Children<N>]?: PartialTree<N[K]>;
@@ -94,7 +102,7 @@ export type Translation<
   L extends S["allowedLocale"] = S["allowedLocale"],
   R extends Key[] = [],
 > = {
-  <VV extends Values>(variables?: (Partial<V & Variables<N>> | Values) & VV): Awaitable<Translation<S, N, V & VV, L, R>>;
+  <VV extends Values>(variables?: Partial<V & Variables<N>> & VV): Awaitable<Translation<S, N, V & VV, L, R>>;
   <LL extends S["allowedLocale"], VV extends Values = Values>(
     locale: `${LL}${"" & {}}`,
     variables?: Partial<V & Variables<N>> & VV,
@@ -135,7 +143,9 @@ export interface TranslationSettings<
   PathSeparator extends string = string,
   N = Node,
 > extends State<AllowedLocale> {
-  locales: Record<AllowedLocale, Keep<N>> & Partial<Tree>;
+  locales: {
+    [Locale in AllowedLocale]?: Keep<N>;
+  } & Partial<Tree>;
   mainLocale: MainLocale;
   defaultLocale: MainLocale;
   currentLocale: AllowedLocale;
@@ -143,15 +153,12 @@ export interface TranslationSettings<
   allowedLocale: AllowedLocale;
   pathSeparator: PathSeparator;
   variables: Variables;
-  tree: Tree;
+  tree: ResolveTree<Tree>;
   ps: PathSeparator;
   settings: this;
   preventDynamic: boolean;
   setLocale?: (locale: Locale) => Locale | void;
-  getLocale?: <L extends AllowedLocale>(locale: L) => Promisable<Tree[L] | undefined>;
-  getLocales?: {
-    [L in AllowedLocale]?: () => Promisable<Tree[L] | undefined>;
-  };
+  getLocale?: (locale: Locale) => Promisable<Node>;
 }
 
 export interface TranslationData<

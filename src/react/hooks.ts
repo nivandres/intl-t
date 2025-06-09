@@ -19,7 +19,7 @@ export function useLocale<L extends Locale = Locale>(
     hidratation?: boolean;
     path?: string;
     // @ts-ignore-error optional binding
-  } = this?.settings,
+  } = this?.settings || {},
 ) {
   path &&= `${LOCALE_CLIENT_KEY}${path}`;
   // @ts-ignore-error optional binding

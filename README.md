@@ -8,7 +8,9 @@
 [![React](https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=white&style=flat)](https://reactjs.org/)
 [![Next.js](https://img.shields.io/badge/-Next.js-000000?logo=next.js&logoColor=white&style=flat)](https://nextjs.org/)
 
-> Object-Relational Mapping for your translations. (ORM i18n)
+![Banner](https://raw.githubusercontent.com/nivandres/intl-t/main/banner.png)
+
+> Fully-Typed Node-Based i18n Translation Library.
 
 `Intl T,
 International Tree,
@@ -26,6 +28,7 @@ Internationalization for TypeScript,`
 - 🧩 **ICU message format** support and extended for complex and nested pluralization and formatting
 - ⚛️ **React components injections** out of the box with translation variables
 - 🚀 Supports **server-side rendering** and **static rendering** awith [Next.js](https://nextjs.org/) and [React](https://reactjs.org/)
+- 🔄 **Dynamic importing of locales** for optimized bundle size and on-demand language loading
 - ⚙️ Modular and agnostic to **any framework** or **library**
 - 📦 **[4kb](https://bundlephobia.com/package/intl-t) Lightweight bundle** with no dependencies and **Tree-Shakable**
 
@@ -659,47 +662,19 @@ process.env.NODE_ENV !== "development" && patch(React, jsx, jsxDEV);
 
 ## Dynamic Locales import
 
-```ts
-import { Translation } from "intl-t";
-
-export const t = new Translation({
-  getLocales: {
-    en: () => import("./messages/en.json"),
-    es: () => import("./messages/es.json"),
-  },
-});
-
-await t;
-```
+To dynamically import locales, set node values as functions to be called when needed.
 
 ```ts
 import { Translation } from "intl-t";
 
 export const t = new Translation({
-  locales: {} as {
-    en: typeof en;
-    es: typeof es;
-  }, // For type safety
-  allowedLocales: ["en", "es"], // IMPORTANT: You must define allowed locales with dynamic import
-  getLocale(locale) {
-    return import(`./messages/${locale}.json`);
+  locales: {
+    en: () => import("./en.json"),
+    es: () => import("./es.json"),
   },
 });
 
-await t; // Automatically imports the locale that is needed
-```
-
-```ts
-import { getLocales, createTranslation } from "intl-t/core";
-
-const locales = await getLocales({
-  en: () => import("./en.json"),
-  es: () => import("./es.json"),
-}); // preload locales at server and dynamically imported at client
-
-export const { t } = createTranslation({
-  locales,
-});
+await t; // Automatically imports the locale that is needed at client
 ```
 
 ```ts
@@ -707,14 +682,27 @@ import { createTranslation } from "intl-t/core";
 
 // use await at createTranslation to preload default locale
 export const { t } = await createTranslation({
-  getLocales: {
+  locales: {
     en: () => import("./en.json"),
     es: () => import("./es.json"),
   },
-  hidratation: false, // disable hidratation to automatically load the client locale
+  hidratation: false, // disable hidratation to automatically load the correct client locale
 });
+```
+
+### `getLocales` function
+
+This is the recommended way to load locales dynamically depending if it is client or server.
+
+```ts
+import { createTranslation, getLocales } from "intl-t";
+import { allowedLocales } from "./locales"; // as locale list, e.g. ["en", "es"] as const;
+
+const locales = await getLocales(locale => import(`./messages/${locale}.json`), allowedLocales); // Preload locales at server and dynamically imported at client
+
+export const { t } = createTranslation({ locales });
 ```
 
 ## Hello there 👋
 
-This translation lib was built for my own projects, so at least for me I consider the best way to handle translations. I mean nice Developer Experience, performance, ultra lightweight, full customizable, auto-complete everywhere with typescript, Translation node based, and super flexible syntax integrating the best parts of other i18n libraries. It also has its own ICU message format, and everything included with zero dependencies. And I have still many ideas to enhance it. Also supports everything from React, Next.js, to static rendering. But at the moment it is still in beta (from docs, readme, tests, example, core, everything), so it could not be totally recommended for large production projects, but I will keep working on it, to make it better. Feel free to use it, contribute to it or contact me. Thank you.
+This translation lib was built for my own projects, so at least for me I consider the best way to handle translations. I mean nice Developer Experience, performance, ultra lightweight, full customizable, auto-complete everywhere with typescript, Translation node based, and super flexible syntax integrating the best parts of other i18n libraries. It also has its own ICU message format, and everything included with zero dependencies. And I have still many ideas to enhance it. Also supports everything from React, Next.js, to static rendering. But it is not totally finished yet, so it could not be totally recommended for large production projects, but I will keep working on it, to make it better. Feel free to use it, contribute to it or contact me. Thank you.

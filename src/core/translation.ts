@@ -390,7 +390,7 @@ export function createTranslationSettings<
   N = Node,
 >(settings: Partial<TranslationSettings<L, M, T, V, PS, N>> = {}) {
   type S = TranslationSettings<L, M, T, V, PS>;
-  settings.locales ??= (settings.getLocales || {}) as T;
+  settings.locales ??= {} as T;
   settings.allowedLocales ??= Object.keys(settings.locales as object) as L[];
   settings.mainLocale ??= settings.defaultLocale ??= settings.allowedLocales[0] as M;
   settings.defaultLocale ??= settings.mainLocale;
@@ -404,7 +404,7 @@ export function createTranslationSettings<
   settings.ps ??= settings.pathSeparator ??= "." as PS;
   const gls = settings.getLocale;
   if (gls)
-    settings.getLocale ??= function (locale: L) {
+    settings.getLocale ??= function (locale: Locale) {
       return ((settings.locales as any)[locale] ??= gls.call(this, locale));
     };
   if (TranslationNode.context?.source) settings.locales[settings.locale as L] = TranslationNode.context.source;
