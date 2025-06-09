@@ -426,6 +426,23 @@ interface TranslationNode<S extends TranslationSettings, N extends Node, V exten
 }
 ```
 
+### Reserved Keywords
+
+These keys are reserved and used to access some translations properties and methods.
+
+- `base`
+- `values`
+- `children`
+- `parent`
+- `settings`
+- `node`
+- `path`
+- `settings`
+- `key`
+- `default`
+- `catch`
+- `then`
+
 ## React
 
 intl-t provides seamless integration with React through the `useTranslation` hook:
@@ -686,7 +703,7 @@ export const { t } = await createTranslation({
     en: () => import("./en.json"),
     es: () => import("./es.json"),
   },
-  hidratation: false, // disable hidratation to automatically load the correct client locale
+  hydration: false, // disable hydration to automatically load the correct client locale
 });
 ```
 

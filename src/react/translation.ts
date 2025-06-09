@@ -5,14 +5,14 @@ import { injectReactChunks as ir } from "./inject";
 import { TranslationProvider, useTranslation } from "./context";
 import { TranslationFC } from "./types";
 import { getClientLocale } from "./client";
-import { hidratation } from "../state";
+import { hydration } from "../state";
 
 export const injectVariables = ((str: string, ...args: any[]) => ir(iv(str, ...args), ...args)) as typeof iv;
 
 TranslationNode.injectVariables = injectVariables;
 TranslationNode.Provider = TranslationProvider as TranslationFC;
 TranslationNode.hook = useTranslation;
-!hidratation && (TranslationNode.getLocale = getClientLocale);
+!hydration && (TranslationNode.getLocale = getClientLocale);
 
 export { createTranslation, Translation, TranslationNode } from "../core/translation";
 export { getLocales } from "../core/dynamic";

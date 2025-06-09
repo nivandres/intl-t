@@ -18,7 +18,7 @@ import type {
   TranslationNodeFC,
 } from "./types";
 import { injectVariables } from "../tools/inject";
-import { hidratation } from "../state";
+import { hydration } from "../state";
 
 abstract class TranslationProxy extends Function {
   public name = "Translation";
@@ -400,7 +400,7 @@ export function createTranslationSettings<
   settings.setLocale ??= TranslationNode.setLocale;
   settings.tree ??= settings.locales as T;
   settings.variables ??= {} as unknown as V;
-  settings.hidratation ??= hidratation;
+  settings.hydration ??= hydration;
   settings.ps ??= settings.pathSeparator ??= "." as PS;
   const gls = settings.getLocale;
   if (gls)
