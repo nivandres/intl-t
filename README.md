@@ -8,7 +8,7 @@
 [![React](https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=white&style=flat)](https://reactjs.org/)
 [![Next.js](https://img.shields.io/badge/-Next.js-000000?logo=next.js&logoColor=white&style=flat)](https://nextjs.org/)
 
-![Banner](https://raw.githubusercontent.com/nivandres/intl-t/main/assets/banner.png)
+![Banner](https://raw.githubusercontent.com/nivandres/intl-t/main/assets/banner.webp)
 
 > Fully-Typed Node-Based i18n Translation Library.
 
