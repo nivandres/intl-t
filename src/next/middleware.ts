@@ -14,7 +14,8 @@ export interface MiddlewareConfig<L extends Locale> extends MG, ResolveConfig<L>
   detect?: false | string | string[] | ((req: NextRequest) => string[] | string);
   domains?: I18NDomains;
   config?: MG;
-  middleware?: NextMiddleware;
+  middleware?: (req: NextRequest, res: NextResponse) => NextResponse | Promise<NextResponse> | void;
+  mw?: any;
 }
 
 export const middlewareConfig: MG = {
@@ -30,6 +31,7 @@ export function detect(req: NextRequest, domains: I18NDomains = this?.domains ||
 
 export function createMiddleware<L extends Locale>(settings: MiddlewareConfig<L>) {
   settings.config = middlewareConfig;
+  settings.mw ??= settings.middleware;
   settings.middleware = middleware.bind(settings);
   settings.domains && (settings.detect ??= detect.bind(settings));
   return Object.assign(settings.middleware, settings, middlewareConfig);
@@ -37,7 +39,7 @@ export function createMiddleware<L extends Locale>(settings: MiddlewareConfig<L>
 
 export function middleware<L extends Locale>(req: NextRequest) {
   // @ts-ignore
-  const config: MiddlewareConfig<L> = this?.ts || this;
+  const config: MiddlewareConfig<L> = this;
   let {
     allowedLocales = [],
     defaultLocale = allowedLocales[0],
@@ -52,8 +54,7 @@ export function middleware<L extends Locale>(req: NextRequest) {
   let url = nextUrl.clone();
   let [, locale, ...path] = nextUrl.pathname.split("/") as string[];
   if (!allowedLocales.includes(locale as L)) {
-    if (locale == redirectPath)
-      (pathBase = "detect-latest"), (pathPrefix = "always"), (strategy = "param"), (res = undefined);
+    if (locale == redirectPath) (pathBase = "detect-latest"), (pathPrefix = "always"), (strategy = "param"), (res = undefined);
     else path.unshift(locale);
     if (pathBase == "always-default") locale = defaultLocale;
     else if (pathBase == "always-detect" || !(locale = cookies.get(LOCALE_COOKIE_KEY)?.value as string))
@@ -74,7 +75,7 @@ export function middleware<L extends Locale>(req: NextRequest) {
   res.headers.set(PATH_HEADERS_KEY, (path.unshift(""), path.join("/")));
   res.headers.set(LOCALE_HEADERS_KEY, locale);
   res.cookies.set(LOCALE_COOKIE_KEY, locale);
-  return res;
+  return config.mw?.(req, res) ?? res;
 }
 
 export default middleware;

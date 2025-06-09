@@ -7,19 +7,21 @@ export function getLocale<const N extends Node>(node: N | (() => Promisable<N>))
   return node as N;
 }
 
-export async function getLocales<const T, L extends Locale>(
+export async function getLocales<const T, L extends Locale = Locale>(
   node: T | ((locale: L) => Promisable<T>),
   allowedLocales: readonly L[],
 ): Promise<{
   [K in L]: T extends (locale: K) => infer N ? Awaited<N> : T;
 }>;
-export async function getLocales<const T, L extends Locale>(
-  locales: T & Record<L, Node | (() => Promisable<Node>)>,
+export async function getLocales<const T, L extends Locale = Locale>(
+  locales: T & {
+    [K in L]: Node | (() => Promisable<Node>);
+  },
 ): Promise<{
   [K in L & keyof T]: T[K] extends () => infer N ? Awaited<N> : T[K];
 }>;
 export async function getLocales(node: any, list?: readonly any[]) {
   let locales = typeof node === "object" ? node : list?.reduce((acc, locale) => ({ ...acc, [locale]: node }), {});
-  await Promise.all(Object.keys(locales).map(async locale => (locales[locale] = await getLocale(locales[locale]))));
+  await Promise.all(Object.keys(locales).map(async locale => (locales [locale] = await getLocale(locales[locale]))));
   return locales as any;
 }
