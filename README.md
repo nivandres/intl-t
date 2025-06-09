@@ -703,6 +703,12 @@ const locales = await getLocales(locale => import(`./messages/${locale}.json`), 
 export const { t } = createTranslation({ locales });
 ```
 
-## Hello there 👋
+## Hello there
 
-This translation lib was built for my own projects, so at least for me I consider the best way to handle translations. I mean nice Developer Experience, performance, ultra lightweight, full customizable, auto-complete everywhere with typescript, Translation node based, and super flexible syntax integrating the best parts of other i18n libraries. It also has its own ICU message format, and everything included with zero dependencies. And I have still many ideas to enhance it. Also supports everything from React, Next.js, to static rendering. But it is not totally finished yet, so it could not be totally recommended for large production projects, but I will keep working on it, to make it better. Feel free to use it, contribute to it or contact me. Thank you.
+This translation library was originally built for my own projects, aiming to provide the best possible developer experience: high performance, ultra-lightweight, fully customizable, and with TypeScript autocomplete everywhere. It uses a translation node-based approach and offers a super flexible syntax, integrating the best features from other i18n libraries. It includes its own ICU message format, works out of the box with React and Next.js, supports static rendering, and has zero dependencies. While it's still under active development and may not yet be recommended for large-scale production projects, I am committed to improving it further. Feel free to use it, contribute, or reach out with feedback. Thank you!
+
+## Support
+
+If you find this project useful, consider supporting its development ☕
+
+[![Donate via PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6)
