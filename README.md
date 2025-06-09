@@ -448,6 +448,8 @@ These keys are reserved and used to access some translations properties and meth
 intl-t provides seamless integration with React through the `useTranslation` hook:
 
 ```jsx
+import { useTranslation } from "@/i18n/translation";
+
 const MyComponent = () => {
   const { t, locale, setLocale } = useTranslation("common");
 
@@ -726,6 +728,8 @@ This translation library was originally built for my own projects, aiming to pro
 
 ## Support
 
-If you find this project useful, consider supporting its development ☕
+> If you find this project useful, consider supporting its development ☕ or [leave a ⭐ on the Github Repo](https://github.com/nivandres/intl-t) > [![Donate via PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6) > [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t?style=social)](https://github.com/nivandres/intl-t)
 
-[![Donate via PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6)
+```
+
+```
