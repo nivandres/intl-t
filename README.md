@@ -587,6 +587,7 @@ export const { middleware, Link, generateStaticParams } = createNavigation({ all
 //app/[locale]/layout.tsx
 import { Translation } from "@/i18n/translation";
 import { setRequestLocale } from "intl-t/next";
+
 export { generateStaticParams } from "@/i18n/navigation";
 
 interface Props {
@@ -781,6 +782,7 @@ If your import function doesn't return the type directly, you can assert it in t
 type Locale = typeof import("./messages/en.json");
 getLocales<Locale>(locale => import(`./messages/${locale}.json`), allowedLocales);
 ```
+
 ## Migration Guide from Other i18n Libraries
 
 Before migrating, make sure you understand the core concepts of intl-t. See the [Basic Usage](#basic-usage) section for details.
@@ -960,9 +962,9 @@ export default function Component() {
 }
 ```
 
-For easier migration from other i18n libraries, you can use the `getTranslations` and `useTranslations` aliases. `getTranslation` and `useTranslation` are functionally the same and adapt to the environment.
+For easier migration from other i18n libraries, you can use the `getTranslations` and `useTranslations` aliases. `getTranslation` and `useTranslation` are functionally the same and adapt depending on the environment.
 
-You can also use the translation object directly, e.g., `useTranslation.greeting.es({ name: "Ivan" })`—it's modular, type-safe, and flexible.
+You can also use them as translation object directly, e.g., `useTranslation.greeting.es({ name: "Ivan" })`—it's modular, type-safe, and flexible.
 
 **Link Navigation Component:**
 
@@ -1009,7 +1011,3 @@ This translation library was originally built for my own projects, aiming to pro
 ## Support
 
 > If you find this project useful, consider supporting its development ☕ or [leave a ⭐ on the Github Repo](https://github.com/nivandres/intl-t) [![Donate via PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6) [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t?style=social)](https://github.com/nivandres/intl-t)
-
-```
-
-```
