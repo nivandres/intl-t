@@ -3,10 +3,11 @@
 ### A Fully-Typed Node-Based i18n Translation Library.
 
 [![npm version](https://img.shields.io/npm/v/intl-t.svg)](https://www.npmjs.com/package/intl-t)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=white&style=flat)](https://reactjs.org/)
-[![Next.js](https://img.shields.io/badge/-Next.js-000000?logo=next.js&logoColor=white&style=flat)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/-TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
+[![Next.js](https://img.shields.io/badge/-Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Donate via PayPal](https://img.shields.io/badge/logo-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6)
+[![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)
 
 ![Banner](https://raw.githubusercontent.com/nivandres/intl-t/main/assets/banner.webp)
 
@@ -16,7 +17,8 @@
 International Tree,
 International Translations,
 International T Object,
-Internationalization for TypeScript,`
+Internationalization for TypeScript,
+International T`
 
 ## Features
 
@@ -1011,4 +1013,6 @@ This translation library was originally built for my own projects, aiming to pro
 
 ## Support
 
-> If you find this project useful, consider supporting its development ☕ or [leave a ⭐ on the Github Repo](https://github.com/nivandres/intl-t) [![Donate via PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6) [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t?style=social)](https://github.com/nivandres/intl-t)
+> If you find this project useful, consider supporting its development ☕ or [leave a ⭐ on the Github Repo](https://github.com/nivandres/intl-t)
+[![Donate via PayPal](https://img.shields.io/badge/logo-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6)
+> [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t?style=social)](https://github.com/nivandres/intl-t)
