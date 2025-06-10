@@ -6,7 +6,7 @@
 [![TypeScript](https://img.shields.io/badge/-TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
 [![Next.js](https://img.shields.io/badge/-Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
-[![Donate via PayPal](https://img.shields.io/badge/logo-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6)
+[![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6)
 [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)
 
 ![Banner](https://raw.githubusercontent.com/nivandres/intl-t/main/assets/banner.webp)
@@ -1014,5 +1014,5 @@ This translation library was originally built for my own projects, aiming to pro
 ## Support
 
 > If you find this project useful, consider supporting its development ☕ or [leave a ⭐ on the Github Repo](https://github.com/nivandres/intl-t)
-[![Donate via PayPal](https://img.shields.io/badge/logo-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6)
+[![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6)
 > [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t?style=social)](https://github.com/nivandres/intl-t)
