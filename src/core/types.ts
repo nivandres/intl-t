@@ -26,7 +26,6 @@ export type Node =
 
 export type Keep<T> =
   | (() => Promisable<Keep<T>>)
-  | Promise<Keep<T>>
   | (T extends Base
       ? Base
       : T extends [infer F, ...infer R]
@@ -102,10 +101,10 @@ export type Translation<
   L extends S["allowedLocale"] = S["allowedLocale"],
   R extends Key[] = [],
 > = {
-  <VV extends Values>(variables?: Partial<V & Variables<N>> & VV): Awaitable<Translation<S, N, V & VV, L, R>>;
+  <VV extends Values>(variables?: Partial<V & Variables<N>> | VV): Awaitable<Translation<S, N, V & VV, L, R>>;
   <LL extends S["allowedLocale"], VV extends Values = Values>(
     locale: `${LL}${"" & {}}`,
-    variables?: Partial<V & Variables<N>> & VV,
+    variables?: Partial<V & Variables<N>> | VV,
   ): Awaitable<Translation<S, FollowWay<S["tree"][LL], R>, V & VV, LL, R>>;
   <D extends ArrayToString<isArray<SearchWays<N>>, S["ps"]> | (string & {}), VV extends Values = Values>(
     path?: D,

@@ -131,6 +131,7 @@ bun i intl-t
 - [Next.js](#nextjs)
 - [Static Rendering](#static-rendering)
 - [Dynamic Rendering](#dynamic-rendering)
+- [Migration Guide from other i18n libraries](#migration-guide-from-other-i18n-libraries)
 
 ## Basic Usage
 
