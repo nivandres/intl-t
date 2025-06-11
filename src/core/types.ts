@@ -142,9 +142,7 @@ export interface TranslationSettings<
   PathSeparator extends string = string,
   N = Node,
 > extends State<AllowedLocale> {
-  locales: {
-    [Locale in AllowedLocale]?: Keep<N>;
-  } & Partial<Tree>;
+  locales: Record<AllowedLocale, Keep<N>> & Partial<Tree>;
   mainLocale: MainLocale;
   defaultLocale: MainLocale;
   currentLocale: AllowedLocale;

@@ -22,6 +22,6 @@ export async function getLocales<const T, L extends Locale = Locale>(
 }>;
 export async function getLocales(node: any, list?: readonly any[]) {
   let locales = typeof node === "object" ? node : list?.reduce((acc, locale) => ({ ...acc, [locale]: node }), {});
-  await Promise.all(Object.keys(locales).map(async locale => (locales [locale] = await getLocale(locales[locale]))));
+  await Promise.all(Object.keys(locales).map(async locale => (locales[locale] = await getLocale(locales[locale]))));
   return locales as any;
 }

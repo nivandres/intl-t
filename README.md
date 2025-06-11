@@ -768,11 +768,11 @@ export const { t } = await createTranslation({
 
 ### `getLocales` function
 
-This is the recommended way to load locales dynamically depending if it is client or server.
+This is a way to load locales dynamically depending if it is client or server.
 
 ```ts
 import { createTranslation, getLocales } from "intl-t";
-import { allowedLocales } from "./locales"; // as locale list, e.g. ["en", "es"] as const;
+import { allowedLocales } from "./locales"; // as locale list, e.g. ["en", "es"] as const; !important use `as const`
 
 const locales = await getLocales(locale => import(`./messages/${locale}.json`), allowedLocales); // Preload locales at server and dynamically imported at client
 
@@ -783,7 +783,8 @@ If your import function doesn't return the type directly, you can assert it in t
 
 ```ts
 type Locale = typeof import("./messages/en.json");
-getLocales<Locale>(locale => import(`./messages/${locale}.json`), allowedLocales);
+
+getLocales(locale => import(`./messages/${locale}.json`) as Promise<Locale>, allowedLocales);
 ```
 
 ## Migration Guide from Other i18n Libraries
@@ -1013,6 +1014,4 @@ This translation library was originally built for my own projects, aiming to pro
 
 ## Support
 
-> If you find this project useful, consider supporting its development ☕ or [leave a ⭐ on the Github Repo](https://github.com/nivandres/intl-t)
-[![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6)
-> [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t?style=social)](https://github.com/nivandres/intl-t)
+> If you find this project useful, consider supporting its development ☕ or [leave a ⭐ on the Github Repo](https://github.com/nivandres/intl-t) > [![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6) > [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)
