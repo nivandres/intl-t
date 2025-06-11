@@ -784,7 +784,7 @@ If your import function doesn't return the type directly, you can assert it in t
 ```ts
 type Locale = typeof import("./messages/en.json");
 
-getLocales(locale => import(`./messages/${locale}.json`) as Promise<Locale>, allowedLocales);
+await getLocales(locale => import(`./messages/${locale}.json`) as Promise<Locale>, allowedLocales);
 ```
 
 ## Migration Guide from Other i18n Libraries

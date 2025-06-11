@@ -5,6 +5,7 @@
 .npmignore
 .vscode
 .prettierrc
+assets
 bun.lock*
 node_modules
 scripts

@@ -1,9 +1,9 @@
 import { isClient } from "../state";
 import type { Locale, Node, Promisable } from "../types";
 
-export function getLocale<const N extends Node>(node: N | (() => Promisable<N>)): N {
+export function getLocale<const N extends Node>(node: N | ((locale?: Locale) => Promisable<N>), locale?: Locale): N {
   if (isClient) return node as N;
-  if (typeof node === "function") return node() as N;
+  if (typeof node === "function") return node(locale) as N;
   return node as N;
 }
 
@@ -22,6 +22,6 @@ export async function getLocales<const T, L extends Locale = Locale>(
 }>;
 export async function getLocales(node: any, list?: readonly any[]) {
   let locales = typeof node === "object" ? node : list?.reduce((acc, locale) => ({ ...acc, [locale]: node }), {});
-  await Promise.all(Object.keys(locales).map(async locale => (locales[locale] = await getLocale(locales[locale]))));
+  await Promise.all(Object.keys(locales).map(async locale => (locales[locale] = await getLocale(locales[locale], locale))));
   return locales as any;
 }

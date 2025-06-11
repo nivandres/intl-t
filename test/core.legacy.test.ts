@@ -195,6 +195,7 @@ describe("dynamic import", () => {
         en: {
           hello: "hello world",
         },
+        es: undefined as unknown as { hello: string },
       },
       allowedLocales: ["en", "es"],
       getLocale() {
@@ -209,5 +210,25 @@ describe("dynamic import", () => {
       locales: { en },
     });
     expect(t.en.common.base).toBeString();
+  });
+  it("should work with mapped getLocales", async () => {
+    const locales = await getLocales({
+      en: { hello: "Hello" },
+      es: () => ({ hello: "Hola" }),
+    });
+    expect(locales.en.hello).toBe("Hello");
+    expect(locales.es.hello).toBe("Hola");
+  });
+  it("should work with fn getLocales", async () => {
+    const locales = await getLocales(
+      async locale => {
+        if (locale === "en") return { hello: "Hello" };
+        if (locale === "es") return { hello: "Hola" };
+        else throw new Error("Locale not supported");
+      },
+      ["en", "es"],
+    );
+    expect(locales.en.hello).toBe("Hello");
+    expect(locales.es.hello).toBe("Hola");
   });
 });
