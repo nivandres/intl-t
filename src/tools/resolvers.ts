@@ -32,15 +32,15 @@ export function resolveHref<L extends Locale>(
     currentLocale,
     redirectPath,
     // @ts-ignore-error optional binding
-    config = this?.ts || this || {},
+    config = this || {},
     allowedLocales = config.allowedLocales,
     pathPrefix = config.pathPrefix || "always",
     defaultLocale = config.defaultLocale,
     getLocale = () => match(l, allowedLocales, undefined),
   }: // @ts-ignore-error optional binding
-  LocalizedHref<L> = this?.ts || this || {},
+  LocalizedHref<L> = this || {},
 ): Awaitable<`/${L | ""}${string}`> {
-  if (href[0] != "/") return href as any;
+  if (href[0] !== "/") return href as any;
   if (pathPrefix == "hidden" && locale) pathPrefix = "always";
   if (pathPrefix == "hidden") locale = "";
   else locale ||= currentLocale || getLocale() || (redirectPath as L);
@@ -53,7 +53,7 @@ export function resolveHref<L extends Locale>(
 }
 
 export function resolvePath(pathname: string, locales: string[] = []) {
-  const [, _, p] = pathname.match(/(\/[a-z]{2})?(\/.*|$)/) || [];
+  const [, _, p] = pathname.match(/(\/[a-z]{2}(?:-[A-Za-z]+)*)(\/.*|$)/) || [];
   if (!locales[0] || !p) return p || "/";
   return locales.some(l => _?.includes(l)) ? p : _ + p;
 }

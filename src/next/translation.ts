@@ -1,4 +1,4 @@
-import "../react/translation";
+import "./patch";
 import { TranslationNode } from "../core/translation";
 import { TranslationProvider, getTranslation } from "./rsc";
 import { isRSC } from "./state";

@@ -19,11 +19,11 @@ export * from "./state";
 
 export function resolvedRedirect(href?: string, type?: RedirectType) {
   // @ts-ignore
-  return r(resolveHref.bind(this?.ts || this || {})({ href }), type);
+  return r(resolveHref.bind(this || {})({ href }), type);
 }
 export function resolvedPermanentRedirect(href?: string, type?: RedirectType) {
   // @ts-ignore
-  return pr(resolveHref.bind(this?.ts || this || {})({ href }), type);
+  return pr(resolveHref.bind(this || {})({ href }), type);
 }
 
 export const redirect: typeof r = resolvedRedirect;
@@ -40,7 +40,7 @@ export interface IntlConfig<L extends Locale = Locale, T extends FC<any> = NL>
 
 export function createNavigation<L extends Locale, LC extends FC<any>>(
   // @ts-ignore
-  config: IntlConfig<L, LC> = this?.ts || this || {},
+  config: IntlConfig<L, LC> = this || {},
 ) {
   const { allowedLocales } = config;
   if (!allowedLocales && Array.isArray(config.locales)) config.allowedLocales = config.locales;

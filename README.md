@@ -571,7 +571,7 @@ import "./patch";
 
 intl-t offers special integration with Next.js for server-side rendering and routing:
 
-For Static Rendering you will need to generate static params and in each layout implement setRequestLocale to cache the current locale.
+For Static Rendering you will need to generate static params for each locale.
 
 In dynamic pages with just `await getTranslation()` you can get the translation with current locale from headers.
 
@@ -589,7 +589,6 @@ export const { middleware, Link, generateStaticParams } = createNavigation({ all
 ```tsx
 //app/[locale]/layout.tsx
 import { Translation } from "@/i18n/translation";
-import { setRequestLocale } from "intl-t/next";
 
 export { generateStaticParams } from "@/i18n/navigation";
 
@@ -601,7 +600,6 @@ interface Props {
 export default async function RootLayout({ children, params }: Props) {
   const { locale } = await params;
   if (!Translation.locales.includes(locale)) return;
-  setRequestLocale(locale);
   return (
     <html lang={locale}>
       <body>
@@ -706,7 +704,7 @@ import { setRequestLocale } from "intl-t/next";
 
 export default function Page({ params }) {
   const { locale } = await params;
-  setRequestLocale(locale);
+  setRequestLocale(locale); // required if not using server TranslationProvider
   // or
   // setLocale(locale); Same as setRequestLocale but typed with available locales
   const { t } = getTranslation(); // It works like useTranslation
@@ -903,7 +901,6 @@ interface Props {
 export default async function RootLayout({ children, params }: Props) {
   const { locale } = await params;
   if (!Translation.locales.includes(locale)) return;
-  setRequestLocale(locale);
   return (
     <html lang={locale}>
       <body>
@@ -929,7 +926,7 @@ export default function Component() {
 
 **With React Server Components (Dynamic):**
 
-If you don't provide a Translation Provider or don't use `setRequestLocale`, you can use `await getTranslation()` for dynamic rendering in Next.js.
+If you don't provide a Translation Provider or don't use `setRequestLocale` if required, you can use `await getTranslation()` for dynamic rendering in Next.js.
 
 ```tsx
 import { getTranslation } from "@/i18n/translation";

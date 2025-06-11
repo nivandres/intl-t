@@ -19,7 +19,7 @@ export interface MiddlewareConfig<L extends Locale> extends MG, ResolveConfig<L>
 }
 
 export const middlewareConfig: MG = {
-  matcher: ["/((?!api|static|.*\\..*|_next).*)"],
+  matcher: ["/((?!api|.*\\..*|_next).*)"],
 };
 
 // @ts-ignore
