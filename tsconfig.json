@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "allowArbitraryExtensions": true,
+    "baseUrl": ".",
     "declaration": true,
     "jsx": "react-jsx",
     "lib": ["ESNext"],
@@ -8,8 +10,7 @@
     "outDir": "dist",
     "skipLibCheck": true,
     "strict": true,
-    "target": "ESNext",
-    "baseUrl": "."
+    "target": "ESNext"
   },
   "exclude": ["node_modules", "test", "dist", "examples"],
   "include": ["src"]

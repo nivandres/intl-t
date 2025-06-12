@@ -19,7 +19,7 @@ export async function generateDeclaration(file: string, params: Params = {}): Pr
   remove &&= `--remove`;
   ts &&= `--ts`;
   try {
-    await main([file, outFile, symbolName, remove, ts].filter(Boolean).join(" "));
+    await main([!0, "declarations", file, outFile, symbolName, remove, ts].filter(Boolean));
   } catch (error) {
     console.error(error);
   }

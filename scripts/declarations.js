@@ -1,7 +1,7 @@
 import { exists, readFile, rm, writeFile, stat, readdir } from "fs/promises";
 import { basename, join } from "path";
 
-export default async function main(args) {
+export default async function main(args = []) {
   const cmdName = basename(args[1]);
 
   if (args.length < 3)
@@ -39,7 +39,7 @@ export default async function main(args) {
       throw new Error(`No JSON files found in directory "${filePath}".`);
     }
     for (const file of jsonFiles) try {
-      await main([null, join(filePath, file.name), ...args.slice(3)]);
+      await main([!0, cmdName, join(filePath, file.name), ...args.slice(3)]);
     } catch (err) {
       console.warn(`Error processing file "${file.name}": ${err.message}`);
     }
@@ -52,7 +52,7 @@ export default async function main(args) {
   let json;
 
   try {
-    json = await readFile(filePath, "utf-8").trim();
+    json = (await readFile(filePath, "utf-8")).trim();
   } catch (err) {
     throw new Error(`Error reading file "${filePath}": ${err.message}`);
   }
