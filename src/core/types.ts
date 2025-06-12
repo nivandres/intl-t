@@ -8,7 +8,8 @@ export type { TranslationProps, ReactNode, TranslationFC, TranslationNodeFC } fr
 
 export type Base = string | number;
 export type Key = string | number | symbol;
-export type Values = Record<Key, Base | null | undefined | boolean | String[] | Date | ReactChunk>;
+export type Value = Base | null | undefined | boolean | String[] | Date | ReactChunk;
+export type Values = Record<Key, Value>;
 export type Stringable = string | number | boolean | null | undefined;
 
 export type InvalidKey = (typeof invalidKeys)[number];
@@ -27,14 +28,12 @@ export type Node =
 export type Keep<T> = T extends Base
   ? Base
   : T extends [infer F, ...infer R]
-  ? readonly [Keep<F>, ...isArray<Keep<R>>]
-  :
-      | {
-          readonly [K in keyof T]: T[K] extends object ? Keep<T[K]> : T[K] | Base;
-        }
-      | (() => Promisable<Keep<T>>);
+  ? [Keep<F>, ...isArray<Keep<R>>]
+  : {
+      [K in keyof T]: T[K] extends object ? Keep<T[K]> : T[K] | Base;
+    };
 
-export type ResolveNode<T> = T extends infer N extends Node ? N : T extends () => Promisable<infer N extends Node> ? N : never;
+export type ResolveNode<T> = T extends () => Promisable<infer N extends Node> ? N : T;
 export type ResolveTree<T extends Record<string, any>> = {
   [L in keyof T]: ResolveNode<T[L]>;
 };
@@ -44,7 +43,6 @@ export type PartialTree<N> = {
 } & { children?: string[]; values?: Values; path?: Key[] };
 
 export type Display<N> = N extends `${infer A}{${string}}${infer B}` ? `${A}${string}${Display<B>}` : N;
-
 export type Content<N> = N extends Base ? Display<N> : N extends { base: infer B } ? Display<B> : Base;
 
 export type Children<N> = N extends object
@@ -67,7 +65,10 @@ type VFS1<S extends string> = S extends `${string}{{${infer V}}}${infer C}`
   : {};
 export type VariablesFromString<S extends string> = VFS1<S>;
 
-export type Variables<N> = "values" extends keyof N ? N["values"] : N extends string ? VariablesFromString<N> : {};
+export type Override<T, U> = T & U extends never ? Omit<T, keyof U> & U : T & U;
+
+export type VariablesFromNode<N> = "values" extends keyof N ? N["values"] : N extends string ? VariablesFromString<N> : {};
+export type Variables<N, V> = Override<V, VariablesFromNode<N>>;
 export type LastKey<R extends Key[]> = R extends [...Key[], infer K] ? K : Key;
 export type Join<K extends Key[], S extends string> = K extends [infer F extends Stringable, ...infer R]
   ? R extends [Key, ...Key[]]
@@ -101,7 +102,7 @@ export type FollowWay<N, W extends Key[]> = W extends [infer F, ...infer R exten
     : ArrayToString<W>
   : N;
 
-export type FollowWayWithValues<N, W extends Key[], VV = Values, V = Variables<N> & VV> = W extends [
+export type FollowWayWithValues<N, W extends Key[], VV = Values, V = Variables<N, VV>> = W extends [
   infer F extends keyof N,
   ...infer R extends Key[],
 ]
@@ -117,34 +118,36 @@ export type Translation<
   L extends S["allowedLocale"] = S["allowedLocale"],
   R extends Key[] = [],
 > = {
-  <const VV extends Values>(variables?: Partial<V & Variables<N>> | VV): Translation<S, N, V & VV, L, R>;
+  <const VV extends Values>(variables?: Override<Partial<Variables<N, V>>, VV>): Translation<S, N, Override<V, VV>, L, R>;
   <LL extends S["allowedLocale"], const VV extends Values = Values>(
     locale: `${LL}${"" & {}}`,
-    variables?: Partial<V & Variables<N>> | VV,
-  ): Translation<S, FollowWay<S["tree"][LL], R>, V & VV, LL, R>;
+    variables?: Override<Partial<Variables<N, V>>, VV>,
+  ): Translation<S, FollowWay<S["tree"][LL], R>, Override<V, VV>, LL, R>;
   <D extends ArrayToString<isArray<SearchWays<N>>, S["ps"]> | (string & {}), const VV extends Values = Values>(
     path?: D,
-    variables?: Partial<FollowWayWithValues<N, StringToArray<D, S["ps"]>, V & Variables<N>>> & VV,
+    variables?: Override<Partial<FollowWayWithValues<N, StringToArray<D, S["ps"]>, V>>, VV>,
   ): Translation<
     S,
     FollowWay<N, StringToArray<D, S["ps"]>>,
-    FollowWayWithValues<N, StringToArray<D, S["ps"]>, V & Variables<N> & VV>,
+    FollowWayWithValues<N, StringToArray<D, S["ps"]>, any, Override<Variables<N, V>, VV>>,
     L,
     [...R, ...StringToArray<D, S["ps"]>]
   >;
   <A extends isArray<SearchWays<N>>, A_ extends string[] = A, const VV extends Values = Values>(
     path?: A | A_ | TemplateStringsArray[],
-    variables?: Partial<FollowWayWithValues<N, A_, V & Variables<N>>> & VV,
-  ): Translation<S, FollowWay<N, A_>, FollowWayWithValues<N, A_, V & Variables<N> & VV>, L, [...R, ...A_]>;
+    variables?: Override<Partial<FollowWayWithValues<N, A_, V>>, VV>,
+  ): Translation<S, FollowWay<N, A_>, FollowWayWithValues<N, A_, any, Override<Variables<N, V>, VV>>, L, [...R, ...A_]>;
   <A extends isArray<SearchWays<N>>, A_ extends string[] = A, const VV extends Values = Values>(
-    ...path: A | A_ | [...(A | A_), (Partial<FollowWayWithValues<N, A_, V>> & Variables<N> & VV)?]
-  ): Translation<S, FollowWay<N, A_>, FollowWayWithValues<N, A_, V & Variables<N> & VV>, L, [...R, ...A_]>;
+    ...path: A | A_ | [...(A | A_), Override<Partial<FollowWayWithValues<N, A_, V>>, VV>?]
+  ): Translation<S, FollowWay<N, A_>, FollowWayWithValues<N, A_, any, Override<Variables<N, V>, VV>>, L, [...R, ...A_]>;
   new <const T extends TranslationData>(data: T): TranslationDataAdapter<T>;
 } & TranslationNode<S, N, V & Values, L, R> & {
-    [C in Children<N>]: Translation<S, N[C], V & Variables<N>, L, [...R, C]>;
+    [C in Children<N>]: Translation<S, N[C], Variables<N, V>, L, [...R, C]>;
   } & {
     [LL in S["allowedLocale"]]: Translation<S, FollowWay<S["tree"][LL], R>, V, LL, R>;
-  } & (N extends any[] | readonly any[] ? Translation<S, N[Children<N>], V & Variables<V>, L, [...R, Children<N>]>[] : Content<N>);
+  } & (N extends any[] | readonly any[]
+    ? Translation<S, FollowWay<S["tree"][L], [...R, Children<N>]>, Variables<N, V>, L, [...R, Children<N>]>[]
+    : Content<N>);
 
 export type { Translation as TranslationType };
 
@@ -156,11 +159,13 @@ export interface TranslationSettings<
   PathSeparator extends string = string,
   N = Node,
 > extends State<AllowedLocale> {
-  locales: Record<AllowedLocale, Keep<N>> & Partial<Tree>;
+  locales: Partial<Tree> & {
+    [Locale in AllowedLocale]?: Keep<N> | (() => Promisable<Keep<N>>);
+  };
   mainLocale: MainLocale;
   defaultLocale: MainLocale;
   currentLocale: AllowedLocale;
-  allowedLocales: AllowedLocale[] | [MainLocale, ...AllowedLocale[]];
+  allowedLocales: AllowedLocale[] & [MainLocale, ...AllowedLocale[]];
   allowedLocale: AllowedLocale;
   pathSeparator: PathSeparator;
   variables: Variables;

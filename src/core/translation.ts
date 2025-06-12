@@ -65,7 +65,7 @@ export class TranslationNode<
   tr = this;
   translation = this;
   node: N;
-  variables: Variables<N>;
+  variables: Variables<N, V>;
   locale: L;
   path: [] extends R ? Key[] : R;
   key: LastKey<R>;
@@ -228,7 +228,7 @@ export class TranslationNode<
       this,
     );
   }
-  set<VV extends Values>(variables: Partial<V & Variables<N>> & VV = {} as any) {
+  set<VV extends Values>(variables: Partial<Variables<N, V>> & VV = {} as any) {
     Object.assign(this.variables as {}, variables);
     return this as TranslationType<S, N, V & VV, L, R>;
   }
@@ -303,7 +303,7 @@ export class TranslationNode<
     this.then?.(() => sl?.(locale)) || sl?.(locale) || (this.settings.locale = locale);
     return this[locale as any];
   }
-  get values(): V & Variables<N> {
+  get values(): Variables<N, V> {
     return { ...this.parent.values, ...this.variables } as any;
   }
   get child(): Children<N> {
@@ -375,7 +375,7 @@ export const Translation = TranslationNode as unknown as {
     AllowedLocale extends Locale = Locale,
     MainLocale extends AllowedLocale = AllowedLocale,
     const Tree extends Record<AllowedLocale, any> = Record<AllowedLocale, any>,
-    Variables extends Values = Values,
+    const Variables extends Values = Values,
     PathSeparator extends string = ".",
     N = Node,
   >(
@@ -388,13 +388,13 @@ export function createTranslationSettings<
   L extends Locale = Locale,
   M extends L = L,
   const T extends Record<L, any> = Record<L, any>,
-  V extends Values = Values,
+  const V extends Values = Values,
   PS extends string = ".",
   N = Node,
 >(settings: Partial<TranslationSettings<L, M, T, V, PS, N>> = {}) {
   type S = TranslationSettings<L, M, T, V, PS>;
   settings.locales ??= {} as T;
-  settings.allowedLocales ??= Object.keys(settings.locales as object) as L[];
+  settings.allowedLocales ??= Object.keys(settings.locales as object) as [M, ...L[]];
   settings.mainLocale ??= settings.defaultLocale ??= settings.allowedLocales[0] as M;
   settings.defaultLocale ??= settings.mainLocale;
   settings.allowedLocale ??= settings.mainLocale;
@@ -419,7 +419,7 @@ export function createTranslation<
   AllowedLocale extends Locale = Locale,
   MainLocale extends AllowedLocale = AllowedLocale,
   const Tree extends Record<AllowedLocale, any> = Record<AllowedLocale, any>,
-  Variables extends Values = Values,
+  const Variables extends Values = Values,
   PathSeparator extends string = ".",
   N = Node,
 >(settings: Partial<TranslationSettings<AllowedLocale, MainLocale, Tree, Variables, PathSeparator, N>> = {}) {

@@ -56,6 +56,7 @@ describe("Translation object", () => {
   });
   it("should work with deep nesting", () => {
     const t = ct({
+      allowedLocales: ["en", "es"],
       locales: {
         en: {
           base: ".",
@@ -141,6 +142,7 @@ describe("Translation object", () => {
     const t = ct({
       locales: {
         en: ["hello", "world"],
+        es: ["hola", "mundo"],
       },
     }).getTranslation();
     expect(t.map(t => t.base)).toEqual(["hello", "world"]);
@@ -165,7 +167,7 @@ describe("Translation object", () => {
         },
       },
     });
-    t.n1.n2;
+    expect(t.n1.n2.base).toBe("hello 2");
   });
 });
 
@@ -217,7 +219,6 @@ describe("dynamic import", () => {
         en: {
           hello: "hello world",
         },
-        es: undefined as unknown as { hello: string },
       },
       allowedLocales: ["en", "es"],
       getLocale() {

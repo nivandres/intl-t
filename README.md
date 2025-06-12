@@ -449,7 +449,7 @@ These keys are reserved and used to access some translations properties and meth
 
 ## Declarations
 
-TypeScript don't infer directly the types of each translation from JSON as literal string, but you can generate them automatically with the `generateDeclarations` function or `declarations` script.
+TypeScript does not infer the types of each translation from JSON literal strings directly, but you can generate them automatically using the `generateDeclarations` function or the `declarations` script.
 
 ```ts
 // i18n/declarations.ts
@@ -458,15 +458,15 @@ import { generateDeclarations } from "intl-t/tools";
 generateDeclarations("./en.json");
 ```
 
-Also you can generate declarations from a specific JSON folder.
+You can also generate declarations from a specific JSON folder:
 
 ```ts
 generateDeclarations("./i18n/messages");
 ```
 
-This function is async and run once per process, in order to use it.
+This function is asynchronous and it will run once per process, for example when running build or dev mode.
 
-You can use it as script in your package.json, and then generate declarations each time you update the locales or whenever is required. Or generate them automatically through a build script or init entrypoint. For example importing it a `next.config.js` file at Next.js.
+You can use it as a script in your `package.json` to generate declarations whenever needed, for example, by checking for updates to your locales or as part of a build script or initialization entry point. For example, you can import it in your `next.config.js` file in a Next.js project.
 
 ```jsonc
 // package.json
@@ -477,10 +477,10 @@ You can use it as script in your package.json, and then generate declarations ea
 }
 ```
 
-Before start using these declarations, it is recommended to enable `allowArbitraryExtensions` in your tsconfig.json.
+Before using these declarations, it is recommended to enable `allowArbitraryExtensions` in your `tsconfig.json`:
 
 ```jsonc
-//tsconfig.json
+// tsconfig.json
 {
   "compilerOptions": {
     "allowArbitraryExtensions": true
@@ -488,7 +488,22 @@ Before start using these declarations, it is recommended to enable `allowArbitra
 }
 ```
 
-Or just importing the declarations and asserting them into your translation settings file.
+After running the script, declaration files will appear in your locales folder with the corresponding types. These types are not needed for production or development runtime, so you can ignore them in your git repository:
+
+`*.d.json.ts`
+
+Alternatively, you can import the declarations and assert them in your translation settings file, but it is not recommended in order to use generated declarations.
+
+```ts
+// i18n/translation.ts
+import { createTranslation } from "intl-t/core";
+
+type Locale = typeof import("./messages/en.d.json.ts").default;
+
+export const t = createTranslation({
+  locales: () => import("./messages/en.json") as Promise<Locale>,
+});
+```
 
 ## React
 
