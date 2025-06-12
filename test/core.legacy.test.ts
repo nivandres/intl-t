@@ -144,7 +144,7 @@ describe("Translation object", () => {
         en: ["hello", "world"],
         es: ["hola", "mundo"],
       },
-    }).getTranslation();
+    });
     expect(t.map(t => t.base)).toEqual(["hello", "world"]);
     expect(t.join(" ")).toBe("hello world");
     expect([...t][0].base).toBe("hello");

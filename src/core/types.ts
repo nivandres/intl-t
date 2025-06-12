@@ -146,7 +146,7 @@ export type Translation<
   } & {
     [LL in S["allowedLocale"]]: Translation<S, FollowWay<S["tree"][LL], R>, V, LL, R>;
   } & (N extends any[] | readonly any[]
-    ? Translation<S, FollowWay<S["tree"][L], [...R, Children<N>]>, Variables<N, V>, L, [...R, Children<N>]>[]
+    ? Translation<S, FollowWay<S["tree"][L], [...R, Children<N>]>, V, L, [...R, Children<N>]>[]
     : Content<N>);
 
 export type { Translation as TranslationType };

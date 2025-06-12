@@ -29,7 +29,7 @@ International T`
 - 🪄 **Flexible syntax** integrating all the best parts of other i18n libraries
 - 🧩 **ICU message format** support and extended for complex and nested pluralization and formatting
 - ⚛️ **React components injections** out of the box with translation variables
-- 🚀 Supports **server-side rendering** and **static rendering** awith [Next.js](https://nextjs.org/) and [React](https://reactjs.org/)
+- 🚀 Supports **server-side rendering** and **static rendering** with [Next.js](https://nextjs.org/) and [React](https://reactjs.org/)
 - 🔄 **Dynamic importing of locales** for optimized bundle size and on-demand language loading
 - ⚙️ Modular and agnostic to **any framework** or **library**
 - 📦 **[4kb](https://bundlephobia.com/package/intl-t) Lightweight bundle** with no dependencies and **Tree-Shakable**
@@ -602,6 +602,8 @@ const Welcome = () => (
   </div>
 );
 ```
+
+[Go to Next.js section](#nextjs)
 
 ## React Patch
 
