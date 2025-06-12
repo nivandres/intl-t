@@ -24,15 +24,15 @@ export type Node =
       base?: Base;
     });
 
-export type Keep<T> =
-  | (() => Promisable<Keep<T>>)
-  | (T extends Base
-      ? Base
-      : T extends [infer F, ...infer R]
-      ? readonly [Keep<F>, ...isArray<Keep<R>>]
-      : {
+export type Keep<T> = T extends Base
+  ? Base
+  : T extends [infer F, ...infer R]
+  ? readonly [Keep<F>, ...isArray<Keep<R>>]
+  :
+      | {
           readonly [K in keyof T]: T[K] extends object ? Keep<T[K]> : T[K] | Base;
-        });
+        }
+      | (() => Promisable<Keep<T>>);
 
 export type ResolveNode<T> = T extends infer N extends Node ? N : T extends () => Promisable<infer N extends Node> ? N : never;
 export type ResolveTree<T extends Record<string, any>> = {
@@ -43,7 +43,9 @@ export type PartialTree<N> = {
   [K in Children<N>]?: PartialTree<N[K]>;
 } & { children?: string[]; values?: Values; path?: Key[] };
 
-export type Content<N> = N extends Base ? N : N extends { base: infer B } ? B : Base;
+export type Display<N> = N extends `${infer A}{${string}}${infer B}` ? `${A}${string}${Display<B>}` : N;
+
+export type Content<N> = N extends Base ? Display<N> : N extends { base: infer B } ? Display<B> : Base;
 
 export type Children<N> = N extends object
   ? N extends readonly any[] | any[]
@@ -51,7 +53,21 @@ export type Children<N> = N extends object
     : Exclude<keyof N, InvalidKey>
   : never;
 
-export type Variables<N> = "values" extends keyof N ? N["values"] : Values;
+type VFSO<V extends string, C extends string = string, T extends any = Base> = {
+  [K in V]: T;
+} & VFS1<C>;
+type VFSR<S extends string, C extends string> = VFSO<S extends `/${infer V}` | `${infer V} ${string}` ? V : S, C, ReactChunk>;
+type VFS2<S extends string> = S extends `${infer V},${string}` ? V : S;
+type VFS1<S extends string> = S extends `${string}{{${infer V}}}${infer C}`
+  ? VFSO<VFS2<V>, C>
+  : S extends `${string}{${infer V}}${infer C}`
+  ? VFSO<VFS2<V>, C>
+  : S extends `${string}<${infer V}>${infer C}`
+  ? VFSR<V, C>
+  : {};
+export type VariablesFromString<S extends string> = VFS1<S>;
+
+export type Variables<N> = "values" extends keyof N ? N["values"] : N extends string ? VariablesFromString<N> : {};
 export type LastKey<R extends Key[]> = R extends [...Key[], infer K] ? K : Key;
 export type Join<K extends Key[], S extends string> = K extends [infer F extends Stringable, ...infer R]
   ? R extends [Key, ...Key[]]
@@ -85,7 +101,7 @@ export type FollowWay<N, W extends Key[]> = W extends [infer F, ...infer R exten
     : ArrayToString<W>
   : N;
 
-export type FollowWayWithValues<N, W extends Key[], VV extends Values = Values, V extends Values = Variables<N> & VV> = W extends [
+export type FollowWayWithValues<N, W extends Key[], VV = Values, V = Variables<N> & VV> = W extends [
   infer F extends keyof N,
   ...infer R extends Key[],
 ]
@@ -97,36 +113,34 @@ export type FollowWayWithValues<N, W extends Key[], VV extends Values = Values, 
 export type Translation<
   S extends TranslationSettings = TranslationSettings,
   N = S["tree"][S["allowedLocale"]],
-  V extends Values = S["variables"],
+  V = S["variables"],
   L extends S["allowedLocale"] = S["allowedLocale"],
   R extends Key[] = [],
 > = {
-  <VV extends Values>(variables?: Partial<V & Variables<N>> | VV): Awaitable<Translation<S, N, V & VV, L, R>>;
-  <LL extends S["allowedLocale"], VV extends Values = Values>(
+  <const VV extends Values>(variables?: Partial<V & Variables<N>> | VV): Translation<S, N, V & VV, L, R>;
+  <LL extends S["allowedLocale"], const VV extends Values = Values>(
     locale: `${LL}${"" & {}}`,
     variables?: Partial<V & Variables<N>> | VV,
-  ): Awaitable<Translation<S, FollowWay<S["tree"][LL], R>, V & VV, LL, R>>;
-  <D extends ArrayToString<isArray<SearchWays<N>>, S["ps"]> | (string & {}), VV extends Values = Values>(
+  ): Translation<S, FollowWay<S["tree"][LL], R>, V & VV, LL, R>;
+  <D extends ArrayToString<isArray<SearchWays<N>>, S["ps"]> | (string & {}), const VV extends Values = Values>(
     path?: D,
     variables?: Partial<FollowWayWithValues<N, StringToArray<D, S["ps"]>, V & Variables<N>>> & VV,
-  ): Awaitable<
-    Translation<
-      S,
-      FollowWay<N, StringToArray<D, S["ps"]>>,
-      FollowWayWithValues<N, StringToArray<D, S["ps"]>, V & Variables<N> & VV>,
-      L,
-      [...R, ...StringToArray<D, S["ps"]>]
-    >
+  ): Translation<
+    S,
+    FollowWay<N, StringToArray<D, S["ps"]>>,
+    FollowWayWithValues<N, StringToArray<D, S["ps"]>, V & Variables<N> & VV>,
+    L,
+    [...R, ...StringToArray<D, S["ps"]>]
   >;
-  <A extends isArray<SearchWays<N>>, A_ extends string[] = A, VV extends Values = Values>(
+  <A extends isArray<SearchWays<N>>, A_ extends string[] = A, const VV extends Values = Values>(
     path?: A | A_ | TemplateStringsArray[],
     variables?: Partial<FollowWayWithValues<N, A_, V & Variables<N>>> & VV,
-  ): Awaitable<Translation<S, FollowWay<N, A_>, FollowWayWithValues<N, A_, V & Variables<N> & VV>, L, [...R, ...A_]>>;
-  <A extends isArray<SearchWays<N>>, A_ extends string[] = A, VV extends Values = Values>(
+  ): Translation<S, FollowWay<N, A_>, FollowWayWithValues<N, A_, V & Variables<N> & VV>, L, [...R, ...A_]>;
+  <A extends isArray<SearchWays<N>>, A_ extends string[] = A, const VV extends Values = Values>(
     ...path: A | A_ | [...(A | A_), (Partial<FollowWayWithValues<N, A_, V>> & Variables<N> & VV)?]
-  ): Awaitable<Translation<S, FollowWay<N, A_>, FollowWayWithValues<N, A_, V & Variables<N> & VV>, L, [...R, ...A_]>>;
+  ): Translation<S, FollowWay<N, A_>, FollowWayWithValues<N, A_, V & Variables<N> & VV>, L, [...R, ...A_]>;
   new <const T extends TranslationData>(data: T): TranslationDataAdapter<T>;
-} & TranslationNode<S, N, V, L, R> & {
+} & TranslationNode<S, N, V & Values, L, R> & {
     [C in Children<N>]: Translation<S, N[C], V & Variables<N>, L, [...R, C]>;
   } & {
     [LL in S["allowedLocale"]]: Translation<S, FollowWay<S["tree"][LL], R>, V, LL, R>;
@@ -161,7 +175,7 @@ export interface TranslationSettings<
 export interface TranslationData<
   S extends TranslationSettings = TranslationSettings,
   N = S["tree"],
-  V extends Values = S["variables"],
+  V = S["variables"],
   L extends S["allowedLocale"] = S["mainLocale"],
   R extends Key[] = Key[],
 > {

@@ -103,7 +103,7 @@ export default function Component() {
       "change": "Change your account settings. Your account id is {accountId}"
     },
     "values": {
-      // local node values
+      // default values for this node
       "accountId": 0
     }
   },
@@ -151,7 +151,7 @@ First, create JSON files for each of your supported languages.
 
 Your JSON files their keys and values can be **nested** in a multiple layer deep tree structure, so that each translation is an unique node in the tree with its mutable variables and base text.
 
-Your translations also can have multiple placeholders, that can be replaced with variables. For example, `Hello, {user}!` has a user placeholder, that can be replaced. We can define variables in this way to be used for typescript autocomplete and validation:
+Your translations also can have multiple placeholders, that can be replaced with variables. For example, `Hello, {user}!` has a user placeholder, that can be replaced. These values can be inferred by typescript through declarations, or you can specify them manually in json structure through `values` property. There you specify the default values for the node.
 
 ```jsonc
 {
@@ -170,7 +170,7 @@ Your translations also can have multiple placeholders, that can be replaced with
 }
 ```
 
-Each node can herit varaibles from its parent node, so that we can define default values for all nodes in the tree and override them in each node, or just define isolated variables for each node.
+Each node can herit varaibles from its parent node, so that we can define default values for all nodes in the tree and override them in each node, or just define isolated variables for each node. Also them can be inferred by typescript, but if you want to specify them manually with its right type and declarations, you can do it through `values` property.
 
 ```json
 {
@@ -203,7 +203,7 @@ Remember all your JSON files for each language should have the same structure, k
 }
 ```
 
-In these case variables are not declared, it will work, but no will have autocomplete.
+In these case variables are not declared manually, typescript will try to infer them, partial autocomplete will work. But there no will be any problem in injection through JavaScript. The unique purpose of `values` property, types and declarations, is to help you with autocomplete and validation.
 
 ```jsonc
 {
@@ -219,6 +219,7 @@ In these case variables are not declared, it will work, but no will have autocom
       ],
       "values": {
         "price": 10 // nodes can be numbers | string | node arrays | record of arrays (object)
+        // or even React Components with `intl-t/react` or `intl-t/next`
       }
     }
   }
@@ -446,6 +447,49 @@ These keys are reserved and used to access some translations properties and meth
 - `catch`
 - `then`
 
+## Declarations
+
+TypeScript don't infer directly the types of each translation from JSON as literal string, but you can generate them automatically with the `generateDeclarations` function or `declarations` script.
+
+```ts
+// i18n/declarations.ts
+import { generateDeclarations } from "intl-t/tools";
+
+generateDeclarations("./en.json");
+```
+
+Also you can generate declarations from a specific JSON folder.
+
+```ts
+generateDeclarations("./i18n/messages");
+```
+
+This function is async and run once per process, in order to use it.
+
+You can use it as script in your package.json, and then generate declarations each time you update the locales or whenever is required. Or generate them automatically through a build script or init entrypoint. For example importing it a `next.config.js` file at Next.js.
+
+```jsonc
+// package.json
+{
+  "scripts": {
+    "declarations": "bun ./i18n/declarations.ts"
+  }
+}
+```
+
+Before start using these declarations, it is recommended to enable `allowArbitraryExtensions` in your tsconfig.json.
+
+```jsonc
+//tsconfig.json
+{
+  "compilerOptions": {
+    "allowArbitraryExtensions": true
+  }
+}
+```
+
+Or just importing the declarations and asserting them into your translation settings file.
+
 ## React
 
 intl-t provides seamless integration with React through the `useTranslation` hook:
@@ -578,6 +622,8 @@ In dynamic pages with just `await getTranslation()` you can get the translation 
 > Note: `intl-t/next` is for Next.js App with RSC. For Next.js Pages you should use `intl-t/react` instead, and `intl-t/navigation` for Next.js Navigation and Routing tools.
 
 ### Navigation
+
+Import `createNavigation` from `intl-t/navigation` and pass the allowed locales. Don't import createNavigation from `intl-t/next` in order to use it from middleware.
 
 ```ts
 //i18n/navigation.ts
@@ -728,10 +774,9 @@ export default async function Page() {
 ```ts
 import React from "react";
 import jsx from "react/jsx-runtime";
-import jsxDEV from "react/jsx-dev-runtime";
 import patch from "intl-t/react";
 
-process.env.NODE_ENV !== "development" && patch(React, jsx, jsxDEV);
+process.env.NODE_ENV !== "development" && patch(React, jsx);
 ```
 
 ## Dynamic Locales import
@@ -793,25 +838,19 @@ Before migrating, make sure you understand the core concepts of intl-t. See the 
 
 1. **Prepare your translations**
 
-`intl-t` supports flexible JSON files with deeply nested nodes. However, you should review the [Reserved Keywords](#reserved-keywords) before using them in your translations. For variable auto-completion, use the `values` property in the relevant node. All locale translation files must have the same structure, keys, and nodes. `intl-t` will warn you if there are any discrepancies.
+`intl-t` supports flexible JSON files with deeply nested nodes. However, you should review the [Reserved Keywords](#reserved-keywords) before using them in your translations. All locale translation files must have the same structure, keys, and nodes. `intl-t` will warn you if there are any discrepancies.
 
 ```jsonc
 // en.json
 {
   "homepage": {
     "welcome": "Welcome, {user}!",
-    "values": {
-      "user": "Ivan"
-    }
   }
 }
 // es.json
 {
   "homepage": {
     "welcome": "Bienvenido, {user}!",
-    "values": {
-      "user": "Iván"
-    }
   }
 }
 ```
@@ -1011,4 +1050,6 @@ This translation library was originally built for my own projects, aiming to pro
 
 ## Support
 
-> If you find this project useful, consider supporting its development ☕ or [leave a ⭐ on the Github Repo](https://github.com/nivandres/intl-t) > [![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6) > [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)
+> If you find this project useful, consider supporting its development ☕ or [leave a ⭐ on the Github Repo](https://github.com/nivandres/intl-t)
+
+> [![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6) [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)

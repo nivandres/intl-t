@@ -33,7 +33,7 @@ export type ReactChunk = (props: ReactChunkProps) => ReactNode | void;
 export interface TranslationProps<
   S extends TranslationSettings = TranslationSettings,
   N = Node,
-  V extends Values = Values,
+  V = Values,
   A extends string[] = isArray<SearchWays<N>>,
   D extends string = ArrayToString<A, S["ps"]>,
 > extends Partial<State<S["allowedLocale"]>> {
@@ -51,18 +51,14 @@ export interface TranslationProps<
   onLocaleChange?: ReactSetState<S["allowedLocale"]>;
 }
 
-export type TranslationFC<S extends TranslationSettings = TranslationSettings, N = Node, V extends Values = Values> = <
+export type TranslationFC<S extends TranslationSettings = TranslationSettings, N = Node, V = Values> = <
   A extends isArray<SearchWays<N>>,
   D extends ArrayToString<A, S["ps"]>,
 >(
   props: TranslationProps<S, N, V, A, D>,
 ) => ReactNode;
 
-export type TranslationNodeFC<S extends TranslationSettings = TranslationSettings, N = Node, V extends Values = Values> = TranslationFC<
-  S,
-  N,
-  V
-> & {
+export type TranslationNodeFC<S extends TranslationSettings = TranslationSettings, N = Node, V = Values> = TranslationFC<S, N, V> & {
   g: TranslationNodeFC<S, S["tree"][S["allowedLocale"]], V>;
   global: TranslationNodeFC<S, S["tree"][S["allowedLocale"]], V>;
   locale: S["allowedLocale"];

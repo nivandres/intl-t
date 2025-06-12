@@ -13,7 +13,8 @@
     "landing": {
       "title": "Welcome",
       "hero": {
-        "paragraph": "content"
+        "paragraph": "content",
+        "features": ["hi {name}. This is Feature 1", "hi {name}. This is Feature 2"]
       }
     }
   }

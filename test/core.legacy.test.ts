@@ -94,6 +94,7 @@ describe("Translation object", () => {
     const t = ct({
       locales: {
         en: {
+          greeting: "hello {name}",
           hello: {
             base: "hello",
             o1: "o1",
@@ -107,12 +108,13 @@ describe("Translation object", () => {
     expect(t.hello.path).toEqual(["hello"]);
     expect(t.key).toBeOneOf(["en", "", undefined]);
     expect(t.hello.key).toBe("hello");
-    expect(t.child).toBe("hello");
+    expect(t.child).toBe("greeting");
     expect(t.children);
     expect(t.hello.children).toEqual(["o1", "o2"]);
     expect(t.hello.base).toBe("hello");
     expect(typeof t.hello.o1.node).toBe("string");
     expect(typeof t.hello.o2.node).toBe("object");
+    expect(t.greeting({ name: "John" }).base).toBe("hello John");
   });
   it("should support json directly imported", () => {
     const t = ct({ locales: { en } });
@@ -140,10 +142,30 @@ describe("Translation object", () => {
       locales: {
         en: ["hello", "world"],
       },
-    });
+    }).getTranslation();
     expect(t.map(t => t.base)).toEqual(["hello", "world"]);
     expect(t.join(" ")).toBe("hello world");
     expect([...t][0].base).toBe("hello");
+  });
+  it("should work with overrided values", () => {
+    const t = ct({
+      locales: {
+        en: {
+          n1: {
+            n2: {
+              base: "hello {name}",
+            },
+            values: {
+              name: "2",
+            },
+          },
+          values: {
+            name: "1",
+          },
+        },
+      },
+    });
+    t.n1.n2;
   });
 });
 

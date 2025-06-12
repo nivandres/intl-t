@@ -136,7 +136,7 @@ export class TranslationNode<
   constructor(params: TranslationData<S, N, V, L, R>) {
     super((...args: any[]) => this.call(...args));
 
-    this.settings = params.settings ??= createTranslationSettings(params) as S;
+    this.settings = params.settings ??= createTranslationSettings(params) as unknown as S;
 
     const {
       settings = params.settings,
@@ -285,7 +285,7 @@ export class TranslationNode<
     const node = this.getNode();
     return TranslationNode.injectVariables(
       (!node || typeof node !== "object" ? node : (node as any).base) || this.path.join(this.settings.ps),
-      this.values,
+      this.values as Values,
       this.settings,
     ) as Content<N>;
   }
@@ -304,7 +304,7 @@ export class TranslationNode<
     return this[locale as any];
   }
   get values(): V & Variables<N> {
-    return { ...this.parent.values, ...this.variables };
+    return { ...this.parent.values, ...this.variables } as any;
   }
   get child(): Children<N> {
     return this.children[0];
@@ -330,8 +330,11 @@ export class TranslationNode<
   [Symbol.toStringTag]() {
     return "Translation";
   }
-  toString() {
-    return String(this.base);
+  toString(): Content<N> & string {
+    return String(this.base) as any;
+  }
+  get raw() {
+    return this.toString();
   }
   get promise(): Promise<this> {
     return new Promise((r, c) => {
@@ -361,8 +364,8 @@ export class TranslationNode<
     }
     yield this.base;
   }
-  toJSON() {
-    return typeof this.node === "object" ? this.node : this.base;
+  toJSON(): N {
+    return typeof this.node === "object" ? this.node : (this.base as N);
   }
 }
 
