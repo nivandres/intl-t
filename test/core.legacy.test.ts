@@ -12,7 +12,7 @@ describe("Translation object", () => {
   });
   it("should work with multiple languages", () => {
     const t = ct({
-      locales: {
+      locales: { 
         es: "es",
         en: "en",
       },
@@ -208,7 +208,6 @@ describe("dynamic import", () => {
     let t = ct({
       allowedLocales: ["en", "es"],
       getLocale(locale) {
-        console.log("hello", locale);
         return { hello: locale === "es" ? "hola mundo" : "hello world" };
       },
     });

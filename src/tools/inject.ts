@@ -1,4 +1,4 @@
-import type { Values } from "../types";
+import type { Values, Override, Content, Variables } from "../types";
 import { format } from "./format";
 
 export function nested(content: string) {
@@ -13,8 +13,8 @@ export function nested(content: string) {
   return null;
 }
 
-const variableRegex = /{{?(\w+|(?:\(.*?\)|[=+!><\-&|%*/?:#\w]|{\w+}|".*?"|'.*?')+)\s*(?:[,\.;]+\s*(\w+)\s*)?(?:[,\.;]+(.*))?}}?/s;
-const instructionsRegex =
+export const variableRegex = /{{?(\w+|(?:\(.*?\)|[=+!><\-&|%*/?:#\w]|{\w+}|".*?"|'.*?')+)\s*(?:[,\.;]+\s*(\w+)\s*)?(?:[,\.;]+(.*))?}}?/s;
+export const instructionsRegex =
   /(?:(?<t1>(?<k1>\w+))|(?<kn1>'|")(?<k2>.*?)(?<!`)\k<kn1>|(?<k3>(?:[=+!><\-\/&|%*/?:]*(?:#|\(.*?\)|\w+|{\w+}|(?<kn2>'|").*?(?<!`)\k<kn2>|\[.*?\]|\/.*?\/w*))+))(?:[\s=>]|:(?!:\w))*(?:(?<=[\s:=>])(?<t_1>(?<v1>[\w\#\+\-]+))(?=$|[,\s;])|(?<vn1>'|")(?<v2>.*?)(?<!`)\k<vn1>|(?<v3>{.*(?<!`)(?<vn2>})))|:?:?(?<t2>(?<k4>\w+))(?:[\\/](?<t_2>(?<v4>[\w\.\,\+\-]+))|\((?:(?<t_3>(?<v5>\w+))|(?<vn3>'|")(?<v6>.*?)(?<!`)\k<vn3>)\))?/s;
 const instructionRegex = /{(.*)}/s;
 
@@ -34,9 +34,13 @@ export function instructionsMatch(content: string) {
   return instructions;
 }
 
-// @ts-ignore
-export function injectVariables<T extends string>(content: T = "", variables: Values = {}, state: State = this || {}): T | (string & {}) {
-  if (!content || !variables) return content;
+export function injectVariables<T extends string, const V extends Values>(
+  content: T = "" as T,
+  variables: Override<Partial<Variables<T>>, V> = {} as any,
+  // @ts-ignore
+  state: State = this || {},
+) {
+  if (!content || !variables) return content as never;
   const { formatFallback = "", formatOptions } = state;
   let match: RegExpMatchArray | null | undefined;
   const matches = new Set();
@@ -141,11 +145,13 @@ export function injectVariables<T extends string>(content: T = "", variables: Va
           )
             v = format.number(v, options, state);
         }
-        value?.includes("{") && (value = injectVariables(value, variables, { ...state, formatOptions: options, formatFallback: key }));
+        value?.includes("{") && (value = injectVariables(value as T, variables, { ...state, formatOptions: options, formatFallback: key }));
         break;
     }
     value = value?.replace(/(?<!`)#/, String(v)) ?? v;
     content = content.replaceAll(target, String(value)) as T;
   }
-  return content.replace(/`(.)/, "$1");
+  return content.replace(/`(.)/, "$1") as Content<T>;
 }
+
+export { injectVariables as inject };

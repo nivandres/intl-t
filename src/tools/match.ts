@@ -18,3 +18,5 @@ export function match<L extends Locale>(
   }
   return matchedLocale || defaultLocale || (undefined as unknown as L);
 }
+
+export { match as matchLocale };

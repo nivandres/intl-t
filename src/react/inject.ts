@@ -47,3 +47,5 @@ export function injectReactChunks(content: string = "", variables: Values = {}, 
   if (content) elements.push(content);
   return elements.length > 1 ? elements : elements[0];
 }
+
+export { injectReactChunks as injectReactChunk };

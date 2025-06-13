@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { TranslationProvider as TranslationClientProvider, TranslationProviderProps } from "../react/context";
 import { TranslationNode } from "../core/translation";
-import type { isArray, SearchWays, ArrayToString } from "../types";
+import type { isArray, SearchWays, ArrayToString, GlobalTranslation } from "../types";
 import { getCache } from "./cache";
 import { getRequestLocale } from "./request";
 import { createTranslation } from "./translation";
@@ -13,7 +13,7 @@ export async function TranslationProvider<
   // @ts-ignore-error optional binding
 >({ children, t = this, preventDynamic, ...props }: TranslationProviderProps<T, A, D>) {
   const cache = getCache();
-  t ||= cache.t || (createTranslation(props.settings) as any);
+  t ||= cache.t ||= TranslationNode.t || (createTranslation(props.settings) as any);
   props.locale ||= cache.locale;
   preventDynamic ??= t.settings.preventDynamic;
   if (!(props.locale || preventDynamic)) {
@@ -31,20 +31,18 @@ export async function TranslationProvider<
   return (<TranslationClientProvider {...props}>{children}</TranslationClientProvider>) as never;
 }
 export default TranslationProvider;
-
 export const T = TranslationProvider;
-export const Tr = T;
-export const Trans = T;
+export { T as Tr, T as Trans };
 
 export const TranslationDynamicRendering: typeof TranslationProvider = async ({ children, ...props }) => {
   props.locale ||= (await getRequestLocale.call(props.t)) as string;
   return <TranslationProvider {...props}>{children}</TranslationProvider>;
 };
 
-export function getTranslation(...args: any[]) {
+export const getTranslation = function (...args: any[]) {
   const cache = getCache();
   // @ts-ignore-error optional binding
-  let t = this || cache.t;
+  let t = this || (cache.t ||= TranslationNode.t);
   if (!t) throw new Error("Translation not found");
   t.then?.();
   if (cache.locale) return (t[(t.settings.locale = cache.locale)] || t)(...args);
@@ -60,4 +58,6 @@ export function getTranslation(...args: any[]) {
     });
   }
   return t.current(...args);
-}
+} as GlobalTranslation;
+
+export { getTranslation as getTranslations };

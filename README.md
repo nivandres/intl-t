@@ -324,8 +324,8 @@ console.log(t.es("greeting", { name: "Juan" })); // Output: ¡Hola, Juan!
   }
 };
 
-console.log(t('user.profile.title')); // Output: User Profile
-console.log(t('user.profile.greeting', { name: 'Alice' })); // Output: Welcome back, Alice!
+console.log(t("user.profile.title")); // Output: User Profile
+console.log(t("user.profile.greeting", { name: 'Alice' })); // Output: Welcome back, Alice!
 ```
 
 #### Dynamic Keys
@@ -355,8 +355,8 @@ console.log(t("items", { count: 5 })); // Output: You have 5 items.
   price: "The total is {amount, number, currency}"
 };
 
-console.log(t('date', { now: new Date() })); // Output: Today is Wednesday, April 7, 2023
-console.log(t('price', { amount: 123.45 })); // Output: The total is $123.45
+console.log(t("date", { now: new Date() })); // Output: Today is Wednesday, April 7, 2023
+console.log(t("price", { amount: 123.45 })); // Output: The total is $123.45
 ```
 
 #### Nested Variable Injection with operations.
@@ -448,18 +448,22 @@ These keys are reserved and used to access some translations properties and meth
 - `catch`
 - `then`
 
+[Continue with the React section.](#react)
+
 ## Declarations
 
-TypeScript does not infer the types of each translation from JSON literal strings directly, but you can generate them automatically using the `generateDeclarations` function or the `declarations` script.
+TypeScript does not infer the literal strings directly from JSON, but you can generate them automatically using the `generateDeclarations` function or the `declarations` script.
+
+This will generate declarations files for JSON (.d.json.ts) including the literal strings and structured types.
 
 ```ts
 // i18n/declarations.ts
-import { generateDeclarations } from "intl-t/tools";
+import { generateDeclarations } from "intl-t/declarations";
 
 generateDeclarations("./en.json");
 ```
 
-You can also generate declarations from a specific JSON folder:
+You can also generate declarations from a specific JSON folder, it will scan all JSON files in the folder and generate declarations for each one.
 
 ```ts
 generateDeclarations("./i18n/messages");
@@ -487,6 +491,15 @@ Before using these declarations, it is recommended to enable `allowArbitraryExte
     "allowArbitraryExtensions": true
   }
 }
+```
+
+Example in case you would like to generate declarations in Next.js from your next.config file:
+
+```ts
+// next.config.js
+import { generateDeclarations } from "intl-t/declarations";
+
+generateDeclarations("i18n"); // translations folder
 ```
 
 After running the script, declaration files will appear in your locales folder with the corresponding types. These types are not needed for production or development runtime, so you can ignore them in your git repository:
@@ -586,7 +599,9 @@ const { t, locale, setLocale } = useTranslation(path?: string);
 - `locale`: The current language code.
 - `setLocale`: A function to change the current language.
 
-### React Component Injection out of the box
+### React Component Injection
+
+React chunk injection out of the box
 
 ```jsx
 {
@@ -605,7 +620,25 @@ const Welcome = () => (
 );
 ```
 
-[Go to Next.js section](#nextjs)
+Props for React Chunk Injection
+
+```ts
+export interface ReactChunkProps {
+  children: ReactNode;
+  tagName: string;
+  tagAttributes: string;
+  tagContent: string;
+  value?: Base | null;
+  key: ReactKey;
+  [key: string]: unknown; // custom props injected from translation strings
+}
+```
+
+By default, if a variable is not specified, it will be injected as an HTML element with the corresponding `tagName`, `tagAttributes`, and `tagContent` (`children`).
+
+For example, if your translation is `Go to <a href="/" className="font-bold">Home</a>` it will be literally rendered as `<a href="/" className="font-bold">Go to Home</a>`. HTML Element with its attributes, children and custom props will be injected and working. Also this chunks can be nested.
+
+[Continue with the Next.js section.](#nextjs)
 
 ## React Patch
 
@@ -1140,6 +1173,121 @@ export default function Component() {
 }
 ```
 
+## TypeScript
+
+It is recommended to use TypeScript with intl-t. You may find the following configuration useful, especially when using [`declarations`](#declarations):
+
+```jsonc
+{
+  "compilerOptions": {
+    "allowArbitraryExtensions": true,
+    "paths": {
+      "@i18n/*": ["./i18n/*"]
+    }
+  }
+}
+```
+
+If you want to import functions, methods, etc. from the `intl-t/*` package directly instead of your custom i18n folder (`@/i18n/*`), you can declare `intl-t` module with TypeScript. However, this is not recommended, as the intended approach is for intl-t to infer everything from your created translations at `@/i18n/*`, which you then import with bound values and functions. If you import directly from the `intl-t` module, the value will be shared globally, but the types will not. If you want to enforce global type consistency, you can do so as follows:
+
+```ts
+import { t } from "@/i18n/translation";
+
+declare module "intl-t" {
+  export interface Global {
+    Translation: typeof t;
+  }
+}
+```
+
+In this way you can then import from the `intl-t` module with inferred types.
+
+> This is not necessary. `intl-t` is designed to infer translations from your custom files in `@/i18n/*`, which you import with their bound values and functions.
+
+## Tools
+
+Intl-t provides a set of tools to help you with your translations. You can use each of them independently from `intl-t/tools`.
+
+```ts
+import /* tools */ "intl-t/tools";
+```
+
+### Inject
+
+Inject variables into content, with built-in support for the ICU message format.
+
+```ts
+import { inject } from "intl-t/tools";
+
+const str = inject("Hello, {user}!", { user: "Ivan" }); // "Hello, Ivan!"
+
+// TypeScript Support
+typeof str; // `Hello, ${string}`
+
+// Full support for ICU message format
+
+// Extended keeping syntax and performance
+inject("One plus one equals {(1+1), =2 {two (#)} other {# (#)}}"); // "One plus one equals two (2)"
+inject("{a} plus {b} {(a+b), (typeof # != 'number') {is not a number. #} <0 {is negative. #} other {equals {(a+b)}. {a}+{b}=#}}");
+// nested injections
+```
+
+### React Injection
+
+To use the [React Chunk Injection](#react-component-injection) function, import it from `intl-t/react`.
+
+```ts
+import { injectReactChunk } from "intl-t/react";
+```
+
+### Match
+
+Function to match the best locale from the available ones.
+
+```ts
+import { match } from "intl-t/tools";
+
+const availableLocales = navigator.languages.split(","); // ["es", "en"]; // can be string | string[]
+const allowedLocales = ["en-US", "es-MX", "fr-FR", "zh-Hant"];
+const defaultLocale = "en-US";
+
+const locale = match(availableLocales, allowedLocales, defaultLocale); // "es-MX"
+```
+
+It finds the best locale by comparing the available locales with the allowed locales. Try it yourself.
+
+### Negotiator
+
+Simple function to extract the locale from HTTP headers.
+
+```ts
+import { negotiator } from "intl-t/tools";
+negotiator({ headers });
+```
+
+### Formatters
+
+Formatters are used internally by the [inject](#inject) function, but they can also be used directly.
+
+```ts
+import { format } from "intl-t/tools";
+```
+
+```ts
+// format params
+format.list(value: string[], options?: Intl.ListFormatOptions);
+format.number(value: number = 0, options?: Intl.NumberFormatOptions);
+format.currency(value: number = 0, options: Intl.NumberFormatOptions = {});
+format.date(value: Date = new Date(), options?: Intl.DateTimeFormatOptions);
+format.relative(value: Date | number = 0, options: Intl.RelativeTimeFormatOptions & Record<string, any> = {}); // relative time inferred from value
+format.time(value: Date = new Date(), options?: Intl.DateTimeFormatOptions);
+format.price(value: number = 0, options: Intl.NumberFormatOptions = {}); // uses USD by default
+```
+
+### Resolvers
+
+Resolver functions are best used via [createNavigation](#createnavigation), but you can also import them directly from `intl-t/tools` without bound values and types.
+
 ## Hello there
 
 This translation library was originally built for my own projects, aiming to provide the best possible developer experience: high performance, ultra-lightweight, fully customizable, and with TypeScript autocomplete everywhere. It uses a translation node-based approach and offers a super flexible syntax, integrating the best features from other i18n libraries. It includes its own ICU message format, works out of the box with React and Next.js, supports static rendering, and has zero dependencies. While it's still under active development and may not yet be recommended for large-scale production projects, I am committed to improving it further. Feel free to use it, contribute, or reach out with feedback. Thank you!
@@ -1149,3 +1297,7 @@ This translation library was originally built for my own projects, aiming to pro
 > If you find this project useful, consider supporting its development ☕ or [leave a ⭐ on the Github Repo](https://github.com/nivandres/intl-t)
 
 > [![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6) [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)
+
+```
+
+```

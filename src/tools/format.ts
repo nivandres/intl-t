@@ -1,4 +1,5 @@
 import { type State, state } from "../state";
+import { inject } from "./inject";
 
 // @ts-ignore
 export function list(value: string[] = [], options?: Intl.ListFormatOptions, { locale }: State = this) {
@@ -52,4 +53,4 @@ export function relative(
   return new Intl.RelativeTimeFormat(locale, options).format(value, unit);
 }
 
-export const format = { ...state, list, number, currency, date, relative, time: date, price: currency };
+export const format = { ...state, list, number, currency, date, relative, time: date, price: currency, inject };

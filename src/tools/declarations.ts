@@ -86,7 +86,7 @@ export default async function main(args: any[]) {
   }
 }
 
-const declarations = new Set<string>();
+export const declarations = new Set<string>();
 
 interface Params {
   outFile?: string;

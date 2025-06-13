@@ -1,5 +1,5 @@
 import type { TranslationNode, invalidKeys } from "./translation";
-import type { ReactChunk } from "../types";
+import type { ReactChunk, GlobalPathSeparator } from "../types";
 import type { Locale } from "../locales/types";
 import type { State } from "../state";
 
@@ -66,7 +66,7 @@ type VFS1<S extends string> = S extends `${string}{{${infer V}}}${infer C}`
 export type VariablesFromString<S extends string> = VFS1<S>;
 export type Override<T, U> = T & U extends never ? Omit<T, keyof U> & U : T & U;
 export type VariablesFromNode<N> = "values" extends keyof N ? N["values"] : N extends string ? VariablesFromString<N> : {};
-export type Variables<N, V> = Override<V, VariablesFromNode<N>>;
+export type Variables<N, V = Values> = Override<V, VariablesFromNode<N>>;
 export type LastKey<R extends Key[]> = R extends [...Key[], infer K] ? K : Key;
 export type Join<K extends Key[], S extends string> = K extends [infer F extends Stringable, ...infer R]
   ? R extends [Key, ...Key[]]
@@ -93,6 +93,11 @@ export type SearchWays<N, A extends any[] = [], C extends keyof N = Children<N>>
   : valueof<{
       [K in C]: SearchWays<N[K], [...A, K]> | [...A, K];
     }>;
+
+type KeysFromNode<N, S extends string = GlobalPathSeparator> = ArrayToString<isArray<SearchWays<N>>, S>;
+export type TranslationKeys<T, S extends string = GlobalPathSeparator> = T extends { node: infer N }
+  ? KeysFromNode<N, S>
+  : KeysFromNode<T, S>;
 
 export type FollowWay<N, W extends Key[]> = W extends [infer F, ...infer R extends Key[]]
   ? F extends keyof N

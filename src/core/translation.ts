@@ -13,10 +13,12 @@ import type {
   PartialTree,
   Children,
   FollowWay,
+  TranslationKeys,
   Join,
   TranslationFC,
   TranslationNodeFC,
 } from "./types";
+import type { GlobalTranslation } from "src/types";
 import { injectVariables } from "../tools/inject";
 import { hydration } from "../state";
 import { getLocales } from "./dynamic";
@@ -205,7 +207,7 @@ export class TranslationNode<
       descriptors.then = {
         value(cb: Function) {
           getLocales(settings.getLocale, settings.allowedLocales).then(
-            locales => ((settings.locales = locales as any), delete (t as any).then, cb(t), console.log(locales)),
+            locales => ((settings.locales = locales as any), delete (t as any).then, cb(t)),
           );
         },
         configurable: true,
@@ -336,6 +338,9 @@ export class TranslationNode<
   get id(): Join<R extends string[] ? R : string[], S["ps"]> {
     return (this[Symbol.for("id")] ??= this.path.join(this.settings.ps)) as any;
   }
+  get keys(): TranslationKeys<{ node: N }, S["ps"]> {
+    return this.child as any;
+  }
   [Symbol.toStringTag]() {
     return "Translation";
   }
@@ -454,3 +459,9 @@ export function getSource<N>(node: N, deep: number = Infinity, path: Key[] = [])
   if (path.length) sourceNode.path = path;
   return sourceNode;
 }
+
+export function getT() {
+  return TranslationNode.t as GlobalTranslation;
+}
+
+export const getTranslation = ((...args: any[]) => getT().current(...args)) as GlobalTranslation;

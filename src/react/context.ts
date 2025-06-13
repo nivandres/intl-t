@@ -1,7 +1,8 @@
 "use client";
 
 import { createElement, createContext, useContext, useMemo, useState, useEffect } from "react";
-import { isArray, SearchWays, ArrayToString, ReactState, ReactSetState, Locale, TranslationProps as TP } from "../types";
+import type { isArray, SearchWays, ArrayToString, ReactState, ReactSetState, Locale, TranslationProps as TP } from "../types";
+import type { GlobalTranslation } from "../global";
 import { useLocale } from "./hooks";
 import { TranslationNode } from "./translation";
 
@@ -58,18 +59,14 @@ export function TranslationProvider<
   variables && t.set(variables);
   return children || t.base;
 }
-
 export default TranslationProvider;
-
 export const T = TranslationProvider;
+export { T as Trans, T as Tr };
 
-export const Trans = T;
-export const Tr = T;
-
-export function useTranslation(...args: any[]) {
+export const useTranslation = function (...args: any[]) {
   const context = useContext(TranslationContext) || {};
   // @ts-ignore-error optional binding
-  let t = this || context.t;
+  let t = this || (context.t ||= TranslationNode.t);
   if (!t) throw new Error("Translation not found");
   context.t ||= t;
   t.settings.locale = (context.localeState ||= useLocale.call(t))[0];
@@ -79,4 +76,6 @@ export function useTranslation(...args: any[]) {
     t.then?.(() => context.reRender?.(p => p + 1));
   }, [t]);
   return t(...args);
-}
+} as GlobalTranslation;
+
+export { useTranslation as useTranslations };

@@ -27,3 +27,10 @@ describe("match locales", () => {
     expect(m(["en-MX"], ["es-US"], "ar")).toBe("ar");
   });
 });
+
+describe("general cases", () => {
+  it("cases", () => {
+    expect(m(["es-CO", "en-US"], ["en", "es"], "en")).toBe("es");
+    expect(m(["es-CO", "en-US"], ["en", "es-MX"], "en")).toBe("es-MX");
+  });
+});
