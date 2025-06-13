@@ -454,7 +454,7 @@ TypeScript does not infer the types of each translation from JSON literal string
 
 ```ts
 // i18n/declarations.ts
-import { generateDeclarations } from "intl-t/tools";
+import { generateDeclarations } from "intl-t/scripts";
 
 generateDeclarations("./en.json");
 ```

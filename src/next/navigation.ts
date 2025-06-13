@@ -8,7 +8,6 @@ import { getLocale, getPathname } from "./state";
 import { createStaticParams, StaticParamsConfig } from "./params";
 import type { FC } from "react";
 
-export * from "../tools/declarations";
 export * from "../tools/match";
 export * from "../tools/negotiator";
 export * from "../tools/resolvers";
