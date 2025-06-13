@@ -1,4 +1,4 @@
-import main from '../dist/scripts/declarations';
+import main from '../dist/scripts/declarations.js';
 
 try {
   main(process.argv);
