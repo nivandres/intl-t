@@ -87,11 +87,3 @@ export default async function main(args: any[]) {
     if (err instanceof Error) throw new Error(`Error writing file "${outFile}": ${err.message}`);
   }
 }
-
-if (require.main === module)
-  try {
-    main(process.argv);
-  } catch (err) {
-    if (err instanceof Error) console.error(err.message);
-    process.exit(1);
-  }
