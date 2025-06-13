@@ -1,7 +1,7 @@
 {
   "name": "intl-t",
   "description": "A Fully-Typed Node-Based i18n Translation Library",
-  "version": "1.0.0-rc.51",
+  "version": "1.0.0-rc.52",
   "type": "module",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,7 +22,7 @@
     "prepublishOnly": "bun run test && bun run build"
   },
   "bin": {
-    "declarations": "./scripts/declarations.js"
+    "declarations": "./dist/scripts/declarations.js"
   },
   "keywords": [
     "translation",

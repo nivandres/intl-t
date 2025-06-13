@@ -1,5 +1,4 @@
-// @ts-ignore
-import main from "../../scripts/declarations.js";
+import main from "../scripts/declarations";
 
 const declarations = new Set<string>();
 

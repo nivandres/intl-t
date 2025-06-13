@@ -1,7 +1,7 @@
 import { exists, readFile, rm, writeFile, stat, readdir } from "fs/promises";
 import { basename, join } from "path";
 
-export default async function main(args = []) {
+export default async function main(args: any[]) {
   const cmdName = basename(args[1]);
 
   if (args.length < 3)
@@ -38,11 +38,12 @@ export default async function main(args = []) {
     if (jsonFiles.length === 0) {
       throw new Error(`No JSON files found in directory "${filePath}".`);
     }
-    for (const file of jsonFiles) try {
-      await main([!0, cmdName, join(filePath, file.name), ...args.slice(3)]);
-    } catch (err) {
-      console.warn(`Error processing file "${file.name}": ${err.message}`);
-    }
+    for (const file of jsonFiles)
+      try {
+        await main([!0, cmdName, join(filePath, file.name), ...args.slice(3)]);
+      } catch (err) {
+        if (err instanceof Error) console.warn(`Error processing file "${file.name}": ${err.message}`);
+      }
     return;
   }
 
@@ -54,23 +55,24 @@ export default async function main(args = []) {
   try {
     json = (await readFile(filePath, "utf-8")).trim();
   } catch (err) {
-    throw new Error(`Error reading file "${filePath}": ${err.message}`);
+    if (err instanceof Error) throw new Error(`Error reading file "${filePath}": ${err.message}`);
   }
 
   try {
-    json = JSON.parse(json);
+    json = JSON.parse(json!);
   } catch (err) {
-    throw new Error(`Error parsing JSON file "${filePath}": ${err.message}`);
+    if (err instanceof Error) throw new Error(`Error parsing JSON file "${filePath}": ${err.message}`);
   }
 
   try {
     json = JSON.stringify(json, null, 2);
   } catch (err) {
-    throw new Error(`Error stringifying JSON file "${filePath}": ${err.message}`);
+    if (err instanceof Error) throw new Error(`Error stringifying JSON file "${filePath}": ${err.message}`);
   }
 
-  json = `${tsFile ? `export const ${symbolName} = (${json}) as const;` : `export declare const ${symbolName}: ${json};`
-    }\nexport type ${symbolName} = typeof ${symbolName};\nexport default ${symbolName};`;
+  json = `${
+    tsFile ? `export const ${symbolName} = (${json}) as const;` : `export declare const ${symbolName}: ${json};`
+  }\nexport type ${symbolName} = typeof ${symbolName};\nexport default ${symbolName};`;
 
   try {
     await writeFile(outFile, json, "utf-8");
@@ -78,17 +80,18 @@ export default async function main(args = []) {
       try {
         await rm(filePath);
       } catch (err) {
-        console.warn(`Error removing original file "${filePath}": ${err.message}`);
+        if (err instanceof Error) console.warn(`Error removing original file "${filePath}": ${err.message}`);
       }
     }
   } catch (err) {
-    throw new Error(`Error writing file "${outFile}": ${err.message}`);
+    if (err instanceof Error) throw new Error(`Error writing file "${outFile}": ${err.message}`);
   }
 }
 
-if (require.main === module) try {
-  main(process.argv);
-} catch (err) {
-  console.error(err.message);
-  process.exit(1);
-}
+if (require.main === module)
+  try {
+    main(process.argv);
+  } catch (err) {
+    if (err instanceof Error) console.error(err.message);
+    process.exit(1);
+  }
