@@ -1,11 +1,10 @@
-import { readFileSync, rmSync, writeFileSync, statSync, readdirSync } from "fs";
+import { readFile, rm, writeFile, stat, readdir } from "fs/promises";
 import { basename, join } from "path";
 
-export default function main(args: any[]) {
+export default async function main(args: any[]) {
   const cmdName = basename(args[1]);
 
-  if (args.length < 3)
-    throw new Error(`Usage: ${cmdName} <file.json|folder> [--outFile=customFile] [--symbolName=customName] [--remove] [--ts]`);
+  if (args.length < 3) throw `Usage: ${cmdName} <file.json|folder> [--outFile=customFile] [--symbolName=customName] [--remove] [--ts]`;
 
   let filePath = args[2];
   let removeFile = false;
@@ -27,13 +26,13 @@ export default function main(args: any[]) {
     }
   });
 
-  const fileStat = statSync(filePath);
+  const fileStat = await stat(filePath);
 
   if (fileStat.isDirectory()) {
-    const files = readdirSync(filePath, { withFileTypes: true });
+    const files = await readdir(filePath, { withFileTypes: true });
     const jsonFiles = files.filter(f => f.isFile() && f.name.endsWith(".json"));
     if (jsonFiles.length === 0) {
-      throw new Error(`No JSON files found in directory "${filePath}".`);
+      throw `No JSON files found in directory "${filePath}".`;
     }
     for (const file of jsonFiles)
       try {
@@ -43,7 +42,7 @@ export default function main(args: any[]) {
       }
     return;
   } else if (!fileStat.isFile()) {
-    throw new Error(`File or folder "${filePath}" is not a file.`);
+    throw `File or folder "${filePath}" is not a file.`;
   }
 
   symbolName ||= basename(filePath, ".json").replace(/[^a-zA-Z0-9_$]/g, "_") || "data";
@@ -52,21 +51,21 @@ export default function main(args: any[]) {
   let json;
 
   try {
-    json = readFileSync(filePath, "utf-8").trim();
+    json = (await readFile(filePath, "utf-8")).trim();
   } catch (err) {
-    if (err instanceof Error) throw new Error(`Error reading file "${filePath}": ${err.message}`);
+    if (err instanceof Error) throw `Error reading file "${filePath}": ${err.message}`;
   }
 
   try {
     json = JSON.parse(json!);
   } catch (err) {
-    if (err instanceof Error) throw new Error(`Error parsing JSON file "${filePath}": ${err.message}`);
+    if (err instanceof Error) throw `Error parsing JSON file "${filePath}": ${err.message}`;
   }
 
   try {
     json = JSON.stringify(json, null, 2);
   } catch (err) {
-    if (err instanceof Error) throw new Error(`Error stringifying JSON file "${filePath}": ${err.message}`);
+    if (err instanceof Error) throw `Error stringifying JSON file "${filePath}": ${err.message}`;
   }
 
   json = `${
@@ -74,16 +73,16 @@ export default function main(args: any[]) {
   }\nexport type ${symbolName} = typeof ${symbolName};\nexport default ${symbolName};`;
 
   try {
-    writeFileSync(outFile, json, "utf-8");
+    await writeFile(outFile, json, "utf-8");
     if (removeFile && outFile !== filePath) {
       try {
-        rmSync(filePath);
+        await rm(filePath);
       } catch (err) {
         if (err instanceof Error) console.warn(`Error removing original file "${filePath}": ${err.message}`);
       }
     }
   } catch (err) {
-    if (err instanceof Error) throw new Error(`Error writing file "${outFile}": ${err.message}`);
+    if (err instanceof Error) throw `Error writing file "${outFile}": ${err.message}`;
   }
 }
 
