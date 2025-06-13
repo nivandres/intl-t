@@ -13,7 +13,7 @@ export async function TranslationProvider<
   // @ts-ignore-error optional binding
 >({ children, t = this, preventDynamic, ...props }: TranslationProviderProps<T, A, D>) {
   const cache = getCache();
-  t ||= cache.t || createTranslation(props.settings);
+  t ||= cache.t || (createTranslation(props.settings) as any);
   props.locale ||= cache.locale;
   preventDynamic ??= t.settings.preventDynamic;
   if (!(props.locale || preventDynamic)) {
@@ -26,7 +26,7 @@ export async function TranslationProvider<
   }
   t = await ((t as any)[(t.settings.locale = cache.locale = props.locale!)] || t);
   if (!children) return t(props.path || props.id || props.i18nKey).base;
-  props.source = props.source || props.messages || { ...t.node };
+  props.source = props.source || props.messages || { ...(t.node as any) };
   // @ts-ignore
   return (<TranslationClientProvider {...props}>{children}</TranslationClientProvider>) as never;
 }

@@ -437,6 +437,7 @@ These keys are reserved and used to access some translations properties and meth
 - `base`
 - `values`
 - `children`
+- `current`
 - `parent`
 - `settings`
 - `node`
@@ -502,6 +503,7 @@ type Locale = typeof import("./messages/en.d.json.ts").default;
 
 export const t = createTranslation({
   locales: () => import("./messages/en.json") as Promise<Locale>,
+  allowedLocales: ["en", "es"],
 });
 ```
 
@@ -752,6 +754,41 @@ You can set these options in the `createNavigation` function.
 
 There are also additional configuration options you may want to explore.
 
+```
+/i18n
+  /navigation.ts
+  /translation.ts
+```
+
+```ts
+// i18n/navigation.ts
+import { createNavigation } from "intl-t/navigation";
+
+export const { middleware, Link, generateStaticParams, useRouter } = createNavigation({
+  allowedLocales: ["en", "es"],
+  defaultLocale: "en",
+
+  // custom
+  pathPrefix: "hidden",
+  pathBase: "always-default",
+});
+```
+
+```ts
+// i18n/translation.ts
+import en from "@/public/locales/en.json";
+import es from "@/public/locales/es.json";
+
+import { createTranslation } from "intl-t";
+
+export const { t } = createTranslation({
+  locales: {
+    en,
+    es,
+  },
+});
+```
+
 ### Static Rendering
 
 ```ts
@@ -814,7 +851,7 @@ await t; // Automatically imports the locale that is needed at client
 ```
 
 ```ts
-import { createTranslation } from "intl-t/core";
+import { createTranslation } from "intl-t";
 
 // use await at createTranslation to preload default locale
 export const { t } = await createTranslation({
@@ -826,9 +863,32 @@ export const { t } = await createTranslation({
 });
 ```
 
+> If you are using [`generateDeclarations`](#declarations) to generate declarations, when you import the translation JSON files, you should use the `default` export.
+
+```ts
+import { createTranslation } from "intl-t";
+
+export const t = createTranslation({
+  locales: {
+    en: async () => (await import("./en.json")).default,
+    es: async () => (await import("./es.json")).default,
+  },
+});
+```
+
+Or you can import the locales dynamically and assert the type in this way.
+
+```ts
+type Locale = typeof import("./en.json").default;
+
+createTranslation({
+  locales: locale => import(`./${locale}.json`) as Promise<Locale>,
+});
+```
+
 ### `getLocales` function
 
-This is a way to load locales dynamically depending if it is client or server.
+`getLocales` function is the way to load locales dynamically depending if it is client or server. If you are invoking from server it preloads with a top-level await, but if you are invoking from client it will dynamically import the locales. If you are using static rendering, the right locale will be automatically handled and sent to the client.
 
 ```ts
 import { createTranslation, getLocales } from "intl-t";
@@ -881,7 +941,7 @@ export const allowedLocales = ["en", "es"];
 
 2. **Set up your translation configuration**
 
-Use the `getLocales` function to preload locales on the server and dynamically import them on the client.
+Use async createTranslation with the `locales` option as a function to preload locales on the server and dynamically import them on the client.
 
 ```ts
 // i18n/translation.ts
@@ -890,10 +950,29 @@ import { allowedLocales } from "./locales";
 
 type Locale = typeof import("./messages/en.json");
 
-const locales = await getLocales<Locale>(locale => import(`./messages/${locale}.json`), allowedLocales);
-
-export const { Translation, useTranslation, getTranslation } = createTranslation({ locales });
+export const { Translation, useTranslation, getTranslation } = await createTranslation({
+  allowedLocales,
+  locales: locale => import(`./messages/${locale}.json`) as Promise<Locale>,
+});
 ```
+
+If you want to use type declarations for each locale, you should set up the configuration as follows:
+
+```ts
+// i18n/translation.ts
+import { createTranslation, getLocales } from "intl-t/next";
+import { allowedLocales } from "./locales";
+
+export const t = createTranslation({
+  locales: {
+    en: async () => (await import("./messages/en.json")).default,
+    es: async () => (await import("./messages/es.json")).default,
+    // ...
+  },
+});
+```
+
+Using `default` export is key if you are using [`generateDeclarations`](#declarations) to generate from your JSON files. (If you want to want to preload from server use [`await getLocales`](#getlocales-function) instead.)
 
 If you're using Next.js in production, you may need to patch React to support translation objects:
 

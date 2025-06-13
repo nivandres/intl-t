@@ -44,11 +44,11 @@ export function TranslationProvider<
   context.reRender ??= useState(0)[1];
   if (locale || onLocaleChange) context.localeState = [locale!, onLocaleChange!];
   else (context.localeState ??= useLocale.call(t, locale)), (locale = context.localeState[0]!);
-  children &&= createElement(TranslationContext, { value: context }, children);
+  children &&= createElement(TranslationContext, { value: context }, children as any);
   if (!t) return (TranslationNode.context = { locale, source }), children;
   t.settings.locale = locale!;
   useMemo(() => Object.assign(t.settings, settings, state), [settings, t, state]);
-  t = t.current(path);
+  t = t.current(path as any) as any;
   useMemo(() => {
     t.setSource(source);
   }, [t, source]);

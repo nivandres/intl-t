@@ -70,7 +70,7 @@ export default async function main(args = []) {
   }
 
   json = `${tsFile ? `export const ${symbolName} = (${json}) as const;` : `export declare const ${symbolName}: ${json};`
-    }\nexport type ${symbolName} = typeof ${symbolName};\nexport default ${symbolName};\n`;
+    }\nexport type ${symbolName} = typeof ${symbolName};\nexport default ${symbolName};`;
 
   try {
     await writeFile(outFile, json, "utf-8");

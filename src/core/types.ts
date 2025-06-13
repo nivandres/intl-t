@@ -64,9 +64,7 @@ type VFS1<S extends string> = S extends `${string}{{${infer V}}}${infer C}`
   ? VFSR<V, C>
   : {};
 export type VariablesFromString<S extends string> = VFS1<S>;
-
 export type Override<T, U> = T & U extends never ? Omit<T, keyof U> & U : T & U;
-
 export type VariablesFromNode<N> = "values" extends keyof N ? N["values"] : N extends string ? VariablesFromString<N> : {};
 export type Variables<N, V> = Override<V, VariablesFromNode<N>>;
 export type LastKey<R extends Key[]> = R extends [...Key[], infer K] ? K : Key;
@@ -154,14 +152,16 @@ export type { Translation as TranslationType };
 export interface TranslationSettings<
   AllowedLocale extends Locale = string,
   MainLocale extends AllowedLocale = AllowedLocale,
-  Tree extends Record<string, any> = Record<string, any>,
+  Tree = unknown,
   Variables extends Values = Values,
   PathSeparator extends string = string,
   N = Node,
 > extends State<AllowedLocale> {
-  locales: Partial<Tree> & {
-    [Locale in AllowedLocale]?: Keep<N> | (() => Promisable<Keep<N>>);
-  };
+  locales:
+    | (Partial<Tree> & {
+        [Locale in AllowedLocale]?: Keep<N> | (() => Promisable<Keep<N>>);
+      })
+    | ((locale: Locale) => Promisable<Tree>);
   mainLocale: MainLocale;
   defaultLocale: MainLocale;
   currentLocale: AllowedLocale;
@@ -169,12 +169,15 @@ export interface TranslationSettings<
   allowedLocale: AllowedLocale;
   pathSeparator: PathSeparator;
   variables: Variables;
-  tree: ResolveTree<Tree>;
+  tree: Tree extends Record<AllowedLocale, any> ? ResolveTree<Tree> : Record<AllowedLocale, Tree>;
   ps: PathSeparator;
   settings: this;
   preventDynamic: boolean;
+  preload: boolean;
+  t?: any;
+  onTranslationNode?: (node: TranslationNode) => void;
   setLocale?: (locale: Locale) => Locale | void;
-  getLocale?: (locale: Locale) => Promisable<Node>;
+  getLocale: (locale: Locale) => Promisable<Tree>;
 }
 
 export interface TranslationData<

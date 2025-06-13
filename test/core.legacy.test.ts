@@ -7,7 +7,7 @@ describe("Translation object", () => {
     const t = ct({});
     expect(t).toBeInstanceOf(Object);
     expect(t.t).toBe(t);
-    expect(t.tr).toBe(t);
+    expect(t.translation).toBe(t);
     expect(t.global).toBe(t);
   });
   it("should work with multiple languages", () => {
@@ -56,7 +56,6 @@ describe("Translation object", () => {
   });
   it("should work with deep nesting", () => {
     const t = ct({
-      allowedLocales: ["en", "es"],
       locales: {
         en: {
           base: ".",
@@ -209,6 +208,7 @@ describe("dynamic import", () => {
     let t = ct({
       allowedLocales: ["en", "es"],
       getLocale(locale) {
+        console.log("hello", locale);
         return { hello: locale === "es" ? "hola mundo" : "hello world" };
       },
     });
@@ -253,5 +253,15 @@ describe("dynamic import", () => {
     );
     expect(locales.en.hello).toBe("Hello");
     expect(locales.es.hello).toBe("Hola");
+  });
+  it("should work with integrated getlocale and preload", async () => {
+    const t = await ct({
+      allowedLocales: ["en", "es"],
+      async locales(l) {
+        return en;
+      },
+    });
+    expect(t.en.common.yes.base).toBeString();
+    expect(t.es.common.yes.base).toBeString();
   });
 });

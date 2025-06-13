@@ -19,6 +19,7 @@ import type {
 } from "./types";
 import { injectVariables } from "../tools/inject";
 import { hydration } from "../state";
+import { getLocales } from "./dynamic";
 
 abstract class TranslationProxy extends Function {
   public name = "Translation";
@@ -62,7 +63,6 @@ export class TranslationNode<
   settings: S;
 
   t = this;
-  tr = this;
   translation = this;
   node: N;
   variables: Variables<N, V>;
@@ -140,8 +140,8 @@ export class TranslationNode<
 
     const {
       settings = params.settings,
-      node = settings.tree[settings.locale] as N,
       locale = settings.locale as L,
+      node = settings.getLocale(locale) as N,
       variables = (node as any)?.values || settings.variables,
       path = [] as unknown as R,
       key = (path.at(-1) || locale) as LastKey<R>,
@@ -156,7 +156,7 @@ export class TranslationNode<
     this.parent = parent;
     this.children = getChildren(node);
 
-    this.global = parent.global || this;
+    this.global = parent.global || (this as any);
     this.g = this.global;
 
     const descriptors: PropertyDescriptorMap = {};
@@ -192,7 +192,7 @@ export class TranslationNode<
                   locale,
                   variables,
                   parent,
-                  node: settings.tree[locale] || settings.getLocale?.(locale),
+                  node: settings.getLocale(locale),
                 });
           Object.defineProperty(t, locale, { value, configurable: true, enumerable: false });
           return value;
@@ -201,8 +201,17 @@ export class TranslationNode<
         enumerable: false,
       };
     });
+    if (!settings.t && settings.preload)
+      descriptors.then = {
+        value(cb: Function) {
+          getLocales(settings.getLocale, settings.allowedLocales).then(
+            locales => ((settings.locales = locales as any), delete (t as any).then, cb(t), console.log(locales)),
+          );
+        },
+        configurable: true,
+      };
+    TranslationNode.t ??= settings.t ??= t;
     Object.defineProperties(this, descriptors);
-    TranslationNode.t ||= t;
   }
   call(...path: any[]): any {
     const variables = path.at(-1)?.__proto__ === Object.prototype ? (path.pop() as Values) : undefined;
@@ -261,7 +270,7 @@ export class TranslationNode<
             node: t.node[child] || null,
             settings,
             locale,
-            parent: t,
+            parent: t as any,
             path,
           });
           Object.defineProperty(t, child, { value, configurable: true, enumerable: false });
@@ -387,13 +396,15 @@ export const Translation = TranslationNode as unknown as {
 export function createTranslationSettings<
   L extends Locale = Locale,
   M extends L = L,
-  const T extends Record<L, any> = Record<L, any>,
+  const T = unknown,
   const V extends Values = Values,
   PS extends string = ".",
-  N = Node,
+  const N = Node,
 >(settings: Partial<TranslationSettings<L, M, T, V, PS, N>> = {}) {
-  type S = TranslationSettings<L, M, T, V, PS>;
-  settings.locales ??= {} as T;
+  type S = TranslationSettings<L, M, T, V, PS, N>;
+  if (typeof settings.locales === "function")
+    (settings.getLocale = settings.locales), (settings.locales = void 0), (settings.preload = true);
+  settings.locales ??= {} as any;
   settings.allowedLocales ??= Object.keys(settings.locales as object) as [M, ...L[]];
   settings.mainLocale ??= settings.defaultLocale ??= settings.allowedLocales[0] as M;
   settings.defaultLocale ??= settings.mainLocale;
@@ -401,30 +412,26 @@ export function createTranslationSettings<
   settings.currentLocale ??= TranslationNode.context?.locale || TranslationNode.getLocale.call(settings) || settings.defaultLocale;
   settings.locale ??= settings.currentLocale;
   settings.setLocale ??= TranslationNode.setLocale;
-  settings.tree ??= settings.locales as T;
+  settings.tree ??= settings.locales as any;
   settings.variables ??= {} as unknown as V;
   settings.hydration ??= hydration;
   settings.ps ??= settings.pathSeparator ??= "." as PS;
-  const gls = settings.getLocale;
-  if (gls)
-    settings.getLocale ??= function (locale: Locale) {
-      return ((settings.locales as any)[locale] ??= gls.call(this, locale));
-    };
-  if (TranslationNode.context?.source) settings.locales[settings.locale as L] = TranslationNode.context.source;
-  settings.locales[settings.locale as L] ??= settings.getLocale?.bind(settings, settings.locale as L) as any;
+  if (TranslationNode.context?.source) (settings.locales as any)[settings.locale] = TranslationNode.context.source;
+  const gls = settings.getLocale as any;
+  settings.getLocale = l => ((settings.locales as any)[l as L] ??= gls?.(l));
   return (settings.settings = settings as S);
 }
 
 export function createTranslation<
   AllowedLocale extends Locale = Locale,
   MainLocale extends AllowedLocale = AllowedLocale,
-  const Tree extends Record<AllowedLocale, any> = Record<AllowedLocale, any>,
+  const Tree = unknown,
   const Variables extends Values = Values,
   PathSeparator extends string = ".",
-  N = Node,
+  const N = Node,
 >(settings: Partial<TranslationSettings<AllowedLocale, MainLocale, Tree, Variables, PathSeparator, N>> = {}) {
-  type Settings = TranslationSettings<AllowedLocale, MainLocale, Tree, Variables, PathSeparator>;
-  return new Translation(createTranslationSettings(settings)) as TranslationType<Settings>;
+  type Settings = TranslationSettings<AllowedLocale, MainLocale, Tree, Variables, PathSeparator, N>;
+  return new Translation(createTranslationSettings(settings)) as unknown as TranslationType<Settings>;
 }
 
 export const invalidKeys = ["base", "values", "children", "parent", "node", "path", "settings", "key", "default", "catch", "then"] as const;
