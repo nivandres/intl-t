@@ -1,4 +1,4 @@
-import { MiddlewareConfig as MG, NextMiddleware, NextRequest, NextResponse } from "next/server";
+import { MiddlewareConfig as MG, NextFetchEvent, NextMiddleware, NextRequest, NextResponse } from "next/server";
 import { negotiator } from "../tools/negotiator";
 import { I18NDomains } from "next/dist/server/config-shared";
 import { match } from "../tools/match";
@@ -8,14 +8,18 @@ import type { Locale } from "../locales/types";
 
 export const LOCALE_COOKIE_KEY = "locale";
 
+export type Middleware = (req: NextRequest, ev: NextFetchEvent, res?: NextResponse) => NextResponse | Promise<NextResponse> | undefined;
+export type MiddlewareFactory = (middleware: Middleware) => Middleware;
+
 export interface MiddlewareConfig<L extends Locale> extends MG, ResolveConfig<L> {
   pathBase?: "always-default" | "detect-default" | "detect-latest" | "always-detect";
   strategy?: "domain" | "param" | "headers";
   detect?: false | string | string[] | ((req: NextRequest) => string[] | string);
   domains?: I18NDomains;
   config?: MG;
-  middleware?: (req: NextRequest, res: NextResponse) => NextResponse | Promise<NextResponse> | void;
-  mw?: any;
+  middleware?: Middleware;
+  withMiddleware?: MiddlewareFactory;
+  withI18nMiddleware?: MiddlewareFactory;
 }
 
 export const middlewareConfig: MG = {
@@ -31,13 +35,14 @@ export function detect(req: NextRequest, domains: I18NDomains = this?.domains ||
 
 export function createMiddleware<L extends Locale>(settings: MiddlewareConfig<L>) {
   settings.config = middlewareConfig;
-  settings.mw ??= settings.middleware;
   settings.middleware = middleware.bind(settings);
+  settings.withMiddleware = withMiddleware.bind(settings);
+  settings.withI18nMiddleware = settings.withMiddleware;
   settings.domains && (settings.detect ??= detect.bind(settings));
   return Object.assign(settings.middleware, settings, middlewareConfig);
 }
 
-export function middleware<L extends Locale>(req: NextRequest) {
+export function middleware<L extends Locale>(req: NextRequest, ev: NextFetchEvent, res?: NextResponse) {
   // @ts-ignore
   const config: MiddlewareConfig<L> = this;
   let {
@@ -49,7 +54,7 @@ export function middleware<L extends Locale>(req: NextRequest) {
     detect = req => negotiator(req),
     redirectPath = "r",
   } = config;
-  let res: NextResponse | undefined = NextResponse.next();
+  res ||= NextResponse.next();
   const { nextUrl, cookies } = req;
   let url = nextUrl.clone();
   let [, locale, ...path] = nextUrl.pathname.split("/") as string[];
@@ -75,7 +80,20 @@ export function middleware<L extends Locale>(req: NextRequest) {
   res.headers.set(PATH_HEADERS_KEY, (path.unshift(""), path.join("/")));
   res.headers.set(LOCALE_HEADERS_KEY, locale);
   res.cookies.set(LOCALE_COOKIE_KEY, locale);
-  return config.mw?.(req, res) ?? res;
+  return res;
 }
+
+export const i18nMiddleware = middleware;
+
+export function withMiddleware(middleware: Middleware) {
+  // @ts-ignore
+  const i18nMiddlewareBound = i18nMiddleware.bind(this);
+  return (req: NextRequest, ev: NextFetchEvent, res?: NextResponse) => {
+    res = i18nMiddlewareBound(req, ev, res);
+    return middleware(req, ev, res);
+  };
+}
+
+export { withMiddleware as withI18nMiddleware };
 
 export default middleware;
