@@ -69,8 +69,8 @@ export default async function main(args = []) {
     throw new Error(`Error stringifying JSON file "${filePath}": ${err.message}`);
   }
 
-  json = `${tsFile ? `const ${symbolName} = (${json}) as const;` : `declare const ${symbolName}: ${json};`
-    }\ndeclare type ${symbolName} = typeof ${symbolName};\nexport { ${symbolName} };\nexport default ${symbolName};`;
+  json = `${tsFile ? `export const ${symbolName} = (${json}) as const;` : `export declare const ${symbolName}: ${json};`
+    }\nexport type ${symbolName} = typeof ${symbolName};\nexport default ${symbolName};\n`;
 
   try {
     await writeFile(outFile, json, "utf-8");
