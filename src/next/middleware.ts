@@ -95,5 +95,3 @@ export function withMiddleware(middleware: Middleware) {
 }
 
 export { withMiddleware as withI18nMiddleware };
-
-export default middleware;

@@ -463,5 +463,5 @@ export function getSource<N>(node: N, deep: number = Infinity, path: Key[] = [])
 export function getT() {
   return TranslationNode.t as GlobalTranslation;
 }
-
 export const getTranslation = ((...args: any[]) => getT().current(...args)) as GlobalTranslation;
+export default TranslationNode;

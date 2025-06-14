@@ -13,4 +13,5 @@ if (isRSC) {
 }
 
 export { createTranslation, Translation, TranslationNode } from "../core/translation";
+export { default } from "../core/translation";
 export { getLocales } from "../core/dynamic";

@@ -30,7 +30,6 @@ export async function TranslationProvider<
   // @ts-ignore
   return (<TranslationClientProvider {...props}>{children}</TranslationClientProvider>) as never;
 }
-export default TranslationProvider;
 export const T = TranslationProvider;
 export { T as Tr, T as Trans };
 
@@ -39,7 +38,7 @@ export const TranslationDynamicRendering: typeof TranslationProvider = async ({ 
   return <TranslationProvider {...props}>{children}</TranslationProvider>;
 };
 
-export const getTranslation = function (...args: any[]) {
+function hook(...args: any[]) {
   const cache = getCache();
   // @ts-ignore-error optional binding
   let t = this || (cache.t ||= TranslationNode.t);
@@ -58,6 +57,11 @@ export const getTranslation = function (...args: any[]) {
     });
   }
   return t.current(...args);
-} as GlobalTranslation;
+}
 
-export { getTranslation as getTranslations };
+// @ts-ignore
+export declare const getTranslation: GlobalTranslation;
+// @ts-ignore
+export declare const getTranslations: GlobalTranslation;
+// @ts-ignore
+export { hook as getTranslation, hook as getTranslations };

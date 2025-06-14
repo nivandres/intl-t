@@ -46,4 +46,3 @@ export async function LS<L extends Locale, L_ extends string, LC extends FC<any>
 }
 
 export const Link: typeof LS = isRSC ? LS : (LC as any);
-export default Link;

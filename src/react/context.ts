@@ -59,11 +59,10 @@ export function TranslationProvider<
   variables && t.set(variables);
   return children || t.base;
 }
-export default TranslationProvider;
 export const T = TranslationProvider;
 export { T as Trans, T as Tr };
 
-export const useTranslation = function (...args: any[]) {
+export function hook(...args: any[]) {
   const context = useContext(TranslationContext) || {};
   // @ts-ignore-error optional binding
   let t = this || (context.t ||= TranslationNode.t);
@@ -76,6 +75,11 @@ export const useTranslation = function (...args: any[]) {
     t.then?.(() => context.reRender?.(p => p + 1));
   }, [t]);
   return t(...args);
-} as GlobalTranslation;
+}
 
-export { useTranslation as useTranslations };
+// @ts-ignore
+export declare const useTranslation: GlobalTranslation;
+// @ts-ignore
+export declare const useTranslations: GlobalTranslation;
+// @ts-ignore
+export { hook as useTranslation, hook as useTranslations };
