@@ -12,7 +12,7 @@ describe("Translation object", () => {
   });
   it("should work with multiple languages", () => {
     const t = ct({
-      locales: { 
+      locales: {
         es: "es",
         en: "en",
       },
@@ -240,6 +240,22 @@ describe("dynamic import", () => {
     });
     expect(locales.en.hello).toBe("Hello");
     expect(locales.es.hello).toBe("Hola");
+  });
+  it("should work with mapped getLocales, with t async", async () => {
+    const t = await ct({
+      locales: {
+        en: async () => {
+          return { hello: "Hello" };
+        },
+        es: async () => {
+          return { hello: "Hola" };
+        },
+        fr: { hello: "Bonjour" },
+      },
+    });
+    expect(t.fr.hello.base).toBe("Bonjour");
+    expect((await t.es).hello.base).toBe("Hola");
+    expect(t.hello.base).toBe("Hello");
   });
   it("should work with fn getLocales", async () => {
     const locales = await getLocales(
