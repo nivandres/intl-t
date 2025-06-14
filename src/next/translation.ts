@@ -1,5 +1,5 @@
 import "./patch";
-import { TranslationNode } from "../core/translation";
+import { TranslationNode } from "../react/translation";
 import { TranslationProvider, getTranslation } from "./rsc";
 import { isRSC } from "./state";
 import type { TranslationFC } from "../types";
@@ -12,6 +12,6 @@ if (isRSC) {
   TranslationNode.getLocale = getCachedRequestLocale;
 }
 
-export { createTranslation, Translation, TranslationNode } from "../core/translation";
-export { default } from "../core/translation";
+export { createTranslation, Translation, TranslationNode } from "../react/translation";
+export default TranslationNode;
 export { getLocales } from "../core/dynamic";

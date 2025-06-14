@@ -205,10 +205,9 @@ export class TranslationNode<
     });
     if (!settings.t && settings.preload)
       descriptors.then = {
-        value(cb: Function) {
-          getLocales(settings.getLocale, settings.allowedLocales).then(
-            locales => ((settings.locales = locales as any), delete (t as any).then, cb(t)),
-          );
+        async value(cb: Function) {
+          const locales = await getLocales(settings.getLocale, settings.allowedLocales);
+          return (settings.locales = locales as any), delete (t as any).then, cb(t), t;
         },
         configurable: true,
       };
