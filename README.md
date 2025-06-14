@@ -493,15 +493,6 @@ Before using these declarations, it is recommended to enable `allowArbitraryExte
 }
 ```
 
-Example in case you would like to generate declarations in Next.js from your next.config file:
-
-```ts
-// next.config.js
-import { generateDeclarations } from "intl-t/declarations";
-
-generateDeclarations("i18n"); // translations folder
-```
-
 After running the script, declaration files will appear in your locales folder with the corresponding types. These types are not needed for production or development runtime, so you can ignore them in your git repository:
 
 `*.d.json.ts`
@@ -1296,8 +1287,4 @@ This translation library was originally built for my own projects, aiming to pro
 
 > If you find this project useful, consider supporting its development ☕ or [leave a ⭐ on the Github Repo](https://github.com/nivandres/intl-t)
 
-> [![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6) [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)
-
-```
-
-```
+[![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6) [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)
