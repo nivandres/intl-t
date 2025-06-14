@@ -460,7 +460,7 @@ This will generate declarations files for JSON (.d.json.ts) including the litera
 // i18n/declarations.ts
 import { generateDeclarations } from "intl-t/declarations";
 
-generateDeclarations("./en.json");
+generateDeclarations("./en.json"); // string | string[]
 ```
 
 You can also generate declarations from a specific JSON folder, it will scan all JSON files in the folder and generate declarations for each one.
@@ -491,6 +491,15 @@ Before using these declarations, it is recommended to enable `allowArbitraryExte
     "allowArbitraryExtensions": true
   }
 }
+```
+
+Example in case you would like to generate declarations in Next.js from your next.config file:
+
+```ts
+// next.config.js
+import { generateDeclarations } from "intl-t/declarations";
+
+generateDeclarations("i18n/messages"); // translations folder
 ```
 
 After running the script, declaration files will appear in your locales folder with the corresponding types. These types are not needed for production or development runtime, so you can ignore them in your git repository:
@@ -710,6 +719,32 @@ export { middleware as default } from "@/i18n/navigation";
 export const config = {
   // middleware matcher config
 };
+```
+
+If you need to customize your middleware or chain multiple middlewares, you can use the `withMiddleware` function to wrap your middleware in a chain.
+
+```ts
+// i18n/navigation.ts
+import { createNavigation } from "intl-t/navigation";
+
+export const { withMiddleware, Link, generateStaticParams, useRouter } = createNavigation({ allowedLocales, defaultLocale });
+
+// middleware.ts
+import { withMiddleware } from "intl-t/navigation";
+
+function middleware(request, event) {
+  // do something
+}
+
+export default withMiddleware(middleware);
+```
+
+This `withMiddleware` also has an allias `withI18nMiddleware` for convenience.
+
+`withMiddleware` and `middleware` both return the response. `middleware` function also can receive the response as the last argument, so you can configure it in a flexible way.
+
+```ts
+middleware(request, event, response);
 ```
 
 From `createNavigation` you can get:
@@ -998,6 +1033,14 @@ export const t = createTranslation({
 
 Using `default` export is key if you are using [`generateDeclarations`](#declarations) to generate from your JSON files. (If you want to want to preload from server use [`await getLocales`](#getlocales-function) instead.)
 
+You can generate literal string declarations for your JSON files using [`generateDeclarations`](#declarations) function.
+
+```ts
+// next.config.js
+import { generateDeclarations } from "intl-t/declarations";
+generateDeclarations("messages");
+```
+
 If you're using Next.js in production, you may need to patch React to support translation objects:
 
 ```ts
@@ -1037,7 +1080,9 @@ export const config = {
 };
 ```
 
-> To customize the `intl-t` middleware, you can wrap the function or configure it via the `middleware` option in `createNavigation`.
+> To customize the `intl-t` middleware, you can extract `withMiddleware` function to wrap the function in a chain or as needed. `middleware(request, event, response)`
+
+[See the complete navigation documentation in the Navigation section.](#navigation)
 
 4. **Set up your root layout**
 

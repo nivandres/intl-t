@@ -2,8 +2,8 @@ import { readFile, rm, writeFile, stat, readdir } from "fs/promises";
 import { basename, join } from "path";
 
 export default async function main(args: any[]) {
-  if (args[1] === "intl-t") args.shift();
-  const cmdName = basename(args[1]);
+  if (args[1] === "intl-t" || args[2] === "declarations") args.shift();
+  const cmdName = args[1];
 
   if (args.length < 3) throw `Usage: ${cmdName} <file.json|folder> [--outFile=customFile] [--symbolName=customName] [--remove] [--ts]`;
 
