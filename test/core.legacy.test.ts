@@ -78,6 +78,7 @@ describe("Translation object", () => {
     expect(t.o1[2].base).toBe(".o1.2");
     expect(t.o1[2].o3[0].base).toBe(".o1.2.o3.0");
     expect(t.o1[2].o3[1][0].base).toBe(".o1.2.o3.1.0");
+    expect(t.o1("2.o3.1.0").base).toBe(".o1.2.o3.1.0");
     expect(t("hello").base).toBe("hello");
     expect(t("o1.3").base).toBe(".o1.3");
     expect(t("o1.2.o3.1").id).toBe("o1.2.o3.1");

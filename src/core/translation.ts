@@ -249,6 +249,11 @@ export class TranslationNode<
     Object.assign(this.variables as {}, variables);
     return this as TranslationType<S, N, V & VV, L, R>;
   }
+  setSource(source: any) {
+    this.node = source;
+    this.__node__ = void 0;
+    return this.getNode();
+  }
   protected setNode(node: N) {
     if (!this) return;
     if (this.__node__ === node) return node;
@@ -358,7 +363,7 @@ export class TranslationNode<
   }
   get then(): Promise<this>["then"] | undefined {
     const t = this;
-    let node = (this.node ||= this.settings.getLocale(this.locale) as N);
+    let node = (this.node ||= this.settings?.getLocale(this.locale) as N);
     if (typeof node === "function") node = this.node = node();
     return node instanceof Promise
       ? cb =>

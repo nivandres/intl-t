@@ -393,7 +393,7 @@ const { t } = createTranslation<TranslationSettings>(options);
 #### Options:
 
 - `locales`: An object containing locale keys and their corresponding translation trees, or an array of allowed locales.
-- `mainLocale`: The primary locale for the application.
+- `mainLocale`: The main locale for the default application locale.
 - `variables`: Global variables available in all translations.
 - `plugins`: An array of plugins to extend functionality.
 
@@ -402,9 +402,11 @@ const { t } = createTranslation<TranslationSettings>(options);
 The main translation function returned by `createTranslation`.
 
 ```typescript
-t(key: string, variables?: Values): string
-t[locale](key: string, variables?: Values): string
-t.use(variables: Values): TranslationNode
+t(key: string, variables?: Values)
+t[locale](key: string, variables?: Values)
+t(variables: Values)
+t`key`
+t(key[])
 ```
 
 #### Methods:
@@ -516,10 +518,7 @@ import es from "./messages/es.json";
 import { createTranslation } from "intl-t";
 
 export const t = createTranslation({
-  locales: {
-    en, // infer default type with literal strings
-    es,
-  },
+  locales: { en, es },
 });
 ```
 
@@ -656,6 +655,8 @@ By default, if a variable is not specified, it will be injected as an HTML eleme
 For example, if your translation is `Go to <a href="/" className="font-bold">Home</a>` it will be literally rendered as `<a href="/" className="font-bold">Go to Home</a>`. HTML Element with its attributes, children and custom props will be injected and working. Also this chunks can be nested.
 
 [Continue with the Next.js section.](#nextjs)
+
+**Warning:** Translation Nodes are not plain strings. Although they have special properties and methods such as `toString()`, `toJSON()`, string prototype via proxy, and [`React Patch`](#react-patch), they do not behave exactly like strings in all contexts. In some cases, you may need to use `t.base`, `t.raw`, or `t.toString()` to obtain the actual string with injected variables. This is fully type-safe. For example, you should use these methods when passing values to JSX element attributes or to function parameters that do not accept functions. Note that `typeof t === 'function'`, so while it can act like a string, it is not exactly a string.
 
 ## React Patch
 
@@ -878,15 +879,25 @@ export const { getTranslation, setLocale } = new Translation({ locales: { en: "H
 
 ```jsx
 import { getTranslation, setLocale } from "@/i18n/translation";
-import { setRequestLocale } from "intl-t/next";
+import { setRequestLocale /* or setLocale */ } from "intl-t/next";
 
 export default function Page({ params }) {
   const { locale } = await params;
   setRequestLocale(locale); // required if not using server TranslationProvider
   // or
-  // setLocale(locale); Same as setRequestLocale but typed with available locales
-  const { t } = getTranslation(); // It works like useTranslation
+  // setLocale(locale); Same as setRequestLocale but typed with available locales (Absolutely not needed)
+  const t = getTranslation(); // It works like useTranslation
   return <div>{t}</div>; // hello world
+}
+```
+
+Then in a sub-component, setRequestLocale is not needed.
+
+```tsx
+import { getTranslation } from "@/i18n/translation";
+export default function Component() {
+  const { t } = getTranslation();
+  return <div>{t("greeting", { name: "Ivan" })}</div>;
 }
 ```
 
@@ -896,7 +907,7 @@ Same configuration. No need any more to set locale in dynamic pages.
 
 ```tsx
 export default async function Page() {
-  const { t } = await getTranslation(); // Get locale from headers through middleware
+  const t = await getTranslation(); // Get locale from headers from middleware with its navigation settings
   return <div>{t}</div>; // hello world
 }
 ```
@@ -928,6 +939,10 @@ export default function RootLayout({ children }) {
 }
 ```
 
+**Warning:** When using `getTranslation` in a React Server Component (RSC) without `async`, and if the `locale` is not yet loaded or cached, you must extract the `t` object like this: `const { t } = getTranslation();`. Avoid using `const t = getTranslation();` in this specific case, as it may return an incorrect `t` object due to how proxies work. If you use `await getTranslation()`, there will be no problem.
+
+The recommended approach is to use `await getTranslation()` when there is no `locale` so that the `locale` is loaded dynamically from headers in order to use [dynamic rendering](#dynamic-rendering). The warning above only applies to this example of flexible usage pattern of `getTranslation`. It works as a promise, a function, and as a `t` object. But if you use `getTranslation` in a regular way, you won't find any problems.
+
 ### Next.js React patch
 
 ```ts
@@ -957,6 +972,8 @@ export const t = new Translation({
 await t; // Automatically imports the locale that is needed at client or server
 ```
 
+> [**Warning:** Unstable, and problems with Next.js build may occur. You can use getLocales function to load locales dynamically.](#getlocales-function)
+
 ```ts
 import { createTranslation } from "intl-t";
 
@@ -982,7 +999,7 @@ createTranslation({
 
 ### `getLocales` function
 
-`getLocales` function is a way to preload locales dynamically depending if it is client or server. If you are invoking from server it preloads with a top-level await, but if you are invoking from client it will dynamically import the locales. If you are using [static rendering](#static-rendering) with [React Provider](#provider), the right locale will be automatically handled and sent to the client. 
+`getLocales` function is a way to preload locales dynamically depending if it is client or server. If you are invoking from server it preloads with a top-level await, but if you are invoking from client it will dynamically import the locales. If you are using [static rendering](#static-rendering) with [React Provider](#provider), the right locale will be automatically handled and sent to the client.
 
 ```ts
 import { createTranslation, getLocales } from "intl-t";
@@ -1003,11 +1020,13 @@ type Locale = typeof import("./messages/en.json");
 await getLocales(locale => import(`./messages/${locale}.json`) as Promise<Locale>, allowedLocales);
 ```
 
-`getLocales` function also supports preloading locales with locales record. `{ en: [AsyncFunction] }` 
+`getLocales` function also supports preloading locales with locales record. `{ en: [AsyncFunction] }`
 
 `getLocales(locales record, list?, preload?)`
 
 ### Preload Locales
+
+> **Warning:** Unstable, and problems with Next.js build may occur. Use just getLocales function in order to preload locales dynamically.
 
 Preload option is a way to implement `getLocales` function directly at create translation, instead of using `await getLocales` you will use `await` directly on the translation object.
 
@@ -1242,7 +1261,7 @@ The locale is automatically detected from headers.
 import { getTranslation } from "@/i18n/translation";
 
 export function greeting() {
-  const t = getTranslation();
+  const t = await getTranslation(); // use await to get locale from await headers
   return t("greeting", { name: "Ivan" });
 }
 ```
@@ -1259,7 +1278,7 @@ export default function Component() {
 }
 ```
 
-For easier migration from other i18n libraries, you can use the `getTranslations` and `useTranslations` aliases. `getTranslation` and `useTranslation` are functionally the same and adapt depending on the environment.
+For easier migration from other i18n libraries, you can use the `getTranslations` and `useTranslations` aliases, exactly the same and keep type safety. `getTranslation` and `useTranslation` are functionally the same and adapt depending on the environment.
 
 You can also use them as translation object directly, e.g., `useTranslation.greeting.es({ name: "Ivan" })`—it's modular, type-safe, and flexible.
 
@@ -1458,6 +1477,18 @@ export default function RootLayout({ children, params }) {
     </html>
   );
 }
+```
+
+### Fallbacks
+
+When a translation node is executed and the translation is not found, it will fall back to the input text with injected variables. This could be useful when you receive a string from an external API or server. You might get either a translation key or the direct text.
+
+```ts
+t("Please try again"); // falls back to "Please try again"
+t("messages.try_again"); // outputs the translation
+t("Please try again, {name}", { name: "John" }); // falls back to "Please try again, John"
+// these fallbacks are also type safe
+typeof t("Please try again, {name}"); // `Please try again, ${string}`
 ```
 
 ### Namespaces

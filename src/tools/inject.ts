@@ -113,10 +113,10 @@ export function injectVariables<T extends string, V extends Values>(
                       /^(one|uno)s?$/i.test(name)
                         ? /(?<!1)1$/
                         : /^(two|do[zs]e?n?)s?$/i.test(name)
-                        ? /2$/
-                        : /^(thre+|tre)s?$/i.test(name)
-                        ? /3$/
-                        : (null as unknown as string),
+                          ? /2$/
+                          : /^(thre+|tre)s?$/i.test(name)
+                            ? /3$/
+                            : (null as unknown as string),
                     )) ||
                   (v == 1 && /^(one|[ui]nit|uno)s?$/i.test(name)) ||
                   (v == 2 && /^(two|pai?r|du(ale?|o)|do[sz]e?n?)s?$/i.test(name)) ||

@@ -24,11 +24,7 @@ describe("IntlMessageFormat", function () {
   });
 
   it("should accept formatters", function () {
-    const mf = new IntlMessageFormat(
-      "My name is {FIRST} {LAST}, age {age, number}, time {time, md}, date {date}.",
-      "en",
-      undefined,
-    );
+    const mf = new IntlMessageFormat("My name is {FIRST} {LAST}, age {age, number}, time {time, md}, date {date}.", "en", undefined);
     const ts = 12 * 3600 * 1e3;
     const output = mf.format({
       FIRST: "Anthony",
