@@ -51,7 +51,14 @@ function hook(...args: any[]) {
     return new Proxy(t, {
       get(_, p, receiver) {
         return p in Promise.prototype
-          ? (cb: Function) => new Promise((r, c) => (locale as any)[p](() => (tp ||= tc = t.current(...args)), r(tp), cb(tp))?.catch?.(c))
+          ? (cb: Function) =>
+              new Promise((r, c) =>
+                (locale as any)
+                  [p](() => {
+                    (tp ||= tc = t.current(...args)), r(tp), cb(tp);
+                  })
+                  ?.catch?.(c),
+              )
           : Reflect.get((tc ||= t(...args)), p, receiver);
       },
     });

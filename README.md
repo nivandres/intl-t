@@ -939,7 +939,7 @@ export default function RootLayout({ children }) {
 }
 ```
 
-**Warning:** When using `getTranslation` in a React Server Component (RSC) without `async`, and if the `locale` is not yet loaded or cached, you must extract the `t` object like this: `const { t } = getTranslation();`. Avoid using `const t = getTranslation();` in this specific case, as it may return an incorrect `t` object due to how proxies work. If you use `await getTranslation()`, there will be no problem.
+**Warning:** When calling directly the `t` object from `getTranslation` in a React Server Component (RSC) without `async`, and if the `locale` is not yet loaded or cached, you must extract the `t` object like this: `const { t } = getTranslation();`. Avoid using `const t = getTranslation();` in this specific case, as it may return an incorrect `t` object due to how proxies work. If you use `await getTranslation()` or you don't invoke the `t` directly, there will be no problem.
 
 The recommended approach is to use `await getTranslation()` when there is no `locale` so that the `locale` is loaded dynamically from headers in order to use [dynamic rendering](#dynamic-rendering). The warning above only applies to this example of flexible usage pattern of `getTranslation`. It works as a promise, a function, and as a `t` object. But if you use `getTranslation` in a regular way, you won't find any problems.
 
@@ -951,6 +951,10 @@ import jsx from "react/jsx-runtime";
 import patch from "intl-t/react";
 
 process.env.NODE_ENV !== "development" && patch(React, jsx);
+```
+
+```ts
+import "./patch";
 ```
 
 ## Dynamic Locales import
@@ -971,8 +975,6 @@ export const t = new Translation({
 
 await t; // Automatically imports the locale that is needed at client or server
 ```
-
-> [**Warning:** Unstable, and problems with Next.js build may occur. You can use getLocales function to load locales dynamically.](#getlocales-function)
 
 ```ts
 import { createTranslation } from "intl-t";

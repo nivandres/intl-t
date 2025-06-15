@@ -1,7 +1,7 @@
 {
   "name": "intl-t",
   "description": "A Fully-Typed Node-Based i18n Translation Library",
-  "version": "1.0.0-rc.66",
+  "version": "1.0.0-rc.67",
   "type": "module",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -56,6 +56,10 @@
     "./navigation": {
       "default": "./dist/next/navigation.js",
       "types": "./dist/next/navigation.d.ts"
+    },
+    "./link": {
+      "default": "./dist/next/link/index.js",
+      "types": "./dist/next/link/index.d.ts"
     },
     "./react": {
       "default": "./dist/react/index.js",
