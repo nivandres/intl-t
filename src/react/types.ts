@@ -11,6 +11,7 @@ import type {
   State,
   Children,
   Content,
+  TranslationType,
 } from "../types";
 
 export type { ReactNode, ReactKey };
@@ -66,6 +67,7 @@ export type TranslationNodeFC<S extends TranslationSettings = TranslationSetting
   settings: S;
   node: N;
   values: V;
+  t: TranslationType<S, N, V, S["allowedLocale"]>;
 } & {
   [L in S["allowedLocale"]]: TranslationNodeFC<S, N, V>;
 } & {

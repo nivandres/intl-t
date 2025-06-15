@@ -259,6 +259,8 @@ export const { useTranslation, getTranslation, settings, t } = translation;
 const { t } = useTranslation();
 ```
 
+> You can use either `createTranslation` or `new Translation` to create a translation instance. Both keep type safety and autocomplete features. But for the most of the examples `createTranslation` will be used.
+
 #### Translation Node Logic
 
 Translation will be based on translation nodes, each translation node have its base value, default variables, children, parent, etc. The translation core object is the tree of all these nodes. The root of the object will be the default locale tree with properties for all locale tree. All in this tree are nodes, so all of them have the same methods. But for typescript, depending if is root o has base text the methods will differ.
@@ -381,7 +383,7 @@ interface TranslationSettings<L extends Locale, M extends L, T extends Node, V e
   locales: Record<L, T> | L[];
   mainLocale?: M;
   variables?: V;
-  plugins?: TranslationPlugin[];
+  pathSeparator?: string; // default is ".". And yes, it doesn't affect type safety
   // ... other options
 }
 
@@ -448,7 +450,9 @@ These keys are reserved and used to access some translations properties and meth
 - `catch`
 - `then`
 
-[Continue with the React section.](#react)
+[Continue with React section.](#react)
+[Continue with Tools section.](#tools)
+[Continue with TypeScript section.](#typescript)
 
 ## Declarations
 
@@ -506,13 +510,26 @@ After running the script, declaration files will appear in your locales folder w
 
 `*.d.json.ts`
 
+```ts
+import en from "./messages/en.json";
+import es from "./messages/es.json";
+import { createTranslation } from "intl-t";
+
+export const t = createTranslation({
+  locales: {
+    en, // infer default type with literal strings
+    es,
+  },
+});
+```
+
 Alternatively, you can import the declarations and assert them in your translation settings file, but it is not recommended in order to use generated declarations.
 
 ```ts
 // i18n/translation.ts
 import { createTranslation } from "intl-t/core";
 
-type Locale = typeof import("./messages/en.d.json.ts").default;
+type Locale = typeof import("./messages/en.d.json.ts");
 
 export const t = createTranslation({
   locales: () => import("./messages/en.json") as Promise<Locale>,
@@ -807,6 +824,8 @@ interface Config {
 - **`redirectPath`**: Sets a custom path for redirecting users to the appropriate locale.  
   For example, if you are sending an email and don't know the user's locale, you can use a prefix path like `/r` to redirect to the default locale, or set it to any path you prefer.
 
+- **`detect`**: Callback function to detect the locale from the Next Request. E. g. from domain, geolocation, etc.
+
 All these configurations are compatible and are used internally throughout the intl-t tools.
 
 You can set these options in the `createNavigation` function.
@@ -873,12 +892,39 @@ export default function Page({ params }) {
 
 ### Dynamic Rendering
 
-Same configuration. Just middleware, no need any more to set locale in dynamic pages.
+Same configuration. No need any more to set locale in dynamic pages.
 
 ```tsx
 export default async function Page() {
   const { t } = await getTranslation(); // Get locale from headers through middleware
   return <div>{t}</div>; // hello world
+}
+```
+
+If you want to use your own strategy to load locales dynamically, you can and avoid the `[locale]` param in your app routes.
+
+When creating navigation, you can configure its strategy to load locales always dinamically and don't route to the locale path with param. (Also it can be shown or hidden as you want configuring the `pathPrefix` and `pathBase` options)
+
+```tsx
+createNavigation({ allowedLocales, strategy: "headers" });
+```
+
+Then is no more needed to wrap your application routes into `[locale]` param.
+
+```tsx
+// app/layout.tsx
+import { Translation } from "@/i18n/translation";
+import { getRequestLocale /* or getLocale */ } from "intl-t/next";
+
+export default function RootLayout({ children }) {
+  const locale = getRequestLocale();
+  return (
+    <html lang={locale}>
+      <body>
+        <Translation>{children}</Translation>
+      </body>
+    </html>
+  );
 }
 ```
 
@@ -894,6 +940,8 @@ process.env.NODE_ENV !== "development" && patch(React, jsx);
 
 ## Dynamic Locales import
 
+> Dynamic import
+
 To dynamically import locales, set node values as functions to be called when needed.
 
 ```ts
@@ -906,7 +954,7 @@ export const t = new Translation({
   },
 });
 
-await t; // Automatically imports the locale that is needed at client
+await t; // Automatically imports the locale that is needed at client or server
 ```
 
 ```ts
@@ -922,23 +970,10 @@ export const { t } = await createTranslation({
 });
 ```
 
-> If you are using [`generateDeclarations`](#declarations) to generate declarations, when you import the translation JSON files, you should use the `default` export.
-
-```ts
-import { createTranslation } from "intl-t";
-
-export const t = createTranslation({
-  locales: {
-    en: async () => (await import("./en.json")).default,
-    es: async () => (await import("./es.json")).default,
-  },
-});
-```
-
 Or you can import the locales dynamically and assert the type in this way.
 
 ```ts
-type Locale = typeof import("./en.json").default;
+type Locale = typeof import("./en.json");
 
 createTranslation({
   locales: locale => import(`./${locale}.json`) as Promise<Locale>,
@@ -947,7 +982,7 @@ createTranslation({
 
 ### `getLocales` function
 
-`getLocales` function is the way to load locales dynamically depending if it is client or server. If you are invoking from server it preloads with a top-level await, but if you are invoking from client it will dynamically import the locales. If you are using static rendering, the right locale will be automatically handled and sent to the client.
+`getLocales` function is a way to preload locales dynamically depending if it is client or server. If you are invoking from server it preloads with a top-level await, but if you are invoking from client it will dynamically import the locales. If you are using [static rendering](#static-rendering) with [React Provider](#provider), the right locale will be automatically handled and sent to the client. 
 
 ```ts
 import { createTranslation, getLocales } from "intl-t";
@@ -958,6 +993,8 @@ const locales = await getLocales(locale => import(`./messages/${locale}.json`), 
 export const { t } = createTranslation({ locales });
 ```
 
+`getLocales(cb, locales, preload?)`
+
 If your import function doesn't return the type directly, you can assert it in this way.
 
 ```ts
@@ -965,6 +1002,63 @@ type Locale = typeof import("./messages/en.json");
 
 await getLocales(locale => import(`./messages/${locale}.json`) as Promise<Locale>, allowedLocales);
 ```
+
+`getLocales` function also supports preloading locales with locales record. `{ en: [AsyncFunction] }` 
+
+`getLocales(locales record, list?, preload?)`
+
+### Preload Locales
+
+Preload option is a way to implement `getLocales` function directly at create translation, instead of using `await getLocales` you will use `await` directly on the translation object.
+
+```ts
+await createTranslation({
+  locales: locale => import(`./messages/${locale}.json`) as Promise<typeof import("./messages/en.json")>,
+  preload: true, // e. g. preload all locales depending if is server or whichever condition
+});
+```
+
+Actually when using locales as callback, it will automatically turn on preload and use !isClient as default condition.
+
+```ts
+await createTranslation({
+  locales: {
+    en: () => ({ hello: "Hello World!" }),
+    es: new Promise(r => r({ hello: "¡Hola Mundo!" })) as { hello: "¡Hola Mundo!" }, // intl-t supports promises but it is need to assert the type
+    fr: async () => ({ hello: "Bonjour le monde!" }),
+    ja: { hello: "こんにちは世界！" },
+  },
+  preload: true, // preloads all locales when using `await`
+});
+```
+
+When `preload` is enabled, the first `await` invocation will preload all locales. By default, if `preload` is not specified and you use `await`, only the current locale is preloaded. Additionally, if you provide a callback for `locales`, `preload` is enabled automatically and all locales are preloaded on the server by default.
+
+Enabling `preload` turns the top-level translation object into a promise that resolves when all locales are loaded. Therefore, if you enable `preload`, remember to use `await` with `createTranslation`. In this case, you cannot use the `new Translation` syntax, as you cannot use `await` with `new`.
+
+However, intl-t is flexible: if you enable `preload` but do not use `await`, it will behave as a normal translation object without preloading. You can simply use `await` on the specific locales you need. (But it is the same as having `preload: false`)
+
+```ts
+const t = createTranslation({
+  locales: {
+    en: async () => ({ hello: "Hello World!" }),
+    es: async () => ({ hello: "¡Hola Mundo!" }),
+    fr: () => ({ hello: "Bonjour le monde!" }),
+    ja: async () => ({ hello: "こんにちは世界！" }),
+  },
+  preload: true, // preloads all locales when using top-level `await`
+});
+
+t.hello; // undefined
+(await t.es).hello; // "¡Hola Mundo!"
+t.fr.hello; // "Bonjour le monde!" // It works because it is just a function without promise
+(await t.en).hello; // "Hello World!"
+// `t.en` It is being preloaded without preloading the rest of locales, even when preload is on, because it is being used after accessing the specific locale
+(await t.es).hello; // "¡Hola Mundo!" // Already resolved, it doesn't do unnecessary reloads
+```
+
+It works really nice. You can test and debug the locale loads in the console and you can see the locales being loaded and resolved.
+Not repeated nodes, not unnecessary reloads, just the same independent nodes and proxies.
 
 ## Migration Guide from Other i18n Libraries
 
@@ -1024,14 +1118,12 @@ import { allowedLocales } from "./locales";
 
 export const t = createTranslation({
   locales: {
-    en: async () => (await import("./messages/en.json")).default,
-    es: async () => (await import("./messages/es.json")).default,
+    en: () => import("./messages/en.json"),
+    es: () => import("./messages/es.json"),
     // ...
   },
 });
 ```
-
-Using `default` export is key if you are using [`generateDeclarations`](#declarations) to generate from your JSON files. (If you want to want to preload from server use [`await getLocales`](#getlocales-function) instead.)
 
 You can generate literal string declarations for your JSON files using [`generateDeclarations`](#declarations) function.
 
@@ -1245,7 +1337,7 @@ In this way you can then import from the `intl-t` module with inferred types.
 Intl-t provides a set of tools to help you with your translations. You can use each of them independently from `intl-t/tools`.
 
 ```ts
-import /* tools */ "intl-t/tools";
+import { /* tools */ } "intl-t/tools";
 ```
 
 ### Inject
@@ -1323,6 +1415,98 @@ format.price(value: number = 0, options: Intl.NumberFormatOptions = {}); // uses
 ### Resolvers
 
 Resolver functions are best used via [createNavigation](#createnavigation), but you can also import them directly from `intl-t/tools` without bound values and types.
+
+## Strategies and Cases
+
+### Locales metadata
+
+You can include metadata in your translation files to help you with localization and translation management.
+
+For example
+
+```jsonc
+{
+  "meta": {
+    // It is a normal node
+    "code": "en",
+    "name": "English",
+    "dir": "ltr"
+  }
+  // ...
+}
+```
+
+And then you can access it from your translations.
+
+```tsx
+import { Translation, t } from "@/i18n/translation";
+import { match } from "intl-t/tools";
+
+interface Props {
+  params: Promise<{ locale: typeof Translation.locale }>;
+}
+
+export default function RootLayout({ children, params }) {
+  let { locale } = await params;
+  locale = match(locale, t.allowedLocales);
+  const { meta } = await t[locale]; // Preload if you are using dynamic import without TranslationProvider that will preload translations
+  return (
+    <html lang={locale} dir={meta.dir}>
+      <body>
+        <Translation>{children}</Translation>
+      </body>
+    </html>
+  );
+}
+```
+
+### Namespaces
+
+Namespaces are a way to simulate isolated translation contexts in your application. While intl-t does not natively support namespaces as a built-in feature, you can achieve similar separation by organizing your translation files and configuration per feature or section.
+
+For example, you might have:
+
+```
+/protected/i18n/translation.ts
+/i18n/translation.ts
+/docs/i18n/translation.ts
+```
+
+Each of these files can export its own translation instance:
+
+```ts
+// /protected/i18n/translation.ts
+import en from "./locales/en.json";
+import { createTranslation } from "intl-t";
+
+export const { t: protectedT } = createTranslation({ locales: { en } });
+```
+
+```ts
+// /docs/i18n/translation.ts
+import en from "./locales/en.json";
+import { createTranslation } from "intl-t";
+
+export const { t: docsT } = createTranslation({ locales: { en } });
+```
+
+You can then import and use the appropriate translation object in each part of your app:
+
+```ts
+import { protectedT } from "../i18n/translation";
+import { docsT } from "../../docs/i18n/translation";
+
+protectedT("dashboard.title");
+docsT("guide.intro");
+```
+
+Renaming is not required; this is just for demonstration purposes. Simply import from the appropriate folders.
+
+If you are sending translations dynamically to the client via React, you must use a [`TranslationProvider`](#provider) for each isolated translation instance.
+
+You can also implement different strategies for each isolated translation, such as using only [dynamic](#dynamic-rendering) translation loading or preloading at server-side and dynamically importing at client-side.
+
+**This approach keeps translations isolated. In the future, intl-t may support merging or extending translations dynamically, but for now, this pattern allows you to simulate namespaces effectively.**
 
 ## Hello there
 

@@ -34,9 +34,9 @@ export function instructionsMatch(content: string) {
   return instructions;
 }
 
-export function injectVariables<T extends string, const V extends Values>(
+export function injectVariables<T extends string, V extends Values>(
   content: T = "" as T,
-  variables: Override<Partial<Variables<T>>, V> = {} as any,
+  variables: Partial<Variables<T>> & V = {} as any,
   // @ts-ignore
   state: State = this || {},
 ) {
@@ -151,7 +151,7 @@ export function injectVariables<T extends string, const V extends Values>(
     value = value?.replace(/(?<!`)#/, String(v)) ?? v;
     content = content.replaceAll(target, String(value)) as T;
   }
-  return content.replace(/`(.)/, "$1") as Content<T>;
+  return content.replace(/`(.)/, "$1") as Content<T> | (string & {});
 }
 
 export { injectVariables as inject };

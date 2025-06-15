@@ -50,9 +50,6 @@ export function TranslationProvider<
   t.settings.locale = locale!;
   useMemo(() => Object.assign(t.settings, settings, state), [settings, t, state]);
   t = t.current(path as any) as any;
-  useMemo(() => {
-    t.setSource(source);
-  }, [t, source]);
   useEffect(() => {
     t.then?.(() => context.reRender?.(p => p + 1));
   }, [t, t.currentLocale]);

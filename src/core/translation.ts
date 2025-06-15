@@ -10,7 +10,6 @@ import type {
   TranslationType,
   TranslationData,
   TranslationDataAdapter,
-  PartialTree,
   Children,
   FollowWay,
   TranslationKeys,
@@ -20,7 +19,7 @@ import type {
 } from "./types";
 import type { GlobalTranslation } from "src/types";
 import { injectVariables } from "../tools/inject";
-import { hydration } from "../state";
+import { hydration, isClient } from "../state";
 import { getLocales } from "./dynamic";
 
 abstract class TranslationProxy extends Function {
@@ -66,12 +65,14 @@ export class TranslationNode<
 
   t = this;
   translation = this;
+  translationNode = this as TranslationNode<S, N, V, L, R>;
   node: N;
   variables: Variables<N, V>;
   locale: L;
   path: [] extends R ? Key[] : R;
   key: LastKey<R>;
   children: Children<N>[];
+  private __node__: any;
 
   global: TranslationType<S, S["tree"][L], S["variables"], L>;
   g: typeof this.global;
@@ -143,11 +144,12 @@ export class TranslationNode<
     const {
       settings = params.settings,
       locale = settings.locale as L,
-      node = settings.getLocale(locale) as N,
-      variables = (node as any)?.values || settings.variables,
+      node = settings.tree[locale] as N,
+      variables = (node as any)?.values || {},
       path = [] as unknown as R,
-      key = (path.at(-1) || locale) as LastKey<R>,
-      parent = {} as unknown as TranslationNode,
+      key = path.at(-1) as LastKey<R>,
+      parent = settings as unknown as TranslationNode,
+      preload,
     } = params;
 
     this.node = node;
@@ -156,7 +158,7 @@ export class TranslationNode<
     this.path = path;
     this.key = key;
     this.parent = parent;
-    this.children = getChildren(node);
+    this.children = [];
 
     this.global = parent.global || (this as any);
     this.g = this.global;
@@ -164,29 +166,26 @@ export class TranslationNode<
     const descriptors: PropertyDescriptorMap = {};
     const t = this;
 
-    if (node instanceof Promise) node.then(this.setNode);
-    else if (typeof node !== "function") this.setChildren(t.children);
+    this.getNode(preload);
 
     settings.allowedLocales.forEach(locale => {
       if (locale === t.locale) {
-        t[locale as any] = t;
-        (settings as any)[locale] ??= t;
-        if (typeof node !== "function") return;
+        t[locale as any] = parent[locale as any] ??= t;
+        if (typeof node !== "function" && node) return;
         return (descriptors[locale] = {
           configurable: true,
           enumerable: false,
           get() {
             Object.defineProperty(t, locale, { value: t, configurable: true, enumerable: false });
-            if (t.node === node) t.setNode(t.getNode() as N);
-            return t;
+            if (settings.preload && t == settings.t && t.hasOwnProperty("then")) delete settings.t.then;
+            return t.node === node && t.getNode(), t;
           },
         });
       }
       descriptors[locale] = {
         get() {
-          let value: TranslationNode;
-          let node = parent[locale as any]?.[key] || (settings as any)[locale];
-          value =
+          const node = parent[locale as any]?.[key] || parent[locale as any];
+          const value =
             node instanceof TranslationNode
               ? (node as any)
               : new Translation.Node({
@@ -195,6 +194,7 @@ export class TranslationNode<
                   variables,
                   parent,
                   node: settings.getLocale(locale),
+                  preload: true,
                 });
           Object.defineProperty(t, locale, { value, configurable: true, enumerable: false });
           return value;
@@ -203,14 +203,20 @@ export class TranslationNode<
         enumerable: false,
       };
     });
-    if (!settings.t && settings.preload)
+    if (settings.preload && !settings.t)
       descriptors.then = {
-        async value(cb: Function) {
-          const locales = await getLocales(settings.getLocale, settings.allowedLocales);
-          return (settings.locales = locales as any), delete (t as any).then, cb(t), t;
+        value(cb: Function) {
+          return new Promise((r, c) =>
+            getLocales(settings.getLocale, settings.allowedLocales)
+              .then(locales => {
+                (settings.locales = locales as any), delete (t as any).then, r(t), cb?.(t);
+              })
+              .catch(c),
+          );
         },
         configurable: true,
       };
+
     TranslationNode.t ??= settings.t ??= t;
     Object.defineProperties(this, descriptors);
   }
@@ -221,12 +227,13 @@ export class TranslationNode<
     if (variables) Object.assign(this.variables || {}, variables);
     path = path?.filter?.(Boolean);
     if (!path?.length) return this.t;
+    this.getNode();
     return path.reduce(
       (o: TranslationNode, key, index) =>
         o?.[key] ??
         (() => {
           const value = new Translation.Node({
-            node: (o as any)?.[this.settings.mainLocale]?.node[key] || path.slice(0, index + 1).join(o.settings.ps),
+            node: (o as any)?.[this.settings.mainLocale]?.node?.[key] || path.slice(0, index + 1).join(o.settings.ps),
             settings: o.settings,
             locale: o.locale,
             parent: o,
@@ -242,21 +249,19 @@ export class TranslationNode<
     Object.assign(this.variables as {}, variables);
     return this as TranslationType<S, N, V & VV, L, R>;
   }
-  setSource(node: any) {
-    if (!node) return;
-    if (typeof node === "function") node = node.call(this);
-    if (node instanceof Promise) return node.then(this.setNode);
-    this.setNode(node);
-  }
   protected setNode(node: N) {
     if (!this) return;
-    this.node = node;
+    if (this.__node__ === node) return node;
+    this.node = this.__node__ = node;
     this.setChildren();
   }
-  getNode() {
-    if (typeof this.node === "function") this.node = this.node.call(this);
-    if (this.node instanceof Promise) return this.node.then(this.setNode);
-    return this.node as N;
+  getNode(load = true) {
+    if (this.__node__) return this.node;
+    let node = (this.node ||= this.settings.getLocale(this.locale) as N);
+    if (load && typeof node === "function") node = node();
+    if (node instanceof Promise) node.then(this.setNode);
+    else this.setNode(node);
+    return (this.node = node as N);
   }
   addChildren(children: Children<N>[] = []) {
     const t = this;
@@ -287,9 +292,6 @@ export class TranslationNode<
   setChildren(children = getChildren(this.node)) {
     this.children = children;
     return this.addChildren(children);
-  }
-  getSource(deep = Infinity) {
-    return getSource(this.node, deep, this.path);
   }
   get base() {
     const node = this.getNode();
@@ -355,13 +357,19 @@ export class TranslationNode<
     });
   }
   get then(): Promise<this>["then"] | undefined {
-    let node = this.node;
-    if (typeof node === "function") {
-      this.node = node = node.call(this);
-      if (node instanceof Promise) node.then(this.setNode);
-      else this.setNode(node);
-    }
-    return node instanceof Promise ? cb => new Promise((r, c) => node.then(() => r(cb?.(this)!)).catch(c)) : undefined;
+    const t = this;
+    let node = (this.node ||= this.settings.getLocale(this.locale) as N);
+    if (typeof node === "function") node = this.node = node();
+    return node instanceof Promise
+      ? cb =>
+          new Promise((r, c) =>
+            node
+              .then(node => {
+                t.setNode(node), r(t as any), cb?.(t);
+              })
+              .catch(c),
+          )
+      : (this.setNode(node), undefined);
   }
   catch(cb: (reason: any) => void) {
     this.node instanceof Promise && this.node.catch(cb);
@@ -407,7 +415,7 @@ export function createTranslationSettings<
 >(settings: Partial<TranslationSettings<L, M, T, V, PS, N>> = {}) {
   type S = TranslationSettings<L, M, T, V, PS, N>;
   if (typeof settings.locales === "function")
-    (settings.getLocale = settings.locales), (settings.locales = void 0), (settings.preload = true);
+    (settings.getLocale = settings.locales as any), (settings.locales = void 0), (settings.preload = !isClient);
   settings.locales ??= {} as any;
   settings.allowedLocales ??= Object.keys(settings.locales as object) as [M, ...L[]];
   settings.mainLocale ??= settings.defaultLocale ??= settings.allowedLocales[0] as M;
@@ -445,18 +453,6 @@ export function getChildren<N>(node: N) {
     (typeof node !== "object" || !node
       ? []
       : Object.keys(node as object).filter(key => !invalidKeys.includes(key as any)))) as Children<N>[];
-}
-
-export function getSource<N>(node: N, deep: number = Infinity, path: Key[] = []): PartialTree<N> {
-  if (typeof node !== "object" || !node) return node as any;
-  const sourceNode: any = {};
-  sourceNode.children = getChildren(node);
-  if (deep--)
-    sourceNode.children.forEach((child: string) => (sourceNode[child] = getSource(node[child as keyof N], deep, [...path, child])));
-  if ("values" in node && !("values" in (node as any).__proto__)) sourceNode.values = node.values;
-  if ("base" in node) sourceNode.base = String(node.base);
-  if (path.length) sourceNode.path = path;
-  return sourceNode;
 }
 
 export function getT() {

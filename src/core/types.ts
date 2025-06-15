@@ -8,7 +8,7 @@ export type { TranslationProps, ReactNode, TranslationFC, TranslationNodeFC } fr
 
 export type Base = string | number;
 export type Key = string | number | symbol;
-export type Value = Base | null | undefined | boolean | String[] | Date | ReactChunk;
+export type Value = Base | null | undefined | boolean | Base[] | Date | ReactChunk;
 export type Values = Record<Key, Value>;
 export type Stringable = string | number | boolean | null | undefined;
 
@@ -33,14 +33,10 @@ export type Keep<T> = T extends Base
       [K in keyof T]: T[K] extends object ? Keep<T[K]> : T[K] | Base;
     };
 
-export type ResolveNode<T> = T extends () => Promisable<infer N extends Node> ? N : T;
+export type ResolveNode<T> = T extends Promisable<infer N> | (() => Promisable<infer N>) ? Default<N> : Default<T>;
 export type ResolveTree<T extends Record<string, any>> = {
   [L in keyof T]: ResolveNode<T[L]>;
 };
-
-export type PartialTree<N> = {
-  [K in Children<N>]?: PartialTree<N[K]>;
-} & { children?: string[]; values?: Values; path?: Key[] };
 
 export type Display<N> = N extends `${infer A}{${string}}${infer B}` ? `${A}${string}${Display<B>}` : N;
 export type Content<N> = N extends Base ? Display<N> : N extends { base: infer B } ? Display<B> : Base;
@@ -51,7 +47,7 @@ export type Children<N> = N extends object
     : Exclude<keyof N, InvalidKey>
   : never;
 
-type VFSO<V extends string, C extends string = string, T extends any = Base> = {
+type VFSO<V extends string, C extends string = string, T extends any = Value> = {
   [K in V]: T;
 } & VFS1<C>;
 type VFSR<S extends string, C extends string> = VFSO<S extends `/${infer V}` | `${infer V} ${string}` ? V : S, C, ReactChunk>;
@@ -74,6 +70,7 @@ export type Join<K extends Key[], S extends string> = K extends [infer F extends
     : `${F}`
   : string;
 
+export type Default<T> = T extends { default: infer D } ? D : T;
 export type Promisable<T> = T | Promise<T>;
 export type Awaitable<T> = T & Promise<T>;
 export type valueof<O extends object> = O extends Record<any, infer V> ? V : never;
@@ -94,7 +91,7 @@ export type SearchWays<N, A extends any[] = [], C extends keyof N = Children<N>>
       [K in C]: SearchWays<N[K], [...A, K]> | [...A, K];
     }>;
 
-type KeysFromNode<N, S extends string = GlobalPathSeparator> = ArrayToString<isArray<SearchWays<N>>, S>;
+export type KeysFromNode<N, S extends string = GlobalPathSeparator> = ArrayToString<isArray<SearchWays<N>>, S>;
 export type TranslationKeys<T, S extends string = GlobalPathSeparator> = T extends { node: infer N }
   ? KeysFromNode<N, S>
   : KeysFromNode<T, S>;
@@ -174,7 +171,7 @@ export interface TranslationSettings<
   allowedLocale: AllowedLocale;
   pathSeparator: PathSeparator;
   variables: Variables;
-  tree: Tree extends Record<AllowedLocale, any> ? ResolveTree<Tree> : Record<AllowedLocale, Tree>;
+  tree: Tree extends Record<AllowedLocale, any> ? ResolveTree<Tree> : Record<AllowedLocale, Default<Tree>>;
   ps: PathSeparator;
   settings: this;
   preventDynamic: boolean;
@@ -182,7 +179,7 @@ export interface TranslationSettings<
   t?: any;
   onTranslationNode?: (node: TranslationNode) => void;
   setLocale?: (locale: Locale) => Locale | void;
-  getLocale: (locale: Locale) => Promisable<Tree>;
+  getLocale: (locale: Locale) => Promisable<Node>;
 }
 
 export interface TranslationData<
@@ -199,6 +196,7 @@ export interface TranslationData<
   path?: R;
   key?: LastKey<R>;
   parent?: TranslationNode;
+  preload?: boolean;
 }
 
 export type TranslationDataAdapter<T extends TranslationData = TranslationData> = Translation<

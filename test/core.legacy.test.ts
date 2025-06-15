@@ -1,4 +1,4 @@
-import { createTranslation as ct, getChildren as gc, getSource as gs, getLocales } from "../src";
+import { createTranslation as ct, getChildren as gc, getLocales } from "../src";
 import { describe, it, expect } from "bun:test";
 import en from "./messages.json";
 
@@ -100,9 +100,13 @@ describe("Translation object", () => {
             o1: "o1",
             o2: ["o2"],
           },
+          values: {
+            name: "xd",
+          },
         },
       },
     });
+    t.greeting;
     expect(t.hello.settings).toBe(t.settings);
     expect(t.hello.locale).toBe("en");
     expect(t.hello.path).toEqual(["hello"]);
@@ -183,15 +187,15 @@ describe("source node utilities", () => {
     expect(gc({ children: ["hola"] })).toEqual(["hola"] as any);
     expect(gc({ base: "hola", values: { a: "b" } })).toEqual([]);
   });
-  it("get source should work", () => {
-    expect(gs({ a: "b" })).toEqual({ a: "b", children: ["a"] });
-    expect(gs("a")).toEqual("a");
-    expect(gs(2)).toEqual(2);
-    expect(gs([])).toEqual({ children: [] });
-    expect(gs([1])["children" as any]).toEqual(["0"]);
-    expect(gs({ a: { a: "hi" } }, 1).a!.a).toBeUndefined();
-    expect(gs({ a: { a: "hi" } }).a!.a).toBe("hi");
-  });
+  // it("get source should work", () => {
+  //   expect(gs({ a: "b" })).toEqual({ a: "b", children: ["a"] });
+  //   expect(gs("a")).toEqual("a");
+  //   expect(gs(2)).toEqual(2);
+  //   expect(gs([])).toEqual({ children: [] });
+  //   expect(gs([1])["children" as any]).toEqual(["0"]);
+  //   expect(gs({ a: { a: "hi" } }, 1).a!.a).toBeUndefined();
+  //   expect(gs({ a: { a: "hi" } }).a!.a).toBe("hi");
+  // });
 });
 
 describe("variable injection", () => {
@@ -207,42 +211,74 @@ describe("dynamic import", () => {
   it("should work with dynamic get locale", () => {
     let t = ct({
       allowedLocales: ["en", "es"],
-      getLocale(locale) {
+      locales(locale) {
         return { hello: locale === "es" ? "hola mundo" : "hello world" };
       },
     });
     expect(t.en.hello.base).toBe("hello world");
     expect(t.es.hello.base).toBe("hola mundo");
-    t = ct({
-      locales: {
-        en: {
-          hello: "hello world",
-        },
-      },
-      allowedLocales: ["en", "es"],
-      getLocale() {
-        return { hello: "hola mundo" };
-      },
-    });
-    expect(t.hello.base).toBe("hello world");
-    expect(t.hello.es.base).toBe("hola mundo");
   });
-  it("should work", async () => {
+  it("should work as normal", async () => {
     const t = await ct({
       locales: { en },
     });
     expect(t.en.common.base).toBeString();
   });
-  it("should work with mapped getLocales", async () => {
+  it("should work with flexible imports", async () => {
+    const t = ct({
+      locales: {
+        en: async () => {
+          return { hello: "Hello" };
+        },
+        es: async () => {
+          return { hello: "Hola" };
+        },
+        de: () => {
+          return { hello: "Hallo" };
+        },
+        fr: { hello: "Bonjour" },
+        ja: new Promise(r => r({ hello: "こんにちは" })) as unknown as { hello: "こんにちは" },
+      },
+    });
+    expect(t.fr.hello.base).toBe("Bonjour");
+    expect(t.de.hello.base).toBe("Hallo");
+    expect((await t.en).hello.base).toBe("Hello");
+    expect((await t.es).hello.base).toBe("Hola");
+    expect((await t.ja).hello.base).toBe("こんにちは");
+  });
+  it("should work with mapped getLocales function", async () => {
     const locales = await getLocales({
       en: { hello: "Hello" },
       es: () => ({ hello: "Hola" }),
+      fr: async () => ({ hello: "Bonjour" }),
     });
     expect(locales.en.hello).toBe("Hello");
     expect(locales.es.hello).toBe("Hola");
+    expect(locales.fr.hello).toBe("Bonjour");
   });
-  it("should work with mapped getLocales, with t async", async () => {
+  it("should work with integrated getLocales", async () => {
     const t = await ct({
+      locales: {
+        en: async () => {
+          return { hello: "Hello" };
+        },
+        es: async () => {
+          return { hello: "Hola" };
+        },
+        de: () => ({ hello: "Hallo" }),
+        fr: { hello: "Bonjour" },
+        ja: new Promise(r => r({ hello: "こんにちは" })) as unknown as { hello: "こんにちは" },
+      },
+      preload: true,
+    });
+    expect(t.fr.hello.base).toBe("Bonjour");
+    expect(t.de.hello.base).toBe("Hallo");
+    expect(t.en.hello.base).toBe("Hello");
+    expect(t.es.hello.base).toBe("Hola");
+    expect(t.ja.hello.base).toBe("こんにちは");
+  });
+  it("should work with await default", async () => {
+    const t = ct({
       locales: {
         en: async () => {
           return { hello: "Hello" };
@@ -253,7 +289,8 @@ describe("dynamic import", () => {
         fr: { hello: "Bonjour" },
       },
     });
-    expect(t.fr.hello.base).toBe("Bonjour");
+    t.base;
+    expect((await t).hello.base).toBe("Hello");
     expect((await t.es).hello.base).toBe("Hola");
     expect(t.hello.base).toBe("Hello");
   });
@@ -272,7 +309,7 @@ describe("dynamic import", () => {
   it("should work with integrated getlocale and preload", async () => {
     const t = await ct({
       allowedLocales: ["en", "es"],
-      async locales(l) {
+      async locales() {
         return en;
       },
     });
