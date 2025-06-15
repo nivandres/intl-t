@@ -35,7 +35,7 @@ abstract class TranslationProxy extends Function {
       get(target, p, receiver) {
         let val = Reflect.get(target, p, receiver);
         let src;
-        if (val) {
+        if (val !== undefined) {
           if (typeof val !== "function" || !(p in TranslationNode.prototype)) return val;
           src = target;
         } else {
@@ -149,7 +149,7 @@ export class TranslationNode<
       path = [] as unknown as R,
       key = path.at(-1) as LastKey<R>,
       parent = settings as unknown as TranslationNode,
-      preload,
+      preload = false,
     } = params;
 
     this.node = node;
@@ -194,7 +194,7 @@ export class TranslationNode<
                   variables,
                   parent,
                   node: settings.getLocale(locale),
-                  preload: true,
+                  preload: t[Symbol.for("preload")] ?? true,
                 });
           Object.defineProperty(t, locale, { value, configurable: true, enumerable: false });
           return value;
@@ -301,7 +301,7 @@ export class TranslationNode<
   get base() {
     const node = this.getNode();
     return TranslationNode.injectVariables(
-      (!node || typeof node !== "object" ? node : (node as any).base) || this.path.join(this.settings.ps),
+      node ? String(typeof node !== "object" ? node : (node as any).base) : this.path.join(this.settings.ps),
       this.values as Values,
       this.settings,
     ) as Content<N>;
@@ -330,7 +330,10 @@ export class TranslationNode<
     return this.settings.locale as S["allowedLocale"];
   }
   get current(): TranslationType<S, FollowWay<S["tree"][S["allowedLocale"]], R>, V, L, R> {
-    return this[this.currentLocale as any] || this;
+    this[Symbol.for("preload")] = false;
+    const t = this[this.currentLocale as any];
+    this[Symbol.for("preload")] = undefined;
+    return t || this;
   }
   get mainLocale() {
     return this.settings.mainLocale as S["mainLocale"];
@@ -357,9 +360,7 @@ export class TranslationNode<
     return this.toString();
   }
   get promise(): Promise<this> {
-    return new Promise((r, c) => {
-      this.then?.(r).catch(c);
-    });
+    return new Promise((r, c) => this.then?.(r).catch(c) || r(this));
   }
   get then(): Promise<this>["then"] | undefined {
     const t = this;

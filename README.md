@@ -603,7 +603,7 @@ If this component contains children it will work as provider, if not it will ret
 
 ### `useTranslation` Hook
 
-React hook for accessing translations within components.
+Hook for accessing translations within components.
 
 ```ts
 const { t, locale, setLocale } = useTranslation(path?: string);
@@ -614,6 +614,12 @@ const { t, locale, setLocale } = useTranslation(path?: string);
 - `t`: The translation function for the current locale.
 - `locale`: The current language code.
 - `setLocale`: A function to change the current language.
+
+The `useTranslation` function is also the `t` object itself, making it extremely flexible. For example, you can perform `useTranslation("hello").greeting({ name: "Ivan" }).es`. You can set a default locale by using the locale prefix, such as `useTranslation.es("hello").t`. Remember, `t` is a sub-property of itself. You can use the `t` object as a string, object, or function.
+
+These hooks can be used independently, even outside of the [`Translation Provider`](#provider) component.
+
+The main purpose of using the Translation Provider is to synchronize the current locale across your application or to send translations dynamically to the client through [`dynamic import`](#dynamic-locales-import).
 
 ### React Component Injection
 
@@ -961,6 +967,10 @@ import "./patch";
 
 > Dynamic import
 
+There are several ways to dynamically import locales. Please read this section in detail for a complete overview.
+
+### Nodes as dynamic functions
+
 To dynamically import locales, set node values as functions to be called when needed.
 
 ```ts
@@ -995,7 +1005,7 @@ Or you can import the locales dynamically and assert the type in this way.
 type Locale = typeof import("./en.json");
 
 createTranslation({
-  locales: locale => import(`./${locale}.json`) as Promise<Locale>,
+  locales: locale => import(`./${locale}.json`) as Promise<Locale>, // default type is inferred
 });
 ```
 
@@ -1028,7 +1038,7 @@ await getLocales(locale => import(`./messages/${locale}.json`) as Promise<Locale
 
 ### Preload Locales
 
-> **Warning:** Unstable, and problems with Next.js build may occur. Use just getLocales function in order to preload locales dynamically.
+> **Warning:** Unstable, and problems with Next.js build may occur.
 
 Preload option is a way to implement `getLocales` function directly at create translation, instead of using `await getLocales` you will use `await` directly on the translation object.
 
@@ -1078,8 +1088,58 @@ t.fr.hello; // "Bonjour le monde!" // It works because it is just a function wit
 (await t.es).hello; // "¡Hola Mundo!" // Already resolved, it doesn't do unnecessary reloads
 ```
 
-It works really nice. You can test and debug the locale loads in the console and you can see the locales being loaded and resolved.
+You can test and debug the locale loads in the console and you can see the locales being loaded and resolved.
 Not repeated nodes, not unnecessary reloads, just the same independent nodes and proxies.
+
+### Server-side importing
+
+A way to truly preload all locales at server without any problem is to separate the translations into different files and import them at the server.
+
+Client or server file:
+
+```ts
+// i18n/translation.ts
+import { createTranslation } from "intl-t/next";
+
+export const { t } = await createTranslation({
+  locales: {} as {
+    es: typeof import("./messages/es.json");
+    en: typeof import("./messages/en.json");
+  },
+  allowedLocales: ["en", "es"], // It is important to specify in this case
+});
+```
+
+Only server file:
+
+```ts
+// i18n/server.ts
+import en from "./messages/en.json";
+import es from "./messages/es.json";
+import { t } from "./translation";
+
+t.en.setSource(en);
+t.es.setSource(es);
+// or
+t.settings.getLocale = locale => import(`./messages/${locale}.json`);
+```
+
+Then in your server-side code. It could be only the root layout, API endpoints and server actions.
+
+```tsx
+import { Translation } from "./i18n/server";
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        {/* Automatically send the translations to the client */}
+        <Translation>{children}</Translation>
+      </body>
+    </html>
+  );
+}
+```
 
 ## Migration Guide from Other i18n Libraries
 
@@ -1199,7 +1259,7 @@ export const config = {
 
 4. **Set up your root layout**
 
-By default, the locale is handled by the `[locale]` param, but you can customize this as needed.
+By default, the locale is managed using the `[locale]` route parameter. However, you can fully customize this behavior. For example, you can get the locale dynamically from headers, detect the domain, geolocation, or custom HTTP Request. See the [Navigation](#navigation) section for more details. There is also a mini example in the [dynamic rendering with Next.js](#dynamic-rendering) section that shows how to avoid using the `[locale]` param by detecting the locale from headers.
 
 `/app/[locale]/...`
 
@@ -1249,7 +1309,7 @@ If you don't provide a Translation Provider or don't use `setRequestLocale` if r
 import { getTranslation } from "@/i18n/translation";
 
 export default function Component() {
-  const { t } = await getTranslation();
+  const t = await getTranslation();
   return <div>{t("greeting", { name: "Ivan" })}</div>;
 }
 ```
@@ -1263,7 +1323,7 @@ The locale is automatically detected from headers.
 import { getTranslation } from "@/i18n/translation";
 
 export function greeting() {
-  const t = await getTranslation(); // use await to get locale from await headers
+  const t = await getTranslation(); // use await to get locale from headers
   return t("greeting", { name: "Ivan" });
 }
 ```
@@ -1291,15 +1351,18 @@ import { Translation } from "@/i18n/translation";
 import { Link } from "@/i18n/navigation";
 
 export default function LanguageSwitcher() {
-  const { Translation } = useTranslation();
+  const { Translation, t } = useTranslation("languages");
   return (
-    <ul>
-      {t.allowedLocales.map(locale => (
-        <Link locale={locale} key={locale}>
-          <Translation.change variable={{ locale }} />
-        </Link>
-      ))}
-    </ul>
+    <nav>
+      <h2>{t("title")}</h2>
+      <ul>
+        {t.allowedLocales.map(locale => (
+          <Link locale={locale} key={locale}>
+            <Translation.change variable={{ locale }} /> {/* example of Translation component */}
+          </Link>
+        ))}
+      </ul>
+    </nav>
   );
 }
 ```
@@ -1321,6 +1384,8 @@ export default function Component() {
   );
 }
 ```
+
+[Clic to read more about the Router Hook](#router-hook).
 
 ## TypeScript
 
@@ -1547,6 +1612,6 @@ This translation library was originally built for my own projects, aiming to pro
 
 ## Support
 
-> If you find this project useful, consider supporting its development ☕ or [leave a ⭐ on the Github Repo](https://github.com/nivandres/intl-t)
+If you find this project useful, consider supporting its development ☕ or [leave a ⭐ on the Github Repo](https://github.com/nivandres/intl-t)
 
 [![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6) [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)
