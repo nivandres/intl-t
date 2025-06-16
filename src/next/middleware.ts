@@ -1,4 +1,4 @@
-import { MiddlewareConfig as MG, NextFetchEvent, NextMiddleware, NextRequest, NextResponse } from "next/server";
+import { MiddlewareConfig as MG, NextFetchEvent, NextRequest, NextResponse } from "next/server";
 import { negotiator } from "../tools/negotiator";
 import { I18NDomains } from "next/dist/server/config-shared";
 import { match } from "../tools/match";
