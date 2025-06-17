@@ -178,7 +178,7 @@ export interface TranslationSettings<
   preload: boolean;
   hydrate: boolean;
   t?: any;
-  setLocale?: (locale: Locale) => Locale | void;
+  setLocale: (locale: Locale) => Locale | void;
   getLocale: (locale: Locale) => Promisable<Node>;
 }
 

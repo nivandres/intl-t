@@ -329,4 +329,25 @@ describe("dynamic import", () => {
     expect(en).toBeCalledTimes(1);
     expect(es).toBeCalledTimes(1);
   });
+  it("should not load with current", () => {
+    const en = mock(() => ({ hello: "Hello" }));
+    const es = mock(() => ({ hello: "Hola" }));
+    let t = ct({
+      locales: {
+        en,
+        es,
+      },
+    });
+    t.current;
+    t.settings.setLocale('es');
+    t = t.current;
+    expect(t.hello).toBeUndefined();
+    expect(t.locale).toBe("es");
+    t.settings.setLocale('en');
+    t = t.current;
+    expect(t.hello).toBeUndefined();
+    expect(t.locale).toBe("en");
+    expect(en).toBeCalledTimes(0);
+    expect(es).toBeCalledTimes(0);
+  });
 });

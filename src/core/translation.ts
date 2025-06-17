@@ -178,7 +178,7 @@ export class TranslationNode<
           get() {
             Object.defineProperty(t, locale, { value: t, configurable: true, enumerable: false });
             if (settings.preload && t == settings.t && t.hasOwnProperty("then")) delete settings.t.then;
-            return t.node === node && t.getNode(), t;
+            return t.node === node && t.getNode(t[Symbol.for("preload")] ?? true), t;
           },
         });
       }
@@ -193,7 +193,7 @@ export class TranslationNode<
                   locale,
                   variables,
                   parent,
-                  node: settings.getLocale(locale),
+                  node: (settings.locales as any)[locale],
                   preload: t[Symbol.for("preload")] ?? true,
                 });
           Object.defineProperty(t, locale, { value, configurable: true, enumerable: false });
@@ -223,7 +223,7 @@ export class TranslationNode<
     else if (path.length === 1) path = (path[0] as string)?.trim().split(this.settings.ps);
     if (variables) Object.assign(this.variables || {}, variables);
     path = path?.filter?.(Boolean);
-    if (!path?.length) return this.t;
+    if (!path?.length) return this;
     this.getNode();
     return path.reduce(
       (o: TranslationNode, key, index) =>
@@ -258,7 +258,7 @@ export class TranslationNode<
     this.setChildren();
   }
   getNode(load = true) {
-    let node = (this.node ||= this.settings.getLocale(this.locale) as N);
+    let node = (this.node ||= this.settings.getLocale.bind(null, this.locale) as N);
     if (load && typeof node === "function") node = node((this.settings.hydrate ??= true));
     if (node instanceof Promise) node.then(this.setNode);
     else this.setNode(node);
@@ -312,9 +312,9 @@ export class TranslationNode<
     locale: LL | (string & {}) | ((p: L) => LL) = this.settings.locale,
   ): TranslationType<S, FollowWay<S["tree"][LL], R>, V, LL, R> {
     if (typeof locale === "function") locale = locale(this.currentLocale as L);
-    const sl = this.settings.setLocale;
-    this.then?.(() => sl?.(locale)) || sl?.(locale) || (this.settings.locale = locale);
-    return this[locale as any];
+    this.settings.setLocale;
+    this.settings.setLocale(locale) || (this.settings.locale = locale);
+    return this.current as any;
   }
   get values(): Variables<N, V> {
     return { ...this.parent.values, ...this.variables } as any;
@@ -415,7 +415,8 @@ export function createTranslationSettings<
   settings.ps ??= settings.pathSeparator ??= "." as PS;
   if (TranslationNode.context?.source) (settings.locales as any)[TranslationNode.context.locale] = TranslationNode.context.source;
   const gls = settings.getLocale as any;
-  settings.getLocale = l => ((settings.locales as any)[l as L] ??= gls?.(l, (settings.hydrate ??= true)));
+  settings.getLocale = l => ((settings.locales as any)[l] ??= gls?.(l, (settings.hydrate ??= true)));
+  settings.setLocale ??= TranslationNode.setLocale || (l => (settings.locale = l as L));
   return (settings.settings = settings as S);
 }
 

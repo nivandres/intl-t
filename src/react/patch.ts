@@ -13,7 +13,10 @@ const jsxDEV_ = _jsxDEV.jsxDEV;
 const isArray = Array.isArray;
 const check = child => (typeof child === "function" && child instanceof TranslationNode ? child.base : child);
 
-export function patch(React = _React, jsx = _jsx, jsxDEV = _jsxDEV) {
+export function patch({ React, jsx, jsxDEV }: { React?: any; jsx?: any; jsxDEV?: any } = {});
+export function patch(React?: any, jsx?: any, jsxDEV?: any);
+export function patch(React = _React as any, jsx = _jsx as any, jsxDEV = _jsxDEV as any) {
+  if (React.React) return patch(React.React, React.jsx, React.jsxDEV);
   try {
     React.createElement = function createElement(type, props, ...children) {
       return createElement_(type, props, ...children.map(check));
