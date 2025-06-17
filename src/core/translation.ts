@@ -188,7 +188,7 @@ export class TranslationNode<
           const value =
             node instanceof TranslationNode
               ? (node as any)
-              : new Translation.Node({
+              : new TranslationNode({
                   settings,
                   locale,
                   variables,
@@ -214,7 +214,6 @@ export class TranslationNode<
         },
         configurable: true,
       };
-
     TranslationNode.t ??= settings.t ??= t;
     Object.defineProperties(this, descriptors);
   }
@@ -230,7 +229,7 @@ export class TranslationNode<
       (o: TranslationNode, key, index) =>
         o?.[key] ??
         (() => {
-          const value = new Translation.Node({
+          const value = new TranslationNode({
             node: (o as any)?.[this.settings.mainLocale]?.node?.[key] || path.slice(0, index + 1).join(o.settings.ps),
             settings: o.settings,
             locale: o.locale,
@@ -259,7 +258,6 @@ export class TranslationNode<
     this.setChildren();
   }
   getNode(load = true) {
-    if (this.__node__) return this.node;
     let node = (this.node ||= this.settings.getLocale(this.locale) as N);
     if (load && typeof node === "function") node = node((this.settings.hydrate ??= true));
     if (node instanceof Promise) node.then(this.setNode);
@@ -275,7 +273,7 @@ export class TranslationNode<
       const path = [...t.path, child];
       descriptors[child] = {
         get() {
-          const value = new Translation.Node({
+          const value = new TranslationNode({
             node: t.node[child] || null,
             settings,
             locale,

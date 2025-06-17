@@ -617,6 +617,8 @@ const { t, locale, setLocale } = useTranslation(path?: string);
 
 The `useTranslation` function is also the `t` object itself, making it extremely flexible. For example, you can perform `useTranslation("hello").greeting({ name: "Ivan" }).es`. You can set a default locale by using the locale prefix, such as `useTranslation.es("hello").t`. Remember, `t` is a sub-property of itself. You can use the `t` object as a string, object, or function.
 
+`useTranslation` also has `useTranslations` as an alias.
+
 These hooks can be used independently, even outside of the [`Translation Provider`](#provider) component.
 
 The main purpose of using the Translation Provider is to synchronize the current locale across your application or to send translations dynamically to the client through [`dynamic import`](#dynamic-locales-import).
@@ -694,6 +696,8 @@ intl-t offers special integration with Next.js for server-side rendering and rou
 For Static Rendering you will need to generate static params for each locale.
 
 In dynamic pages with just `await getTranslation()` you can get the translation with current locale from headers.
+
+`getTranslation` also has `getTranslations` as an alias.
 
 > Note: `intl-t/next` is for Next.js App with RSC. For Next.js Pages you should use `intl-t/react` instead, and `intl-t/navigation` for Next.js Navigation and Routing tools.
 
@@ -943,9 +947,21 @@ export default function RootLayout({ children }) {
 }
 ```
 
-**Warning:** When calling directly the `t` object from `getTranslation` in a React Server Component (RSC) without `async`, and if the `locale` is not yet loaded or cached, you must extract the `t` object like this: `const { t } = getTranslation();`. Avoid using `const t = getTranslation();` in this specific case, as it may return an incorrect `t` object due to how proxies work. If you use `await getTranslation()` or you don't invoke the `t` directly, there will be no problem.
+[Continue with Dynamic Import](#dynamic-locales-import)
 
-The recommended approach is to use `await getTranslation()` when there is no `locale` so that the `locale` is loaded dynamically from headers in order to use [dynamic rendering](#dynamic-rendering). The warning above only applies to this example of flexible usage pattern of `getTranslation`. It works as a promise, a function, and as a `t` object. But if you use `getTranslation` in a regular way, you won't find any problems.
+#### Advanced Technical Warning.
+
+_Warning: When calling directly the `t` object from `getTranslation` with [dynamic rendering](#dynamic-rendering) in a React Server Component (RSC) without `await`, and the `locale` is not yet loaded or cached, and t is not destructured, you may find the next warning:_
+
+> Translation did not load correctly through the Proxy. Try using `await getTranslation`, `t.t(...args)` or `const { t } = getTranslation()`"
+
+_This only occurs in this specific case, as it returns an incorrect `t` object when called due to how proxies work. If you use `await getTranslation()` or set request locale as normal, there will be no problem._
+
+_The recommended approach is to use `await getTranslation()` when there is no `locale` so that the `locale` is loaded dynamically from headers in order to use [dynamic rendering](#dynamic-rendering). The warning above only applies to this example of flexible usage pattern of `getTranslation`. The `getTranslation` when is not awaited works as a fallback that is not callable if you don't destructure `const { t } = getTranslation()`._
+
+#### Static Rendering together with Dynamic Import Warning
+
+The previous problem only applies for [dynamic rendering with next](#dynamic-rendering), but if you are using [static rendering](#static-rendering) with [dynamic import](#dynamic-locales-import), keep in mind that sometimes pages load before the layout. Therefore, you may need to `await getTranslation` at the top of your static page to preload your locale translations (It keeps static). After this initial preload, you won't need to await the `getTranslation` in your components.
 
 ### Next.js React patch
 
@@ -963,7 +979,7 @@ import "./patch";
 
 ## Dynamic Locales import
 
-> Dynamic import
+> Dynamic Import
 
 There are several ways to dynamically import locales. Please read this section in detail for a complete overview.
 
@@ -994,7 +1010,7 @@ export const { t } = await createTranslation({
     es: () => import("./es.json"),
   },
   hydration: false, // disable hydration to automatically load the correct client locale
-});
+}); // This is not recommended for hydration environments
 ```
 
 Or you can import the locales dynamically and assert the type in this way.
@@ -1004,6 +1020,7 @@ type Locale = typeof import("./en.json");
 
 createTranslation({
   locales: locale => import(`./${locale}.json`) as Promise<Locale>, // default type is inferred
+  allowedLocales: ["en", "es"], // It is important to specify locales
 });
 ```
 
@@ -1035,8 +1052,6 @@ await getLocales(locale => import(`./messages/${locale}.json`) as Promise<Locale
 `getLocales(locales record, list?, preload?)`
 
 ### Preload Locales
-
-> **Warning:** Unstable, and problems with Next.js build may occur.
 
 Preload option is a way to implement `getLocales` function directly at create translation, instead of using `await getLocales` you will use `await` directly on the translation object.
 
@@ -1075,7 +1090,7 @@ const t = createTranslation({
     fr: () => ({ hello: "Bonjour le monde!" }),
     ja: async () => ({ hello: "こんにちは世界！" }),
   },
-  preload: true, // preloads all locales when using top-level `await`
+  preload: false, // preloads all locales when using top-level `await`
 });
 
 t.hello; // undefined
@@ -1087,11 +1102,11 @@ t.fr.hello; // "Bonjour le monde!" // It works because it is just a function wit
 ```
 
 You can test and debug the locale loads in the console and you can see the locales being loaded and resolved.
-Not repeated nodes, not unnecessary reloads, just the same independent nodes and proxies.
+Not repeated nodes, not unnecessary reloads, just the same independent nodes, proxies, instances, values and locales.
 
 ### Server-side importing
 
-A way to truly preload all locales at server without any problem is to separate the translations into different files and import them at the server.
+A way to preload all locales at server is to separate the translations into different files and import them at the server.
 
 Client or server file:
 
@@ -1138,6 +1153,10 @@ export default function RootLayout({ children }) {
   );
 }
 ```
+
+This method is not totally recommended due to some errors when building with Next.js. It is a example of how flexible you can handle your translations and dynamic loads and imports.
+
+If you're getting started with `intl-t` and dynamic imports, you may want to begin by [setting nodes as dynamic functions](#nodes-as-dynamic-functions).
 
 ## Migration Guide from Other i18n Libraries
 

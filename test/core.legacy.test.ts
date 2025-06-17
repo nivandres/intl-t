@@ -1,5 +1,5 @@
 import { createTranslation as ct, getChildren as gc, getLocales } from "../src";
-import { describe, it, expect } from "bun:test";
+import { describe, it, expect, mock } from "bun:test";
 import en from "./messages.json";
 
 describe("Translation object", () => {
@@ -316,5 +316,17 @@ describe("dynamic import", () => {
     });
     expect(t.en.common.yes.base).toBeString();
     expect(t.es.common.yes.base).toBeString();
+  });
+  it("should work with changing locales", async () => {
+    const en = mock(() => ({ hello: "Hello" }));
+    const es = mock(() => ({ hello: "Hola" }));
+    const t = ct({
+      locales: { en, es },
+    });
+    expect(t.es.hello.base).toBe("Hola");
+    expect(en).toBeCalledTimes(0);
+    expect(t.en.hello.base).toBe("Hello");
+    expect(en).toBeCalledTimes(1);
+    expect(es).toBeCalledTimes(1);
   });
 });

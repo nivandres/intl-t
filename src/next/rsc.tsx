@@ -42,20 +42,20 @@ export const TranslationDynamicRendering: typeof TranslationProvider = async ({ 
 function hook(...args: any[]) {
   const cache = getCache();
   // @ts-ignore-error optional binding
-  const t = this || (cache.t ||= TranslationNode.t);
+  let t = this || (cache.t ||= TranslationNode.t);
   if (!t) throw new Error("Translation not found");
   const locale = cache.locale ? (t.settings.locale = cache.locale) : getRequestLocale.call(t);
-  if (locale instanceof Promise || t.promise) {
+  if (locale instanceof Promise || (t = t.current).promise) {
     let tp: any, tc: any;
     return new Proxy(t, {
       get(_, p, receiver) {
         return p in Promise.prototype
-          ? (cb: Function) => new Promise(async r => (await locale, (tp ||= tc = (await t.current)(...args)), r(tp), cb(tp)))
+          ? (cb: Function) => new Promise(async r => (await locale, (tp ||= tc = (await t)(...args)), r(tp), cb(tp)))
           : Reflect.get((tc ||= t(...args)), p, receiver);
       },
     });
   }
-  return t.current(...args);
+  return t(...args);
 }
 
 // @ts-ignore
