@@ -47,6 +47,7 @@ export interface TranslationProps<
   locale?: S["allowedLocale"];
   source?: Node;
   messages?: Node;
+  hydrate?: boolean;
   preventDynamic?: boolean;
   settings?: Partial<TranslationSettings>;
   onLocaleChange?: ReactSetState<S["allowedLocale"]>;

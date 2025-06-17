@@ -11,7 +11,7 @@ export async function TranslationProvider<
   A extends isArray<SearchWays<T>>,
   D extends ArrayToString<A, T["settings"]["ps"]>,
   // @ts-ignore-error optional binding
->({ children, t = this, preventDynamic, ...props }: TranslationProviderProps<T, A, D>) {
+>({ children, t = this, preventDynamic, hydrate, ...props }: TranslationProviderProps<T, A, D>) {
   const cache = getCache();
   t ||= cache.t ||= TranslationNode.t || (createTranslation(props.settings) as any);
   props.locale ||= cache.locale;
@@ -24,9 +24,10 @@ export async function TranslationProvider<
       </Suspense>
     );
   }
-  t = await ((t as any)[(t.settings.locale = cache.locale = props.locale!)] || t);
+  t.settings.locale = cache.locale = props.locale!;
+  t = (await t.current) as any;
   if (!children) return t(props.path || props.id || props.i18nKey).base;
-  props.source = props.source || props.messages || { ...(t.node as any) };
+  props.source = props.source || props.messages || ((hydrate ?? t.settings.hydrate) && { ...(t.node as any) }) || void 0;
   // @ts-ignore
   return (<TranslationClientProvider {...props}>{children}</TranslationClientProvider>) as never;
 }
@@ -41,24 +42,15 @@ export const TranslationDynamicRendering: typeof TranslationProvider = async ({ 
 function hook(...args: any[]) {
   const cache = getCache();
   // @ts-ignore-error optional binding
-  let t = this || (cache.t ||= TranslationNode.t);
+  const t = this || (cache.t ||= TranslationNode.t);
   if (!t) throw new Error("Translation not found");
-  t.then?.();
-  if (cache.locale) return (t[(t.settings.locale = cache.locale)] || t)(...args);
-  const locale = getRequestLocale.call(t);
-  if (locale instanceof Promise) {
+  const locale = cache.locale ? (t.settings.locale = cache.locale) : getRequestLocale.call(t);
+  if (locale instanceof Promise || t.promise) {
     let tp: any, tc: any;
     return new Proxy(t, {
       get(_, p, receiver) {
         return p in Promise.prototype
-          ? (cb: Function) =>
-              new Promise((r, c) =>
-                (locale as any)
-                  [p](() => {
-                    (tp ||= tc = t.current(...args)), r(tp), cb(tp);
-                  })
-                  ?.catch?.(c),
-              )
+          ? (cb: Function) => new Promise(async r => (await locale, (tp ||= tc = (await t.current)(...args)), r(tp), cb(tp)))
           : Reflect.get((tc ||= t(...args)), p, receiver);
       },
     });

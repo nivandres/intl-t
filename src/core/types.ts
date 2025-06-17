@@ -176,8 +176,8 @@ export interface TranslationSettings<
   settings: this;
   preventDynamic: boolean;
   preload: boolean;
+  hydrate: boolean;
   t?: any;
-  onTranslationNode?: (node: TranslationNode) => void;
   setLocale?: (locale: Locale) => Locale | void;
   getLocale: (locale: Locale) => Promisable<Node>;
 }

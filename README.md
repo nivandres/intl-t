@@ -763,8 +763,6 @@ function middleware(request, event) {
 export default withMiddleware(middleware);
 ```
 
-This `withMiddleware` also has an allias `withI18nMiddleware` for convenience.
-
 `withMiddleware` and `middleware` both return the response. `middleware` function also can receive the response as the last argument, so you can configure it in a flexible way.
 
 ```ts

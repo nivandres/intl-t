@@ -1,4 +1,4 @@
-import { createMiddleware, MiddlewareConfig, withMiddleware } from "./middleware";
+import { createMiddleware, middleware, MiddlewareConfig, withMiddleware } from "./middleware";
 import { redirect as r, permanentRedirect as pr, RedirectType } from "next/navigation";
 import { ResolveConfig, resolveHref, resolveLocale, resolvePath } from "../tools/resolvers";
 import { RouterConfig, useRouter, useLocale, usePathname } from "./router";
@@ -60,16 +60,16 @@ export function createNavigation<L extends Locale, LC extends FC<any>>(
     resolvePath: resolvePath.bind(config),
     resolveHref: resolveHref.bind(config)<L>,
     resolveLocale: resolveLocale.bind(config)<L>,
+    match: config.match!,
     middleware: createMiddleware<L>(config),
-    withMiddleware: config.withMiddleware,
-    withI18nMiddleware: config.withI18nMiddleware,
+    withMiddleware: config.withMiddleware!,
     generateStaticParams: createStaticParams<L, string>(config),
     useLocale: useLocale<L>,
     usePathname,
     getPathname,
     settings: Object.assign(config, config.settings),
     allowedLocales,
-    locales: allowedLocales,
-    locale: allowedLocales?.[0],
+    locales: allowedLocales!,
+    locale: allowedLocales?.[0]!,
   };
 }

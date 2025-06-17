@@ -44,7 +44,7 @@ abstract class TranslationProxy extends Function {
           else src = target.node || "";
           val = src[p];
         }
-        if (typeof val === "function") val = val.bind(src);
+        if (typeof val === "function" && !val.t) val = val.bind(src);
         return val;
       },
       ownKeys(target) {
@@ -208,9 +208,7 @@ export class TranslationNode<
         value(cb: Function) {
           return new Promise((r, c) =>
             getLocales(settings.getLocale, settings.allowedLocales)
-              .then(locales => {
-                (settings.locales = locales as any), delete (t as any).then, r(t), cb?.(t);
-              })
+              .then(locales => ((settings.locales = locales as any), delete (t as any).then, r(t), cb?.(t)))
               .catch(c),
           );
         },
@@ -263,7 +261,7 @@ export class TranslationNode<
   getNode(load = true) {
     if (this.__node__) return this.node;
     let node = (this.node ||= this.settings.getLocale(this.locale) as N);
-    if (load && typeof node === "function") node = node();
+    if (load && typeof node === "function") node = node((this.settings.hydrate ??= true));
     if (node instanceof Promise) node.then(this.setNode);
     else this.setNode(node);
     return (this.node = node as N);
@@ -359,36 +357,19 @@ export class TranslationNode<
   get raw() {
     return this.toString();
   }
-  get promise(): Promise<this> {
-    return new Promise((r, c) => this.then?.(r).catch(c) || r(this));
+  get promise(): Promise<this> | undefined {
+    return this.then ? new Promise((r, c) => this.then?.(r).catch(c)) : undefined;
   }
   get then(): Promise<this>["then"] | undefined {
     const t = this;
     let node = (this.node ||= this.settings?.getLocale(this.locale) as N);
-    if (typeof node === "function") node = this.node = node();
+    if (typeof node === "function") node = this.node = node((this.settings.hydrate ??= true));
     return node instanceof Promise
-      ? cb =>
-          new Promise((r, c) =>
-            node
-              .then(node => {
-                t.setNode(node), r(t as any), cb?.(t);
-              })
-              .catch(c),
-          )
+      ? cb => new Promise((r, c) => node.then(node => (t.setNode(node), r(t as any), cb?.(t))).catch(c))
       : (this.setNode(node), undefined);
   }
-  catch(cb: (reason: any) => void) {
-    this.node instanceof Promise && this.node.catch(cb);
-    return this;
-  }
-  finally(cb: () => void) {
-    this.node instanceof Promise ? this.node.finally(cb) : cb();
-    return this;
-  }
   *[Symbol.iterator]() {
-    if (Array.isArray(this.node)) {
-      return yield* this.children.map(child => this[child as any]);
-    }
+    if (Array.isArray(this.node)) return yield* this.children.map(child => this[child as any]);
     yield this.base;
   }
   toJSON(): N {
@@ -434,9 +415,9 @@ export function createTranslationSettings<
   settings.variables ??= {} as unknown as V;
   settings.hydration ??= hydration;
   settings.ps ??= settings.pathSeparator ??= "." as PS;
-  if (TranslationNode.context?.source) (settings.locales as any)[settings.locale] = TranslationNode.context.source;
+  if (TranslationNode.context?.source) (settings.locales as any)[TranslationNode.context.locale] = TranslationNode.context.source;
   const gls = settings.getLocale as any;
-  settings.getLocale = l => ((settings.locales as any)[l as L] ??= gls?.(l));
+  settings.getLocale = l => ((settings.locales as any)[l as L] ??= gls?.(l, (settings.hydrate ??= true)));
   return (settings.settings = settings as S);
 }
 

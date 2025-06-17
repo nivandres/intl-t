@@ -19,7 +19,7 @@ export interface MiddlewareConfig<L extends Locale> extends MG, ResolveConfig<L>
   config?: MG;
   middleware?: Middleware;
   withMiddleware?: MiddlewareFactory;
-  withI18nMiddleware?: MiddlewareFactory;
+  match?: typeof match;
 }
 
 export const middlewareConfig: MG = {
@@ -37,14 +37,12 @@ export function createMiddleware<L extends Locale>(settings: MiddlewareConfig<L>
   settings.config = middlewareConfig;
   settings.middleware = middleware.bind(settings);
   settings.withMiddleware = withMiddleware.bind(settings);
-  settings.withI18nMiddleware = settings.withMiddleware;
+  settings.match = match.bind(settings);
   settings.domains && (settings.detect ??= detect.bind(settings));
   return Object.assign(settings.middleware, settings, middlewareConfig);
 }
 
 export function middleware<L extends Locale>(req: NextRequest, ev: NextFetchEvent, res?: NextResponse) {
-  // @ts-ignore
-  const config: MiddlewareConfig<L> = this;
   let {
     allowedLocales = [],
     defaultLocale = allowedLocales[0],
@@ -53,7 +51,9 @@ export function middleware<L extends Locale>(req: NextRequest, ev: NextFetchEven
     pathBase = pathPrefix == "hidden" ? "detect-latest" : "detect-default",
     detect = req => negotiator(req),
     redirectPath = "r",
-  } = config;
+    match = () => "",
+    // @ts-ignore
+  } = this as MiddlewareConfig<L>;
   res ||= NextResponse.next();
   const { nextUrl, cookies } = req;
   let url = nextUrl.clone();
@@ -63,7 +63,7 @@ export function middleware<L extends Locale>(req: NextRequest, ev: NextFetchEven
     else path.unshift(locale);
     if (pathBase == "always-default") locale = defaultLocale;
     else if (pathBase == "always-detect" || !(locale = cookies.get(LOCALE_COOKIE_KEY)?.value as string))
-      locale = match.bind(config)(typeof detect != "function" ? detect || null : detect(req));
+      locale = match(typeof detect != "function" ? detect || null : detect(req));
     else if (pathBase == "detect-default") locale = defaultLocale;
     else locale ||= defaultLocale;
     url.pathname = [locale, ...path].join("/");

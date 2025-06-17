@@ -49,7 +49,7 @@ export function TranslationProvider<
   if (!t) return (TranslationNode.context = { locale, source }), children;
   t.settings.locale = locale!;
   useMemo(() => Object.assign(t.settings, settings, state), [settings, t, state]);
-  t = t.current(path as any) as any;
+  t = (t as any).current(path);
   useMemo(() => {
     t.setSource(source);
   }, [t, source]);
