@@ -1723,7 +1723,7 @@ Here are some planned features and improvements for future:
 - **Intl-T l10n Service:** A simple service for providing translation management to your application through intl-t API.
 - **Crowdin Integration:** Integration with Crowdin for efficient translation management and dynamic loading.
 
-_Feedback and contributions are welcome! If you have suggestions or feature requests, please open an issue or join the [Discord Support Chat](https://discord.gg/5EbCXKpdyw)._
+_Feedback and contributions are welcome! If you have suggestions or feature requests, please open an issue or contact me._
 
 ## Hello there
 
