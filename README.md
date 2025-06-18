@@ -1709,15 +1709,15 @@ You can also implement different strategies for each isolated translation, such 
 
 Here are some planned features and improvements for future:
 
-- **Translations Merging:** Merging and extending translations namespaces dynamically for each independent node in the tree, so will be able to download
+- **Translations Merging:** Support for dynamically merging and extending translation namespaces for each independent node in the tree, enabling on-demand loading and updates.
 - **CLI Tooling:** Command-line utilities for managing, validating, and extracting translations.
 - **Editor Integrations:** VSCode plugin for enhanced translation management.
 - **Improved ICU Support:** More advanced ICU message format features.
 - **Performance Optimizations:** Further reduce bundle size and improve runtime efficiency.
-- **Testing:** Add robust testing for Intl-T to ensure its reliability.
-- **Documentation:** Expanded guides, recipes, and migration examples in its own website.
 - **Plugins:** Support for third-party plugins and integrations.
+- **Testing:** Add robust testing for Intl-T to ensure its reliability.
 - **More frameworks:** Support for more popular frameworks and libraries, including backend frameworks.
+- **Documentation:** Expanded guides, recipes, and migration examples in its own website.
 - **Modular and agnostic:** To ensure agnosticism, Intl-T will be a monorepo with separate modules for different environments and features (e.g., `@intl-t/next`, `@intl-t/tools`, `@intl-t/server`, etc.)
 - **Intl-T Server:** Easily self-host translations with a simple API that is agnostic and compatible with the intl-t client.
 - **Intl-T l10n Service:** A simple service for providing translation management to your application through intl-t API.
