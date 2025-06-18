@@ -89,6 +89,7 @@
     "@types/bun": "^1.2.0",
     "@types/react": "^19",
     "husky": "^9",
+    "lint-staged": "^16.1.2",
     "next": "^15",
     "react": "^19"
   },
