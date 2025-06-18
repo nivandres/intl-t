@@ -19,15 +19,20 @@ import type {
 } from "./types";
 import type { GlobalTranslation } from "../global";
 import { injectVariables } from "../tools/inject";
-import { hydration, isClient } from "../state";
+import { hydration, isClient, isEdge } from "../state";
 import { getLocales } from "./dynamic";
 
-abstract class TranslationProxy extends Function {
+const TranslationFunction = isEdge ? Object : Function;
+
+abstract class TranslationProxy extends TranslationFunction {
   public name = "Translation";
 
   constructor(protected __call__: Function) {
-    super("...args", "return this.__call__(...args)");
-    return new Proxy(this.bind(this), {
+    super();
+    return new Proxy(this as any, {
+      apply(target, thisArg, argArray) {
+        return __call__.apply(thisArg, argArray);
+      },
       construct(target, [settings]) {
         settings.settings = { ...settings.settings, ...target.settings };
         return new TranslationNode(settings);
@@ -78,8 +83,8 @@ export class TranslationNode<
   g: typeof this.global;
   private parent: TranslationNode;
 
-  use = this;
-  get = this;
+  use = isEdge ? (this.__call__ as unknown as typeof this) : this;
+  get = this.use;
 
   static Node = TranslationNode;
   static createTranslation = createTranslation;
