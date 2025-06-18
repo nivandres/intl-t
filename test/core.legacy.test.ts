@@ -339,11 +339,11 @@ describe("dynamic import", () => {
       },
     });
     t.current;
-    t.settings.setLocale('es');
+    t.settings.setLocale("es");
     t = t.current;
     expect(t.hello).toBeUndefined();
     expect(t.locale).toBe("es");
-    t.settings.setLocale('en');
+    t.settings.setLocale("en");
     t = t.current;
     expect(t.hello).toBeUndefined();
     expect(t.locale).toBe("en");

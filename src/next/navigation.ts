@@ -1,4 +1,4 @@
-import { createMiddleware, middleware, MiddlewareConfig, withMiddleware } from "./middleware";
+import { createMiddleware, MiddlewareConfig } from "./middleware";
 import { redirect as r, permanentRedirect as pr, RedirectType } from "next/navigation";
 import { ResolveConfig, resolveHref, resolveLocale, resolvePath } from "../tools/resolvers";
 import { RouterConfig, useRouter, useLocale, usePathname } from "./router";
@@ -70,6 +70,6 @@ export function createNavigation<L extends Locale, LC extends FC<any>>(
     settings: Object.assign(config, config.settings),
     allowedLocales,
     locales: allowedLocales!,
-    locale: allowedLocales?.[0]!,
+    locale: allowedLocales![0],
   };
 }

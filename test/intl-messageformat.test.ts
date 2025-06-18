@@ -12,7 +12,11 @@ function parse(value: string): string {
 }
 
 class IntlMessageFormat {
-  constructor(public value: string, ...args: any[]) {}
+  constructor(
+    public value: string,
+    // oxlint-disable-next-line no-unused-vars
+    ...args: any[]
+  ) {}
   format(values?: Values) {
     return iv(this.value, values);
   }
@@ -422,14 +426,12 @@ describe("IntlMessageFormat", function () {
   });
 
   describe("select message without other clause", function () {
-    const msg = "{variable, select, a {A} b {B} c {C}}";
-
+    // const msg = "{variable, select, a {A} b {B} c {C}}";
     // it("should throw by default", function () {
     //   expect(() => {
     //     new IntlMessageFormat(msg, "en");
     //   }).toThrow(/MISSING_OTHER_CLAUSE/);
     // });
-
     // it("should not throw when requiresOtherClause is false", function () {
     //   expect(() => {
     //     new IntlMessageFormat(msg, "en", undefined, {

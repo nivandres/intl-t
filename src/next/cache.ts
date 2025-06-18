@@ -6,7 +6,7 @@ export interface Cache {
   t: Translation;
 }
 
-export const getCache = cache(() => ({} as Partial<Cache>));
+export const getCache = cache(() => ({}) as Partial<Cache>);
 
 export function getCachedRequestLocale() {
   const locale = getCache().locale;

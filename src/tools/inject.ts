@@ -1,3 +1,4 @@
+// oxlint-disable no-eval
 import type { Values, Content, Variables } from "../types";
 import { format } from "./format";
 
@@ -13,9 +14,9 @@ export function nested(content: string) {
   return null;
 }
 
-export const variableRegex = /{{?(\w+|(?:\(.*?\)|[=+!><\-&|%*/?:#\w]|{\w+}|".*?"|'.*?')+)\s*(?:[,\.;]+\s*(\w+)\s*)?(?:[,\.;]+(.*))?}}?/s;
+export const variableRegex = /{{?(\w+|(?:\(.*?\)|[=+!><\-&|%*/?:#\w]|{\w+}|".*?"|'.*?')+)\s*(?:[,.;]+\s*(\w+)\s*)?(?:[,.;]+(.*))?}}?/s;
 export const instructionsRegex =
-  /(?:(?<t1>(?<k1>\w+))|(?<kn1>'|")(?<k2>.*?)(?<!`)\k<kn1>|(?<k3>(?:[=+!><\-\/&|%*/?:]*(?:#|\(.*?\)|\w+|{\w+}|(?<kn2>'|").*?(?<!`)\k<kn2>|\[.*?\]|\/.*?\/w*))+))(?:[\s=>]|:(?!:\w))*(?:(?<=[\s:=>])(?<t_1>(?<v1>[\w\#\+\-]+))(?=$|[,\s;])|(?<vn1>'|")(?<v2>.*?)(?<!`)\k<vn1>|(?<v3>{.*(?<!`)(?<vn2>})))|:?:?(?<t2>(?<k4>\w+))(?:[\\/](?<t_2>(?<v4>[\w\.\,\+\-]+))|\((?:(?<t_3>(?<v5>\w+))|(?<vn3>'|")(?<v6>.*?)(?<!`)\k<vn3>)\))?/s;
+  /(?:(?<t1>(?<k1>\w+))|(?<kn1>'|")(?<k2>.*?)(?<!`)\k<kn1>|(?<k3>(?:[=+!><\-/&|%*/?:]*(?:#|\(.*?\)|\w+|{\w+}|(?<kn2>'|").*?(?<!`)\k<kn2>|\[.*?\]|\/.*?\/w*))+))(?:[\s=>]|:(?!:\w))*(?:(?<=[\s:=>])(?<t_1>(?<v1>[\w#+-]+))(?=$|[,\s;])|(?<vn1>'|")(?<v2>.*?)(?<!`)\k<vn1>|(?<v3>{.*(?<!`)(?<vn2>})))|:?:?(?<t2>(?<k4>\w+))(?:[\\/](?<t_2>(?<v4>[\w.,+-]+))|\((?:(?<t_3>(?<v5>\w+))|(?<vn3>'|")(?<v6>.*?)(?<!`)\k<vn3>)\))?/s;
 const instructionRegex = /{(.*)}/s;
 
 export function instructionsMatch(content: string) {
@@ -99,9 +100,9 @@ export function injectVariables<T extends string, V extends Values>(
                 ? ((name = name.replace(/(?<![=<>&|!])([=&|])(?![=&|])/g, "$1$1")),
                   /\/.+\/\w*$/.test(name) && (name += ".test(String(#))"),
                   (name = name.replace(/(?<=[|&])(?=[=<>])/g, "#")),
-                  /^[^\w\#"'/({`\[\]]/.test(name) ? (name = `#${name}`) : null,
+                  /^[^\w#"'/({`[\]]/.test(name) ? (name = `#${name}`) : null,
                   (name = name.replaceAll("#", JSON.stringify(v))),
-                  name.matchAll(/{(\w+)}|\0/g).forEach(([i, v]) => (name = name.replace(i, JSON.stringify(variables[v])))),
+                  name.matchAll(/{(\w+)}/g).forEach(([i, v]) => (name = name.replace(i, JSON.stringify(variables[v])))),
                   eval(name))
                 : name == v) ||
               /^(ot(her|r[ao])|alway)s?$/im.test(name) ||

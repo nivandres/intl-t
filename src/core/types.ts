@@ -28,10 +28,10 @@ export type Node =
 export type Keep<T> = T extends Base
   ? Base
   : T extends [infer F, ...infer R]
-  ? [Keep<F>, ...isArray<Keep<R>>]
-  : {
-      [K in keyof T]: T[K] extends object ? Keep<T[K]> : T[K] | Base;
-    };
+    ? [Keep<F>, ...isArray<Keep<R>>]
+    : {
+        [K in keyof T]: T[K] extends object ? Keep<T[K]> : T[K] | Base;
+      };
 
 export type ResolveNode<T> = T extends Promisable<infer N> | (() => Promisable<infer N>) ? Default<N> : Default<T>;
 export type ResolveTree<T extends Record<string, any>> = {
@@ -55,10 +55,10 @@ type VFS2<S extends string> = S extends `${infer V},${string}` ? V : S;
 type VFS1<S extends string> = S extends `${string}{{${infer V}}}${infer C}`
   ? VFSO<VFS2<V>, C>
   : S extends `${string}{${infer V}}${infer C}`
-  ? VFSO<VFS2<V>, C>
-  : S extends `${string}<${infer V}>${infer C}`
-  ? VFSR<V, C>
-  : {};
+    ? VFSO<VFS2<V>, C>
+    : S extends `${string}<${infer V}>${infer C}`
+      ? VFSR<V, C>
+      : {};
 export type VariablesFromString<S extends string> = VFS1<S>;
 export type Override<T, U> = T & U extends never ? Omit<T, keyof U> & U : T & U;
 export type VariablesFromNode<N> = "values" extends keyof N ? N["values"] : N extends string ? VariablesFromString<N> : {};

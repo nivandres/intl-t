@@ -39,7 +39,7 @@ abstract class TranslationProxy extends Function {
           if (typeof val !== "function" || !(p in TranslationNode.prototype)) return val;
           src = target;
         } else {
-          if (Array.isArray(target.node)) src = [...target.children.map((c: string) => target[c])];
+          if (Array.isArray(target.node)) src = target.children.map((c: string) => target[c]);
           else if (p in String.prototype) src = target.base;
           else src = target.node || "";
           val = src[p];

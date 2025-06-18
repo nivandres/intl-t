@@ -91,31 +91,31 @@ export default function Component() {
     "Hi {name}. This is Feature 3",
     {
       "base": "Hi {name}. This is Feature 4 with html title", // base is default text for objects
-      "title": "Feature 4"
-    }
+      "title": "Feature 4",
+    },
   ],
   "page1": {
     "section1": {
       "article1": {
-        "title": "Article 1"
-      }
-    }
+        "title": "Article 1",
+      },
+    },
   },
   "account": {
     "options": {
-      "change": "Change your account settings. Your account id is {accountId}"
+      "change": "Change your account settings. Your account id is {accountId}",
     },
     "values": {
       // default values for this node
-      "accountId": 0
-    }
+      "accountId": 0,
+    },
   },
   "values": {
     // default values
     "user": "World",
     "name": "{user}",
-    "now": "{(Date.now())}"
-  }
+    "now": "{(Date.now())}",
+  },
 }
 ```
 
@@ -196,13 +196,13 @@ Your translations also can have multiple placeholders, that can be replaced with
     // nested translations
     "count": "Hey {user}, you have {count} items!",
     "values": {
-      "count": 0
-    }
+      "count": 0,
+    },
   },
   "values": {
     // default value
-    "user": "World"
-  }
+    "user": "World",
+  },
 }
 ```
 
@@ -251,14 +251,14 @@ In these case variables are not declared manually, typescript will try to infer 
         "These stylish sunglasses cost ${price} and offer 100% UV protection.",
         "The elegant watch is priced at just ${price} and comes with a stainless steel strap.",
         // Each node inherits the values from its parent
-        "Our fashionable chains are available for just ${price} and make a perfect accessory."
+        "Our fashionable chains are available for just ${price} and make a perfect accessory.",
       ],
       "values": {
-        "price": 10 // nodes can be numbers | string | node arrays | record of arrays (object)
+        "price": 10, // nodes can be numbers | string | node arrays | record of arrays (object)
         // or even React Components with `intl-t/react` or `intl-t/next`
-      }
-    }
-  }
+      },
+    },
+  },
 }
 ```
 
@@ -519,8 +519,8 @@ You can use it as a script in your `package.json` to generate declarations whene
 // package.json
 {
   "scripts": {
-    "declarations": "bun ./i18n/declarations.ts"
-  }
+    "declarations": "bun ./i18n/declarations.ts",
+  },
 }
 ```
 
@@ -530,8 +530,8 @@ Before using these declarations, it is recommended to enable `allowArbitraryExte
 // tsconfig.json
 {
   "compilerOptions": {
-    "allowArbitraryExtensions": true
-  }
+    "allowArbitraryExtensions": true,
+  },
 }
 ```
 
@@ -1495,9 +1495,9 @@ It is recommended to use TypeScript with intl-t. You may find the following conf
   "compilerOptions": {
     "allowArbitraryExtensions": true,
     "paths": {
-      "@i18n/*": ["./i18n/*"]
-    }
-  }
+      "@i18n/*": ["./i18n/*"],
+    },
+  },
 }
 ```
 
@@ -1615,8 +1615,8 @@ For example
     // It is a normal node
     "code": "en",
     "name": "English",
-    "dir": "ltr"
-  }
+    "dir": "ltr",
+  },
   // ...
 }
 ```

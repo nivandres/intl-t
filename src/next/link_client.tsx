@@ -16,7 +16,6 @@ export function LC<L extends Locale, L_ extends string, LC extends NL>({
   // @ts-ignore
   config = this || {},
   Link = config.Link || (NL as LC),
-  preventDynamic = config.preventDynamic ?? true,
   ...props
 }: LinkProps<L | L_, LC> & ComponentProps<LC>) {
   if (!href && locale) href = usePathname();
