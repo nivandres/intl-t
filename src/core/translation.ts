@@ -104,11 +104,13 @@ export class TranslationNode<
     return this[this.settings.locale](...args);
   } as unknown as TranslationFC;
 
-  protected T = new Proxy(this, {
+  protected T = new Proxy(isEdge ? this.call.bind(this) : (this as any), {
     apply(target, _, args) {
+      if (isEdge) target = target();
       return TranslationNode.Provider.apply(target, args as any);
     },
     get(target, p, receiver) {
+      if (isEdge) target = target();
       const t = Reflect.get(target, p, receiver) as any;
       return t?.T || t;
     },
@@ -120,18 +122,20 @@ export class TranslationNode<
   TranslationProvider = this.T;
 
   static hook = function (this: any, ...args: any[]) {
-    return this[this.settings.locale](...args);
+    return this.current(...args);
   };
 
-  protected hook = new Proxy(this, {
-    apply(target, _, args) {
-      return TranslationNode.hook.apply(target, args as any);
+  protected hook = new Proxy(isEdge ? this.call.bind(this) : (this as any), {
+    apply(target, _, argArray) {
+      if (isEdge) target = target();
+      return TranslationNode.hook.apply(target, argArray);
     },
     get(target, p, receiver) {
+      if (isEdge) target = target();
       const t = Reflect.get(target, p, receiver) as any;
       return t?.hook || t;
     },
-  });
+  }) as typeof this;
 
   useTranslation = this.hook;
   useTranslations = this.hook;
@@ -332,9 +336,15 @@ export class TranslationNode<
   }
   get current(): TranslationType<S, FollowWay<S["tree"][S["allowedLocale"]], R>, V, L, R> {
     this[Symbol.for("preload")] = false;
-    const t = this[this.currentLocale as any];
+    const t = this[this.currentLocale as any] || this;
     this[Symbol.for("preload")] = undefined;
-    return t || this;
+    if (isEdge)
+      return new Proxy(t.call, {
+        get(target, p, receiver) {
+          return Reflect.get(t, p, receiver);
+        },
+      });
+    return t;
   }
   get mainLocale() {
     return this.settings.mainLocale as S["mainLocale"];
