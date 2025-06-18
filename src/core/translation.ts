@@ -22,7 +22,7 @@ import { injectVariables } from "../tools/inject";
 import { hydration, isClient, isEdge } from "../state";
 import { getLocales } from "./dynamic";
 
-const TranslationFunction = isEdge ? Object : Function;
+const TranslationFunction = (isEdge ? Object : Function) as FunctionConstructor;
 
 abstract class TranslationProxy extends TranslationFunction {
   public name = "Translation";
