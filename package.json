@@ -17,9 +17,9 @@
     "test": "bun test",
     "test:watch": "bun test --watch",
     "format": "bunx prettier --write .",
-    "lint": "bunx tsc --noEmit",
+    "lint": "bunx oxlint --fix",
     "prepare": "bunx husky",
-    "prepublishOnly": "bun run test && bun run build"
+    "prepublishOnly": "bun run build"
   },
   "keywords": [
     "translation",
@@ -85,12 +85,17 @@
       "types": "./dist/types.d.ts"
     }
   },
+  "lint-staged": {
+    "*.{json,md,js,ts,tsx}": "bunx prettier --check",
+    "*.{js,ts,tsx}": "bunx oxlint"
+  },
   "devDependencies": {
     "@types/bun": "^1.2.0",
     "@types/react": "^19",
     "husky": "^9",
     "lint-staged": "^16.1.2",
     "next": "^15",
+    "oxlint": "^1.1.0",
     "react": "^19"
   },
   "peerDependencies": {

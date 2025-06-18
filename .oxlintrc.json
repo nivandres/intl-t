@@ -1,0 +1,7 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "rules": {
+    "typescript/no-this-alias": "off",
+    "unicorn/no-thenable": "off"
+  }
+}
