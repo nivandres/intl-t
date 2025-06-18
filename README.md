@@ -3,9 +3,10 @@
 ### A Fully-Typed Object-Based i18n Translation Library.
 
 [![npm version](https://img.shields.io/npm/v/intl-t.svg)](https://www.npmjs.com/package/intl-t)
-[![TypeScript](https://img.shields.io/badge/-TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
-[![Next.js](https://img.shields.io/badge/-Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
+[![Next.js](https://img.shields.io/badge/-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Discord Chat](https://img.shields.io/discord/1063280542759526400?label=Chat&logo=discord&color=blue)](https://discord.gg/5EbCXKpdyw)
 [![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6)
 [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)
 
@@ -137,6 +138,7 @@ export default function Component() {
   - [Dynamic Rendering](#dynamic-rendering)
 - [Dynamic Locales Import](#dynamic-locales-import)
 - [Migration Guide from other i18n libraries](#migration-guide-from-other-i18n-libraries)
+- [Why Intl-T?](#why-intl-t)
 - [TypeScript](#typescript)
 - [Tools](#tools)
   - [Inject](#inject)
@@ -145,6 +147,7 @@ export default function Component() {
   - [Formatters](#formatters)
   - [Resolvers](#resolvers)
 - [Strategies and Cases](#strategies-and-cases)
+- [Roadmap](#roadmap)
 - [**Hello there**](#hello-there)
 - [**References**](#references)
 - [**Support**](#support)
@@ -541,6 +544,8 @@ import { generateDeclarations } from "intl-t/declarations";
 generateDeclarations("i18n/messages"); // translations folder
 ```
 
+_Note: Running `generateDeclarations` in `next.config.js` may display ESM warnings in the console. You can safely ignore these warnings, or run the script separately to avoid them._
+
 After running the script, declaration files will appear in your locales folder with the corresponding types. These types are not needed for production or development runtime, so you can ignore them in your git repository:
 
 `*.d.json.ts`
@@ -594,7 +599,7 @@ const MyComponent = () => {
 Use provider to sync current locale across your application:
 
 ```jsx
-import { createTranslation } from "intl-t/react";
+import { createTranslation } from "intl-t/react"; // Important: use intl-t/react
 
 export const { Translation, useTranslation } = createTranslation({ locales: { en, es } });
 
@@ -733,6 +738,14 @@ In dynamic pages with just `await getTranslation()` you can get the translation 
 `getTranslation` also has `getTranslations` as an alias.
 
 > Note: `intl-t/next` is for Next.js App with RSC. For Next.js Pages you should use `intl-t/react` instead, and `intl-t/navigation` for Next.js Navigation and Routing tools.
+
+```ts
+import en from "./messages/en.json";
+import es from "./messages/es.json";
+import { createTranslation } from "intl-t/next"; // Important: use intl-t/next
+
+export const { Translation, useTranslation, getTranslation } = await createTranslation({ locales: { en, es } });
+```
 
 ### Navigation
 
@@ -1207,7 +1220,8 @@ const nextConfig = {
   },
 };
 ```
-Or use `import en from "./en.json"` instead of `await import("./en.json")`. 
+
+Or use `import en from "./en.json"` instead of `await import("./en.json")`.
 
 ## Migration Guide from Other i18n Libraries
 
@@ -1454,6 +1468,24 @@ export default function Component() {
 
 [Clic to read more about the Router Hook](#router-hook).
 
+## Why Intl-T?
+
+> Why Intl-T instead of Other i18n Libraries
+
+Intl-T was created out of frustration with the limitations and poor DX of existing i18n solutions. Although they offer different features, none of them deliver the optimal developer experience. Many require excessive boilerplate code, lack robust type safety, or lack key conveniences. Intl-T combines the best features of all of them to provide a super robust, solid, fully-typed, and streamlined solution that focuses on providing the best possible developer experience that we all want.
+
+Intl-T is designed to be:
+
+- **Fully type-safe**: Enjoy 100% TypeScript autocompletion everywhere for translations, keys, variables and more.
+- **Minimal and dependency-free**: No extra dependencies or complex setup. Just import and use.
+- **Node-based and flexible**: Organize translations in a powerful, deeply nested object structure.
+- **Seamless with React and Next.js**: Integrates out of the box with modern frameworks. Such as React with super powerful [Component Injection](#react-component-injection) and Next.js with [Navigation](#nextjs).
+- **Lightweight**: Small bundle size, optimized for performance.
+- **Rich API**: Access translations as functions, objects, or strings, with dynamic variable injection and ICU support.
+- **Easy migration and adaptation**: Supports most popular i18n formats, key aliases, and usage patterns, making it simple to migrate from other libraries or integrate with existing translation files.
+
+If you want a simple, robust, and modern i18n library that puts developer experience first, give Intl-T a try. Feedback is welcome!
+
 ## TypeScript
 
 It is recommended to use TypeScript with intl-t. You may find the following configuration useful, especially when using [`declarations`](#declarations):
@@ -1673,9 +1705,31 @@ You can also implement different strategies for each isolated translation, such 
 
 **This approach keeps translations isolated. In the future, intl-t may support merging or extending translations dynamically, but for now, this pattern allows you to simulate namespaces effectively.**
 
+## Roadmap
+
+Here are some planned features and improvements for future:
+
+- **Translations Merging:** Merging and extending translations namespaces dynamically for each independent node in the tree, so will be able to download
+- **CLI Tooling:** Command-line utilities for managing, validating, and extracting translations.
+- **Editor Integrations:** VSCode plugin for enhanced translation management.
+- **Improved ICU Support:** More advanced ICU message format features.
+- **Performance Optimizations:** Further reduce bundle size and improve runtime efficiency.
+- **Testing:** Add robust testing for Intl-T to ensure its reliability.
+- **Documentation:** Expanded guides, recipes, and migration examples in its own website.
+- **Plugins:** Support for third-party plugins and integrations.
+- **More frameworks:** Support for more popular frameworks and libraries, including backend frameworks.
+- **Modular and agnostic:** To ensure agnosticism, Intl-T will be a monorepo with separate modules for different environments and features (e.g., `@intl-t/next`, `@intl-t/tools`, `@intl-t/server`, etc.)
+- **Intl-T Server:** Easily self-host translations with a simple API that is agnostic and compatible with the intl-t client.
+- **Intl-T l10n Service:** A simple service for providing translation management to your application through intl-t API.
+- **Crowdin Integration:** Integration with Crowdin for efficient translation management and dynamic loading.
+
+_Feedback and contributions are welcome! If you have suggestions or feature requests, please open an issue or join the [Discord Support Chat](https://discord.gg/5EbCXKpdyw)._
+
 ## Hello there
 
 _This translation library was originally built for my own projects, aiming to provide the best possible developer experience: high performance, ultra-lightweight, fully customizable, and with TypeScript autocomplete everywhere. It uses a translation object-based approach and offers a super flexible syntax, integrating the best features from other i18n libraries. It includes its own ICU message format, works out of the box with React and Next.js, supports static rendering, and has zero dependencies. While it's still under active development and may not yet be recommended for large-scale production projects, I am committed to improving it further. Feel free to use it, contribute, or reach out with feedback. Thank you!_
+
+_Contact: [Email](mailto:nivnnd@gmail.com), [Discord Support Chat](https://discord.gg/5EbCXKpdyw)._
 
 ## References
 
