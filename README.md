@@ -1,6 +1,6 @@
 # Intl-T
 
-### A Fully-Typed Node-Based i18n Translation Library.
+### A Fully-Typed Object-Based i18n Translation Library.
 
 [![npm version](https://img.shields.io/npm/v/intl-t.svg)](https://www.npmjs.com/package/intl-t)
 [![TypeScript](https://img.shields.io/badge/-TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -76,6 +76,8 @@ export default function Component() {
 }
 ```
 
+`en.json`
+
 ```jsonc
 {
   "title": "Homepage",
@@ -116,6 +118,37 @@ export default function Component() {
 }
 ```
 
+## Index
+
+- [Features](#features)
+- [Example](#example)
+- [Index](#index)
+- [Installation](#installation)
+- [Guides](#guides)
+- [Basic Usage](#basic-usage)
+- [API Reference](#api-reference)
+- [React](#react)
+  - [Provider](#provider)
+  - [`useTranslation` Hook](#usetranslation-hook)
+  - [React Component Injection](#react-component-injection)
+- [Next.js](#nextjs)
+  - [Navigation](#navigation)
+  - [Static Rendering](#static-rendering)
+  - [Dynamic Rendering](#dynamic-rendering)
+- [Dynamic Locales Import](#dynamic-locales-import)
+- [Migration Guide from other i18n libraries](#migration-guide-from-other-i18n-libraries)
+- [TypeScript](#typescript)
+- [Tools](#tools)
+  - [Inject](#inject)
+  - [Match](#match)
+  - [Negotiator](#negotiator)
+  - [Formatters](#formatters)
+  - [Resolvers](#resolvers)
+- [Strategies and Cases](#strategies-and-cases)
+- [**Hello there**](#hello-there)
+- [**References**](#references)
+- [**Support**](#support)
+
 ## Installation
 
 Install intl-t with your favorite package manager:
@@ -126,7 +159,7 @@ npm i intl-t
 bun i intl-t
 ```
 
-## Guide
+## Guides
 
 - [Basic Usage](#basic-usage)
 - [React](#react)
@@ -981,7 +1014,7 @@ import "./patch";
 
 > Dynamic Import
 
-There are several ways to dynamically import locales. Please read this section in detail for a complete overview.
+There are several ways to dynamically import locales. Dynamic locale importing consists in loading only the translations you actually need. You may not need to use dynamic importing, but if you do, please read this section carefully for a complete overview.
 
 ### Nodes as dynamic functions
 
@@ -1158,6 +1191,24 @@ This method is not totally recommended due to some errors when building with Nex
 
 If you're getting started with `intl-t` and dynamic imports, you may want to begin by [setting nodes as dynamic functions](#nodes-as-dynamic-functions).
 
+Some of these dynamic locales importing strategies are unstable and may not work as expected. You may find the next error when building with Next.js:
+
+> Linting and checking validity of types ..Debug Failure. False expression.
+> Next.js build worker exited with code: 1 and signal: null
+> error: script "build" exited with code 1
+
+This occurs when using `import("...")` and `bundle` module resolution in `tsconfig.json`. In this case, you can disable typescript check with Next.js
+
+```ts
+// next.config.js
+const nextConfig = {
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+};
+```
+Or use `import en from "./en.json"` instead of `await import("./en.json")`. 
+
 ## Migration Guide from Other i18n Libraries
 
 Before migrating, make sure you understand the core concepts of intl-t. See the [Basic Usage](#basic-usage) section for details.
@@ -1237,10 +1288,9 @@ If you're using Next.js in production, you may need to patch React to support tr
 // i18n/patch.ts
 import React from "react";
 import jsx from "react/jsx-runtime";
-import jsxDEV from "react/jsx-dev-runtime";
 import patch from "intl-t/patch";
 
-patch(React, jsx, jsxDEV);
+process.env.NODE_ENV !== "development" && patch(React, jsx);
 ```
 
 Then import this patch at the top of your translation file:
@@ -1625,10 +1675,16 @@ You can also implement different strategies for each isolated translation, such 
 
 ## Hello there
 
-This translation library was originally built for my own projects, aiming to provide the best possible developer experience: high performance, ultra-lightweight, fully customizable, and with TypeScript autocomplete everywhere. It uses a translation node-based approach and offers a super flexible syntax, integrating the best features from other i18n libraries. It includes its own ICU message format, works out of the box with React and Next.js, supports static rendering, and has zero dependencies. While it's still under active development and may not yet be recommended for large-scale production projects, I am committed to improving it further. Feel free to use it, contribute, or reach out with feedback. Thank you!
+_This translation library was originally built for my own projects, aiming to provide the best possible developer experience: high performance, ultra-lightweight, fully customizable, and with TypeScript autocomplete everywhere. It uses a translation object-based approach and offers a super flexible syntax, integrating the best features from other i18n libraries. It includes its own ICU message format, works out of the box with React and Next.js, supports static rendering, and has zero dependencies. While it's still under active development and may not yet be recommended for large-scale production projects, I am committed to improving it further. Feel free to use it, contribute, or reach out with feedback. Thank you!_
+
+## References
+
+- [dx_over_dt's Stack Overflow answer,](https://stackoverflow.com/a/64418639/29393046) demonstrates how to override the `[Symbol.iterator]` method of a `String` object to prevent character-by-character rendering in React. This idea helped shape earlier versions of Intl-T.
+
+- [Kent C. Dodds's blog post,](https://kentcdodds.com/blog/rendering-a-function-with-react) explores a clever way to trick React into rendering functions as children. Although, this approach is no longer supported due to `react-reconciler`. It provides historical context that eventually led to the strategy used in Intl-T.
 
 ## Support
 
-If you find this project useful, consider supporting its development ☕ or [leave a ⭐ on the Github Repo](https://github.com/nivandres/intl-t)
+If you find this project useful, [consider supporting its development ☕](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6) or [leave a ⭐ on the Github Repo.](https://github.com/nivandres/intl-t) Also, if you need direct support or help, please don't hesitate to contact me.
 
 [![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6) [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)
