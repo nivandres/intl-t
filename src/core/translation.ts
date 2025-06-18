@@ -17,7 +17,7 @@ import type {
   TranslationFC,
   TranslationNodeFC,
 } from "./types";
-import type { GlobalTranslation } from "src/types";
+import type { GlobalTranslation } from "../global";
 import { injectVariables } from "../tools/inject";
 import { hydration, isClient } from "../state";
 import { getLocales } from "./dynamic";
