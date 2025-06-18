@@ -1,6 +1,9 @@
 // oxlint-disable no-eval
 import type { Values, Content, Variables } from "../types";
 import { format } from "./format";
+import { isEdge } from "../state";
+
+if (isEdge) globalThis.eval = (v: any) => v;
 
 export function nested(content: string) {
   const matches = content.matchAll(/(?<!`)({|})/g);

@@ -1468,6 +1468,30 @@ export default function Component() {
 
 [Clic to read more about the Router Hook](#router-hook).
 
+[Why Intl-T?](#why-intl-t)
+
+### Edge Runtime Support Warning
+
+_Edge environments, such as Cloudflare Workers, Vercel Edge Functions, and Cloudflare Pages, are only partially supported and have various limitations and caveats._
+
+_Since `new Function` cannot be executed in edge environments, Translationn Node Proxies created from a new function cannot be functions anymore. This means you won't be able to call them directly. Instead, you'll need to use methods like `.use` or `.get` to perform actions._
+
+```ts
+// from:
+const t = getTranslation();
+t("hello");
+t.greetings({ name: "John" });
+// to:
+const t = getTranslation(); // Also hooks lose their proxy properties
+t.get("hello"); // or t.hello
+t.greetings.use({ name: "John" });
+// .use and .get are aliases
+```
+
+_The upside is that, since these proxies become string objects rather than function objects, this offers better compatibility in some environments and eliminates the need for workarounds such as React Patch. However, this limitation only applies to edge environments._
+
+_The current solution is a temporary workaround. In the future, full compatibility will be achieved, as there are ways in JavaScript that can provide the desired behavior and even allow you to choose between string objects or function objects as needed, thus avoiding the need for workarounds like the React Patch._
+
 ## Why Intl-T?
 
 > Why Intl-T instead of Other i18n Libraries

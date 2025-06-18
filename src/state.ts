@@ -15,16 +15,16 @@ export const locale = isClient ? (navigator["language" as keyof typeof navigator
 export const timeZone = options.timeZone;
 export const now = new Date();
 export let hydration: boolean;
+export let isEdge: boolean;
 
 try {
   hydration = Boolean(process);
 } catch {
-  hydration = false;
+  isEdge = !("window" in globalThis);
 }
 
 export const state: State = {
   timeZone,
   locale,
   now,
-  hydration,
 };
