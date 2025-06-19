@@ -1,6 +1,6 @@
 import { getRequestLocale, getRequestPathname } from "./request";
 import { useLocale, usePathname } from "./router";
-import { setClientLocale } from "src/react";
+import { setClientLocale } from "../react";
 import type { Locale } from "../locales/types";
 import React from "react";
 
