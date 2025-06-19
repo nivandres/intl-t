@@ -1437,6 +1437,18 @@ For easier migration from other i18n libraries, you can use the `getTranslations
 
 You can also use them as translation object directly, e.g., `useTranslation.greeting.es({ name: "Ivan" })`—it's modular, type-safe, and flexible.
 
+**With metadata:**
+
+```tsx
+// layout.tsx
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslation();
+  return t.metadata.toJSON();
+}
+```
+
 **Link Navigation Component:**
 
 ```tsx
