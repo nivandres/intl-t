@@ -8,7 +8,7 @@ export { setCachedRequestLocale as setRequestLocale } from "./cache";
 export function getRequestLocale<L extends Locale>(preventDynamic: true): L | undefined;
 export function getRequestLocale<L extends Locale>(preventDynamic?: boolean): Promise<L> | L | undefined;
 // @ts-ignore
-export function getRequestLocale(preventDynamic: boolean = this?.settings.preventDynamic || false) {
+export function getRequestLocale(preventDynamic: boolean = this?.settings?.preventDynamic || false) {
   return (
     // @ts-ignore
     getCachedRequestLocale.call(this) ||

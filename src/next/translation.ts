@@ -5,6 +5,9 @@ import { isRSC } from "./state";
 import type { TranslationFC } from "../types";
 import { getRequestLocale, setRequestLocale } from "./request";
 
+export { getRequestLocale as getLocale };
+export { setRequestLocale as setLocale };
+
 if (isRSC) {
   TranslationNode.Provider = TranslationProvider as TranslationFC;
   TranslationNode.hook = getTranslation;
