@@ -1,6 +1,6 @@
 import { getHeadersRequestLocale, getHeadersRequestPathname } from "./headers";
 import { getCachedRequestLocale, setCachedRequestLocale } from "./cache";
-import { getRootParamsLocale } from "./root";
+// import { getRootParamsLocale } from "./root";
 import type { Locale } from "../locales/types";
 
 export { setCachedRequestLocale as setRequestLocale } from "./cache";
@@ -12,8 +12,8 @@ export function getRequestLocale(preventDynamic: boolean = this?.settings?.preve
   return (
     // @ts-ignore
     getCachedRequestLocale.call(this) ||
-    // @ts-ignore
-    getRootParamsLocale.call(this) ||
+    // Missing workStore in unstable_rootParams.
+    // getRootParamsLocale.call(this) ||
     // @ts-ignore
     (!preventDynamic && getHeadersRequestLocale.call(this).then(setCachedRequestLocale)) ||
     undefined

@@ -955,7 +955,12 @@ export default function Component() {
 }
 ```
 
-> New Next.js feature `rootParams` has been implemented. `setRequestLocale` is no longer needed in pages and layout, except in the `rootLayout`.
+> New Next.js feature `rootParams` will be implemented. `setRequestLocale` will be no longer needed in pages and layout, except in the `rootLayout`
+
+```ts
+import { getRootParamsLocale } from "intl-t/next";
+// Already available but not directly implemented in getTranslation logic
+```
 
 ### Dynamic Rendering
 
