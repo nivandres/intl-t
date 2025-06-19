@@ -1474,7 +1474,7 @@ export default function Component() {
 
 _Edge environments, such as Cloudflare Workers, Vercel Edge Functions, and Cloudflare Pages, are only partially supported and have various limitations and caveats._
 
-_Since `new Function` cannot be executed in edge environments, Translationn Node Proxies created from a new function cannot be functions anymore. This means you won't be able to call them directly. Instead, you'll need to use methods like `.use` or `.get` to perform actions._
+_Since `new Function` cannot be executed in edge environments, Translation Node Proxies created from a new function cannot be functions anymore. This means you won't be able to call them directly. Instead, you'll need to use methods like `.use` or `.get` to perform actions._
 
 ```ts
 // from:
