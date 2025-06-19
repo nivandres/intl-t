@@ -698,7 +698,7 @@ export interface ReactChunkProps {
 
 By default, if a variable is not specified, it will be injected as an HTML element with the corresponding `tagName`, `tagAttributes`, and `tagContent` (`children`).
 
-For example, if your translation is `Go to <a href="/" className="font-bold">Home</a>` it will be literally rendered as `<a href="/" className="font-bold">Go to Home</a>`. HTML Element with its attributes, children and custom props will be injected and working. Also this chunks can be nested.
+For example, if your translation is `Go to <a href="/" className="font-bold">Home</a>` it will be literally rendered as `Go to <a href="/" className="font-bold">Home</a>`. HTML Element with its attributes, children and custom props will be injected and working. Also this chunks can be nested.
 
 [Continue with the Next.js section.](#nextjs)
 
