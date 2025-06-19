@@ -955,6 +955,8 @@ export default function Component() {
 }
 ```
 
+> New Next.js feature `rootParams` has been implemented. `setRequestLocale` is no longer needed in pages and layout, except in the `rootLayout`.
+
 ### Dynamic Rendering
 
 Same configuration. No need any more to set locale in dynamic pages.
@@ -1359,6 +1361,7 @@ interface Props {
 export default async function RootLayout({ children, params }: Props) {
   const { locale } = await params;
   if (!Translation.locales.includes(locale)) return;
+  setRequestLocale(locale);
   return (
     <html lang={locale}>
       <body>
@@ -1382,6 +1385,8 @@ export default function Component() {
 }
 ```
 
+[Read more about static rendering with Intl-T](#static-rendering)
+
 **With React Server Components (Dynamic):**
 
 If you don't provide a Translation Provider or don't use `setRequestLocale` if required, you can use `await getTranslation()` for dynamic rendering in Next.js.
@@ -1394,6 +1399,8 @@ export default function Component() {
   return <div>{t("greeting", { name: "Ivan" })}</div>;
 }
 ```
+
+[Read more about dynamic rendering with Intl-T](#dynamic-rendering)
 
 **With Server Actions:**
 
