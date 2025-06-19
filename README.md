@@ -1004,7 +1004,7 @@ export default function RootLayout({ children }) {
 
 #### Advanced Technical Warning.
 
-_Warning: When calling directly the `t` object from `getTranslation` with [dynamic rendering](#dynamic-rendering) in a React Server Component (RSC) without `await`, and the `locale` is not yet loaded or cached, and t is not destructured, you may find the next warning:_
+_Warning: When calling directly the `t` object from `getTranslation("...")` with [dynamic rendering](#dynamic-rendering) in a React Server Component (RSC) without `await`, and the `locale` is not yet loaded or cached, and t is not destructured, and the t expected is not the translation root t, you may find unexpected behaviour when calling:_
 
 > Translation did not load correctly through the Proxy. Try using `await getTranslation`, `t.t(...args)` or `const { t } = getTranslation()`"
 
