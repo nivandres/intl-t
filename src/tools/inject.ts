@@ -3,7 +3,7 @@ import type { Values, Content, Variables } from "../types";
 import { format } from "./format";
 import { isEdge } from "../state";
 
-if (isEdge) globalThis.eval = (v: any) => v;
+const ev = isEdge ? (v: any) => v : globalThis.eval;
 
 export function nested(content: string) {
   const matches = content.matchAll(/(?<!`)({|})/g);
@@ -57,12 +57,12 @@ export function injectVariables<T extends string, V extends Values>(
     if (!key.match(/^\w+$/)) {
       const k = key.match(/\w+/)?.[0] ?? formatFallback;
       key.matchAll(/{(\w+)}|(\w+)/g).forEach(([i, _, v = _]) => v in variables && (key = key.replace(i, JSON.stringify(variables[v]))));
-      v = eval(key);
+      v = ev(key);
       key = k;
     } else v = variables[key];
     let value;
     if (v === undefined) break;
-    else if (typeof v === "string" && v && !isNaN(v as any)) v = Number(v);
+    else if (v && typeof v === "string" && !isNaN(v as any)) v = Number(v);
     const options = { ...formatOptions } as Record<string, any>;
     const instructions = instructionsMatch(instruction).map(({ groups = {} }) => {
       const { k: name, v: val, t, t_ } = groups;
@@ -106,7 +106,7 @@ export function injectVariables<T extends string, V extends Values>(
                   /^[^\w#"'/({`[\]]/.test(name) ? (name = `#${name}`) : null,
                   (name = name.replaceAll("#", JSON.stringify(v))),
                   name.matchAll(/{(\w+)}/g).forEach(([i, v]) => (name = name.replace(i, JSON.stringify(variables[v])))),
-                  eval(name))
+                  ev(name))
                 : name == v) ||
               /^(ot(her|r[ao])|alway)s?$/im.test(name) ||
               (v ? /^(yea?[hs]?|y[ue]p|true?|s[íi].?|[sytv])$/im.test(name) : /^(no.?|false?|[nf])$/im.test(name)) ||

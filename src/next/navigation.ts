@@ -4,7 +4,7 @@ import { ResolveConfig, resolveHref, resolveLocale, resolvePath } from "../tools
 import { RouterConfig, useRouter, useLocale, usePathname } from "./router";
 import type { Locale, TranslationSettings } from "../types";
 import { Link, LinkConfig, NL } from "./link";
-import { getLocale, getPathname } from "./state";
+import { getLocale, getPathname, setLocale } from "./state";
 import { createStaticParams, StaticParamsConfig } from "./params";
 import type { FC } from "react";
 
@@ -57,6 +57,7 @@ export function createNavigation<L extends Locale, LC extends FC<any>>(
     redirect: redirect.bind(config),
     permanentRedirect: permanentRedirect.bind(config),
     getLocale: getLocale.bind(config)<L>,
+    setLocale: setLocale.bind(config)<L>,
     resolvePath: resolvePath.bind(config),
     resolveHref: resolveHref.bind(config)<L>,
     resolveLocale: resolveLocale.bind(config)<L>,

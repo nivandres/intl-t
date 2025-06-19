@@ -4,8 +4,7 @@ import type { Values, Base, ReactChunk, ReactChunkProps } from "../types";
 const regex = /<(\w+)([^<>/]+)?(?:\/\s*>|>(?:(.*)<\s*\/\s*\1\s*>)?)/gm;
 const attributesRegex = /(\w+)(?:=(\w+|".*?"|'.*?'|{(.+?)}))?/g;
 
-// oxlint-disable-next-line no-unused-vars
-export const Chunk: ReactChunk = ({ children, tagName, tagAttributes, tagContent, value, key, ...props }) => {
+export const Chunk: ReactChunk = ({ children, tagName, value, key, tagAttributes: _a, tagContent: _c, ...props }) => {
   if (value) return String(value);
   return createElement(tagName, { key, ...props }, children);
 };

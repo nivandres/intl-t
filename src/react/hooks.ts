@@ -7,8 +7,6 @@ import { TranslationContext } from "./context";
 import { getClientLocale, setClientLocale, LOCALE_CLIENT_KEY } from "./client";
 import { ReactState, ReactSetState } from "./types";
 
-export { useTranslation } from "./context";
-
 export function useLocale<L extends Locale = Locale>(
   // @ts-ignore-error optional binding
   defaultLocale: L | undefined | null = this?.locale,
