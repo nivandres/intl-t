@@ -5,6 +5,7 @@
 .npmignore
 .vscode
 .prettierrc
+.oxlintrc.json
 assets
 bun.lock*
 node_modules
