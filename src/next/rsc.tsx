@@ -50,7 +50,7 @@ function hook(...args: any[]) {
     return new Proxy(t, {
       get(_, p, receiver) {
         return p in Promise.prototype
-          ? (cb: Function) => new Promise(async r => (await locale, (tp ||= tc = (await t)(...args)), r(tp), cb(tp)))
+          ? (cb: Function) => new Promise(async r => (await locale, (tp ||= tc = (await t.current)(...args)), r(tp), cb(tp)))
           : Reflect.get((tc ||= t(...args)), p, receiver);
       },
     });
