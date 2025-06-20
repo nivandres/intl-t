@@ -420,7 +420,7 @@ export function createTranslationSettings<
   settings.mainLocale ??= settings.defaultLocale ??= settings.allowedLocales[0] as M;
   settings.defaultLocale ??= settings.mainLocale;
   settings.allowedLocale ??= settings.mainLocale;
-  settings.currentLocale ??= TranslationNode.context?.locale || TranslationNode.getLocale.call(settings) || settings.defaultLocale;
+  settings.currentLocale ??= TranslationNode.context?.locale || settings.defaultLocale;
   settings.locale ??= settings.currentLocale;
   settings.setLocale ??= TranslationNode.setLocale;
   settings.tree ??= settings.locales as any;
