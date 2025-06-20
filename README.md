@@ -706,7 +706,7 @@ For example, if your translation is `Go to <a href="/" className="font-bold">Hom
 
 ## React Patch
 
-If you are using React, in some frameworks you may need to patch React to support translation objects. (Farmfe and Next.js builds)
+If you are using React, in some frameworks you may need to patch React to support translation function objects. (Farmfe and Next.js builds)
 You can do it by importing the patch function and passing the React, jsx and jsxDEV modules directly to it.
 
 ```ts
@@ -726,6 +726,8 @@ And then import it at the top of your translation file
 import "./patch";
 // ...
 ```
+
+This patch will allow you to use translation function objects in JSX children and attributes.
 
 ## Next.js
 
@@ -1018,6 +1020,8 @@ The previous problem only applies for [dynamic rendering with next](#dynamic-ren
 
 ### Next.js React patch
 
+Read more about [React Patch](#react-patch) to understand how it works and limitations.
+
 ```ts
 import React from "react";
 import jsx from "react/jsx-runtime";
@@ -1029,6 +1033,8 @@ process.env.NODE_ENV !== "development" && patch(React, jsx);
 ```ts
 import "./patch";
 ```
+
+_Warning: The only situation where you may encounter unexpected behavior with this Patch is when passing Translation Nodes as JSX attributes from a React Server Component (RSC) to a React Client Component. In this case, you cannot send the `function object` directly. Instead, convert the translation node to a string using `t.toString()`, `t.base`, or to JSON with `t.toJSON()`._
 
 ## Dynamic Locales import
 
