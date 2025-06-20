@@ -7,9 +7,8 @@ export const LOCALE_CLIENT_KEY = "LOCALE";
 
 export function setClientLocale(locale: string, key = LOCALE_CLIENT_KEY) {
   // @ts-ignore-error optional binding
-  const settings = this?.settings;
+  if (this?.settings) this.settings.locale = locale;
   locale && localStorage?.setItem(key, locale);
-  if (settings) settings.locale = locale;
   return locale;
 }
 

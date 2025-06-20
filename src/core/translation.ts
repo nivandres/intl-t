@@ -321,7 +321,6 @@ export class TranslationNode<
     locale: LL | (string & {}) | ((p: L) => LL) = this.settings.locale,
   ): TranslationType<S, FollowWay<S["tree"][LL], R>, V, LL, R> {
     if (typeof locale === "function") locale = locale(this.currentLocale as L);
-    this.settings.setLocale;
     this.settings.setLocale(locale) || (this.settings.locale = locale);
     return this.current as any;
   }
