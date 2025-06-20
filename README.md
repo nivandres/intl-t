@@ -924,6 +924,12 @@ export const { t } = createTranslation({
 });
 ```
 
+#### NotFound Page Warning
+
+When using the param strategy (`[locale]`) with middleware in Next.js, you may encounter unexpected behavior when a page is not found: Next.js will redirect to `app/not-found.tsx`, which is outside the `[locale]` wrapper. To resolve this, use a `[...404]` dynamic param inside `[locale]` to catch all unmatched routes. Then, call the `notFound` function from Next.js to redirect users to the correct `not-found.tsx` page within the expected locale folder.
+
+This workaround will likely not be needed in future versions of Next.js.
+
 ### Static Rendering
 
 ```ts
