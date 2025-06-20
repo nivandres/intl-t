@@ -1,7 +1,7 @@
 {
   "name": "intl-t",
   "description": "A Fully-Typed Node-Based i18n Translation Library",
-  "version": "1.0.0-rc.85",
+  "version": "1.0.0-rc.88",
   "type": "module",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,14 +11,14 @@
     "type": "git"
   },
   "scripts": {
-    "start": "bunx tsc --watch",
-    "dev": "bun test --watch && bunx tsc --watch",
-    "build": "bunx tsc",
+    "start": "bun --bun tsc --watch",
+    "dev": "bun run test:watch",
+    "build": "bun --bun tsc",
     "test": "bun test",
     "test:watch": "bun test --watch",
-    "format": "bunx prettier --write .",
-    "lint": "bunx oxlint --fix",
-    "prepare": "bunx husky",
+    "format": "bun prettier --write .",
+    "lint": "bun oxlint --fix",
+    "prepare": "bun husky",
     "prepublishOnly": "bun run build"
   },
   "keywords": [
@@ -97,7 +97,8 @@
     "next": "^15",
     "oxlint": "^1.1.0",
     "prettier": "^3.5.3",
-    "react": "^19"
+    "react": "^19",
+    "typescript": "^5"
   },
   "peerDependencies": {
     "next": ">=14",
