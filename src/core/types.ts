@@ -134,11 +134,11 @@ export type Translation<
     [...R, ...StringToArray<D, S["ps"]>]
   >;
   <A extends isArray<SearchWays<N>>, A_ extends string[] = A, const VV extends Values = Values>(
-    path?: A | A_ | TemplateStringsArray[],
+    path?: A | A_,
     variables?: Override<Partial<FollowWayWithValues<N, A_, V>>, VV>,
   ): Translation<S, FollowWay<N, A_>, FollowWayWithValues<N, A_, any, Override<Variables<N, V>, VV>>, L, [...R, ...A_]>;
   <A extends isArray<SearchWays<N>>, A_ extends string[] = A, const VV extends Values = Values>(
-    ...path: A | A_ | [...(A | A_), Override<Partial<FollowWayWithValues<N, A_, V>>, VV>?]
+    ...path: A | A_ | [...(A | A_), Override<Partial<FollowWayWithValues<N, A_, V>>, VV>?] | TemplateStringsArray[]
   ): Translation<S, FollowWay<N, A_>, FollowWayWithValues<N, A_, any, Override<Variables<N, V>, VV>>, L, [...R, ...A_]>;
   new <const T extends TranslationData>(data: T): TranslationDataAdapter<T>;
 } & TranslationNode<S, N, V & Values, L, R> & {
