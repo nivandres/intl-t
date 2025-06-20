@@ -1717,6 +1717,29 @@ t("Please try again, {name}", { name: "John" }); // falls back to "Please try ag
 typeof t("Please try again, {name}"); // `Please try again, ${string}`
 ```
 
+### String Methods
+
+```tsx
+<motion.p initial="hidden" animate="visible" transition={{ staggerChildren: 0.04 }}>
+  {t.description.split(" ").map((word, index, words) => {
+    return (
+      <motion.span key={word + index} transition={transition} variants={variants}>
+        {word + " "}
+      </motion.span>
+    );
+  })}
+</motion.p>
+```
+
+### Template Strings
+
+```tsx
+async function Greeting() {
+  "use server";
+  return t`greeting`({ name: await getName() });
+}
+```
+
 ### Namespaces
 
 Namespaces are a way to simulate isolated translation contexts in your application. While intl-t does not natively support namespaces as a built-in feature, you can achieve similar separation by organizing your translation files and configuration per feature or section.
