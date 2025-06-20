@@ -12,7 +12,7 @@ const jsxDEV_ = _jsxDEV.jsxDEV;
 
 const isArray = Array.isArray;
 const check = child => (typeof child === "function" && child instanceof TranslationNode ? child.base : child);
-const checkProps = props => (Object.entries(props).forEach(([key, value]) => (props[key] = check(value))), props);
+const checkProps = props => (Object.entries(props || {}).forEach(([key, value]) => (props[key] = check(value))), props);
 
 export function patch({ React, jsx, jsxDEV }: { React?: any; jsx?: any; jsxDEV?: any } = {});
 export function patch(React?: any, jsx?: any, jsxDEV?: any);
