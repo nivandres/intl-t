@@ -173,6 +173,25 @@ describe("Translation object", () => {
     });
     expect(t.n1.n2.base).toBe("hello 2");
   });
+  it("should work with fallbacks", () => {
+    const t = ct({
+      locales: {
+        en: {
+          hello: "hello world",
+          content: {
+            bye: "bye world",
+          },
+        },
+        es: {} as any,
+      },
+    });
+    expect(t.hello.base).toBe("hello world");
+    expect(t.content.bye.base).toBe("bye world");
+    expect(t("this does not exist. It's a fallback").base).toBe("this does not exist. It's a fallback");
+    expect(t.es("hello").base).toBe("hello world");
+    expect(t.es("content.bye").base).toBe("bye world");
+    expect(t.es("Esto no existe").base).toBe("Esto no existe");
+  });
 });
 
 describe("source node utilities", () => {
