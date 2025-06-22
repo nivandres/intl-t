@@ -3,4 +3,3 @@ bun.lock*
 *lock.json
 dist
 node_modules
-*.d.json.ts

@@ -8,6 +8,7 @@
 .oxlintrc.json
 assets
 bun.lock*
+*lock.json
 node_modules
 src
 test
