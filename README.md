@@ -1661,7 +1661,7 @@ format.price(value: number = 0, options: Intl.NumberFormatOptions = {}); // uses
 
 Resolver functions are best used via [createNavigation](#createnavigation), but you can also import them directly from `intl-t/tools` without bound values and types.
 
-## Strategies and Cases
+## Strategies and Use Examples
 
 ### Locales metadata
 
