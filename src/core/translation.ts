@@ -45,7 +45,6 @@ abstract class TranslationProxy extends TranslationFunction {
           src = target;
         } else {
           if (Array.isArray(target.node)) src = target.children.map((c: string) => target[c]);
-          else if (p in String.prototype) src = target.base;
           else src = target.node || "";
           val = src[p];
         }
@@ -336,7 +335,7 @@ export class TranslationNode<
   get current(): TranslationType<S, FollowWay<S["tree"][S["allowedLocale"]], R>, V, L, R> {
     this[Symbol.for("preload")] = false;
     const t = this[this.currentLocale as any] || this;
-    this[Symbol.for("preload")] = undefined;
+    this[Symbol.for("preload")] = null;
     if (isEdge)
       return new Proxy(t.call, {
         get(target, p, receiver) {
@@ -369,16 +368,16 @@ export class TranslationNode<
   get raw() {
     return this.toString();
   }
-  get promise(): Promise<this> | undefined {
-    return this.then ? new Promise((r, c) => this.then?.(r).catch(c)) : undefined;
+  get promise(): Promise<this> | null {
+    return this.then ? new Promise((r, c) => this.then?.(r).catch(c)) : null;
   }
-  get then(): Promise<this>["then"] | undefined {
+  get then(): Promise<this>["then"] | null {
     const t = this;
     let node = (this.node ||= this.settings?.getLocale(this.locale) as N);
     if (typeof node === "function") node = this.node = node((this.settings.hydrate ??= true));
     return node instanceof Promise
       ? cb => new Promise((r, c) => node.then(node => (t.setNode(node), r(t as any), cb?.(t))).catch(c))
-      : (this.setNode(node), undefined);
+      : (this.setNode(node), null);
   }
   *[Symbol.iterator]() {
     if (Array.isArray(this.node)) return yield* this.children.map(child => this[child as any]);

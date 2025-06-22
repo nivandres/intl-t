@@ -173,6 +173,18 @@ describe("Translation object", () => {
     });
     expect(t.n1.n2.base).toBe("hello 2");
   });
+  it("should work string and array methods", () => {
+    const t = ct({
+      locales: {
+        en: {
+          hello: "hello world",
+          content: ["hello", "world"],
+        },
+      },
+    });
+    expect(t.hello.split(" ")).toEqual(["hello", "world"]);
+    expect(t.content.join(" ")).toEqual("hello world");
+  });
   it("should work with fallbacks", () => {
     const t = ct({
       locales: {
