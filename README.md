@@ -574,6 +574,33 @@ export const t = createTranslation({
 });
 ```
 
+### Script
+
+You can generate TypeScript declarations for your translations using the `declarations` command.
+
+```
+
+Usage: declarations <files|folders>... [options]
+
+Options:
+  --out, --output     Output file or folder
+  --watch             Watch files/folders for changes
+  --format=<fmt>      Output format: ts, d.ts, d.json.ts (default)
+  --symbol=<name>     Exported symbol name (default: data)
+  --delete            Delete original JSON files
+  --no-search         Disable default JSON search
+  --recursive         Search recursively in specified folders
+  --silent            Silence logs
+  -h, --help          Show help
+
+```
+
+This converts your JSON files into TypeScript declarations, which can be used to type your translations and enhance the developer experience.
+
+If no files or folders are specified, the command will search for JSON files in the current directory and its subdirectories.
+
+There is also a watch mode that will automatically update the declarations when the JSON files change.
+
 ## React
 
 intl-t provides seamless integration with React through the `useTranslation` hook:

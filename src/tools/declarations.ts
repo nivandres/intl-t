@@ -1,118 +1,241 @@
-import { readFile, rm, writeFile, stat, readdir } from "fs/promises";
-import { basename, join } from "path";
+#!/usr/bin/env node
+import { promises as fs, watch as fsWatch } from "fs";
+import { join, basename, relative } from "path";
 
-export default async function main(args: any[]) {
-  if (args[1] === "intl-t" || args[2] === "declarations") args.shift();
-  const cmdName = args[1];
+export const cmdName = "declarations";
+export const commonDir = ["i18n", "locales", "messages", "translations", "dictionaries", "intl"];
+export const usage = `
+Usage: ${cmdName} <files|folders>... [options]
 
-  if (args.length < 3) throw `Usage: ${cmdName} <file.json|folder> [--outFile=customFile] [--symbolName=customName] [--remove] [--ts]`;
+Options:
+  --out, --output     Output file or folder
+  --watch             Watch files/folders for changes
+  --format <fmt>      Output format: ts, d.ts, d.json.ts (default)
+  --symbol <name>     Exported symbol name (default: data)
+  --delete            Delete original JSON files
+  --no-search         Disable default JSON search
+  --recursive         Search recursively in specified folders
+  --silent            Silence logs
+  -h, --help          Show help
+`;
 
-  let filePath = args[2];
-  let removeFile = false;
-  let tsFile = false;
-  let symbolName = "";
-  let outFile = "";
+export type DeclarationsFormat = "ts" | "d.ts" | "d.json.ts";
 
-  args.slice(3).forEach(arg => {
-    if (arg === "--remove") {
-      removeFile = true;
-    } else if (arg === "--ts") {
-      tsFile = true;
-    } else if (arg.startsWith("--symbolName=")) {
-      symbolName = arg.substring("--symbolName=".length).trim();
-    } else if (arg.startsWith("--outFile=")) {
-      outFile = arg.substring("--outFile=".length).trim();
-    } else {
-      console.warn(`Unknown argument: ${arg}`);
+export interface Options {
+  inputs: string[];
+  output?: string;
+  watch: boolean;
+  format: DeclarationsFormat;
+  symbolName?: string;
+  deleteOriginal: boolean;
+  disableSearch: boolean;
+  silent: boolean;
+}
+
+export function parseArgs(args: string[], options: Partial<Options> = {}) {
+  options.inputs ??= [];
+  args.splice(0, args[2] === cmdName ? 3 : 2);
+  args.forEach(arg => {
+    if (!arg.startsWith("-")) return options.inputs!.push(arg);
+    const [key, value] = arg.split("=");
+    switch (key) {
+      case "-h":
+      case "--help":
+        console.log(usage);
+        process.exit(0);
+      case "--out":
+      case "--output":
+        options.output = value;
+        break;
+      case "--watch":
+        options.watch = true;
+        break;
+      case "--no-search":
+        options.disableSearch = true;
+        break;
+      case "--format":
+        options.format = value as DeclarationsFormat;
+        break;
+      case "--symbol":
+        options.symbolName = value;
+        break;
+      case "--delete":
+        options.deleteOriginal = true;
+        break;
+      case "--silent":
+        options.silent = true;
+        break;
+      default:
+        throw new Error(`Unknown option ${arg}. Use --help for usage.`);
     }
   });
+  options.disableSearch ??= false;
+  options.silent ??= false;
+  return options;
+}
 
-  const fileStat = await stat(filePath);
+export async function generateDeclarations(inputs: string | string[], options: Partial<Options>): Promise<void>;
+export async function generateDeclarations(options: Partial<Options>): Promise<void>;
+export async function generateDeclarations(
+  inputsOrOptions: string | string[] | Partial<Options>,
+  {
+    inputs = [inputsOrOptions as string].flat(),
+    disableSearch = true,
+    format = "d.json.ts",
+    watch = false,
+    deleteOriginal = false,
+    silent = true,
+    output,
+    symbolName,
+  }: Partial<Options> = Array.isArray(inputsOrOptions) || typeof inputsOrOptions === "string"
+    ? { inputs: [inputsOrOptions as unknown as string].flat() }
+    : inputsOrOptions,
+) {
+  const log = silent ? () => {} : console.log;
+  const currentFolder = process.cwd();
 
-  if (fileStat.isDirectory()) {
-    const files = await readdir(filePath, { withFileTypes: true });
-    const jsonFiles = files.filter(f => f.isFile() && f.name.endsWith(".json"));
-    if (jsonFiles.length === 0) {
-      throw `No JSON files found in directory "${filePath}".`;
-    }
-    for (const file of jsonFiles)
-      try {
-        main([!0, cmdName, join(filePath, file.name), ...args.slice(3)]);
-      } catch (err) {
-        if (err instanceof Error) console.warn(`Error processing file "${file.name}": ${err.message}`);
+  if (!(inputs.length || disableSearch)) {
+    inputs = Object.entries(
+      Object.groupBy(
+        (
+          await fs.readdir(currentFolder, { withFileTypes: true, recursive: true }).catch(err => {
+            throw `Error reading directory "${currentFolder}": ${err.message}`;
+          })
+        ).filter(file => !file.parentPath.match(/node_modules|\/\.\w+\/?/)),
+        file => file.parentPath,
+      ),
+    )
+      .filter(entries => {
+        const [path, { length } = []] = entries;
+        const files = entries[1]?.filter(file => file.name.match(/\.json\w*$/)) || [];
+        return files.length && (files.length >= length / 2 || commonDir.some(dir => path.includes(dir)));
+      })
+      .map(([path]) => path);
+  }
+
+  if (!inputs.length) {
+    throw "No input files or folders specified. Use --help for usage.";
+  }
+
+  log(`Processing ${inputs.length} input file(s) or folder(s)... ${inputs.map(f => relative(currentFolder, f))}`);
+
+  for (const input of inputs) {
+    const stat = await fs.stat(input).catch(() => null);
+    if (!stat) throw `File or folder not found: ${input}`;
+
+    if (stat.isDirectory()) {
+      let files = await fs.readdir(input, { withFileTypes: true, recursive: false });
+      files = files.filter(file => file.isFile() && file.name.match(/\.json\w*$/));
+      for (const file of files) {
+        try {
+          await generateDeclarations(join(file.parentPath, file.name), {
+            disableSearch: true,
+            deleteOriginal,
+            watch: false,
+            format,
+          });
+        } catch (err: any) {
+          log(err);
+        }
       }
-    return;
-  } else if (!fileStat.isFile()) {
-    throw `File or folder "${filePath}" is not a file.`;
-  }
+      if (watch) {
+        try {
+          const watcher = fsWatch(input, { recursive: true });
+          watcher.on("change", (_, filename) => {
+            if (!filename.toString().match(/\.json\w*$/)) return;
+            try {
+              generateDeclarations(join(input, filename.toString()), {
+                disableSearch: true,
+                deleteOriginal: false,
+                watch: false,
+                format,
+              });
+            } catch (err: any) {
+              log(err);
+            }
+          });
+        } catch (err: any) {
+          throw `Error watching directory "${input}": ${err.message}`;
+        }
+      }
+      return;
+    }
 
-  symbolName ||= basename(filePath, ".json").replace(/[^a-zA-Z0-9_$]/g, "_") || "data";
-  outFile ||= filePath.replace(/\.json$/, tsFile ? ".ts" : ".d.json.ts");
+    if (!input.match(/\.json\w*$/)) continue;
 
-  let json;
+    let json;
 
-  try {
-    json = (await readFile(filePath, "utf-8")).trim();
-  } catch (err) {
-    if (err instanceof Error) throw `Error reading file "${filePath}": ${err.message}`;
-  }
+    try {
+      json = await fs.readFile(input, "utf-8");
+    } catch (err: any) {
+      throw `Error reading file "${input}": ${err.message}`;
+    }
 
-  try {
-    json = JSON.parse(json!);
-  } catch (err) {
-    if (err instanceof Error) throw `Error parsing JSON file "${filePath}": ${err.message}`;
-  }
+    try {
+      json = JSON.parse(json);
+    } catch (err: any) {
+      throw `Error parsing JSON file "${input}": ${err.message}`;
+    }
 
-  try {
-    json = JSON.stringify(json, null, 2);
-  } catch (err) {
-    if (err instanceof Error) throw `Error stringifying JSON file "${filePath}": ${err.message}`;
-  }
+    try {
+      json = JSON.stringify(json, null, 2);
+    } catch (err: any) {
+      throw `Error stringifying JSON file "${input}": ${err.message}`;
+    }
 
-  json = `${
-    tsFile ? `export const ${symbolName} = (${json}) as const;` : `export declare const ${symbolName}: ${json};`
-  }\nexport type ${symbolName} = typeof ${symbolName};\nexport default ${symbolName};`;
+    symbolName ??= basename(input)
+      .replace(/\.json\w*$/, "")
+      .replace(/[^a-zA-Z0-9_$]/g, "_");
 
-  try {
-    await writeFile(outFile, json, "utf-8");
-    if (removeFile && outFile !== filePath) {
+    switch (format) {
+      case "ts":
+        json = `export const ${symbolName} = (${json}) as const;\nexport type ${symbolName} = typeof ${symbolName};\nexport default ${symbolName};\n`;
+      case "d.ts":
+        json = `export declare const ${symbolName} = (${json}) as const;\nexport declare type ${symbolName} = typeof ${symbolName};\nexport default ${symbolName};\n`;
+      case "d.json.ts":
+      default:
+        json = `export declare const ${symbolName}: ${json};\nexport type ${symbolName} = typeof ${symbolName};\nexport default ${symbolName};`;
+    }
+
+    output ??= input.replace(/\.json\w*$/, `.${format}`);
+
+    try {
+      await fs.writeFile(output, json, "utf-8");
+      if (deleteOriginal && input !== output) {
+        try {
+          await fs.unlink(input);
+        } catch (err: any) {
+          throw `Error deleting original file "${input}": ${err.message}`;
+        }
+      }
+    } catch (err: any) {
+      throw `Error writing output file "${output}": ${err.message}`;
+    }
+
+    if (watch) {
       try {
-        await rm(filePath);
-      } catch (err) {
-        if (err instanceof Error) console.warn(`Error removing original file "${filePath}": ${err.message}`);
+        const watcher = fsWatch(input);
+        watcher.on("change", () => {
+          try {
+            generateDeclarations(input, {
+              deleteOriginal: false,
+              disableSearch: true,
+              output,
+              symbolName,
+              format,
+              watch: false,
+            });
+          } catch (err: any) {
+            log(err);
+          }
+        });
+      } catch (err: any) {
+        throw `Error watching file "${input}": ${err.message}`;
       }
     }
-  } catch (err) {
-    if (err instanceof Error) throw `Error writing file "${outFile}": ${err.message}`;
   }
 }
 
-export const declarations = new Set<string>();
-
-interface Params {
-  outFile?: string;
-  symbolName?: string;
-  remove?: boolean | string;
-  ts?: boolean | string;
-}
-
-export async function generateDeclaration(file: string, params: Params = {}): Promise<void> {
-  if (declarations.has(file)) return;
-  declarations.add(file);
-  let { outFile, symbolName, remove, ts } = params;
-  outFile &&= `--outFile=${outFile}`;
-  symbolName &&= `--symbolName=${symbolName}`;
-  remove &&= `--remove`;
-  ts &&= `--ts`;
-  try {
-    await main([!0, "declarations", file, outFile, symbolName, remove, ts].filter(Boolean));
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-export async function generateDeclarations(filesOrFolder: string[] | string, params: Params = {}) {
-  if (filesOrFolder instanceof Array) {
-    for (const file of filesOrFolder) await generateDeclaration(file, params);
-  } else await generateDeclaration(filesOrFolder, params);
+export default function main(args: string[]) {
+  return generateDeclarations(parseArgs(args));
 }
