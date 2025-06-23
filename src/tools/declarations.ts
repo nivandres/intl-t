@@ -132,6 +132,7 @@ export async function generateDeclarations(
             disableSearch: true,
             deleteOriginal,
             watch: false,
+            symbolName,
             format,
           });
         } catch (err: any) {
@@ -148,6 +149,7 @@ export async function generateDeclarations(
                 disableSearch: true,
                 deleteOriginal: false,
                 watch: false,
+                symbolName,
                 format,
               });
             } catch (err: any) {
