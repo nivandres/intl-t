@@ -1,5 +1,4 @@
-#!/usr/bin/env node
-import { promises as fs, watch as fsWatch } from "fs";
+import { promises as fs, watch } from "fs";
 import { join, basename, relative } from "path";
 
 export const cmdName = "declarations";
@@ -12,7 +11,7 @@ Options:
   --watch             Watch files/folders for changes
   --format <fmt>      Output format: ts, d.ts, d.json.ts (default)
   --symbol <name>     Exported symbol name (default: data)
-  --delete            Delete original JSON files
+  --del, --remove     Delete original JSON files
   --no-search         Disable default JSON search
   --recursive         Search recursively in specified folders
   --silent            Silence logs
@@ -24,10 +23,10 @@ export type DeclarationsFormat = "ts" | "d.ts" | "d.json.ts";
 export interface Options {
   inputs: string[];
   output?: string;
-  watch: boolean;
+  watchMode: boolean;
   format: DeclarationsFormat;
   symbolName?: string;
-  deleteOriginal: boolean;
+  removeOriginal: boolean;
   disableSearch: boolean;
   silent: boolean;
 }
@@ -48,7 +47,7 @@ export function parseArgs(args: string[], options: Partial<Options> = {}) {
         options.output = value;
         break;
       case "--watch":
-        options.watch = true;
+        options.watchMode = true;
         break;
       case "--no-search":
         options.disableSearch = true;
@@ -60,13 +59,15 @@ export function parseArgs(args: string[], options: Partial<Options> = {}) {
         options.symbolName = value;
         break;
       case "--delete":
-        options.deleteOriginal = true;
+      case "--remove":
+      case "--del":
+        options.removeOriginal = true;
         break;
       case "--silent":
         options.silent = true;
         break;
       default:
-        throw new Error(`Unknown option ${arg}. Use --help for usage.`);
+        throw new Error(`Unknown option ${key}. Use --help for usage.`);
     }
   });
   options.disableSearch ??= false;
@@ -82,8 +83,8 @@ export async function generateDeclarations(
     inputs = [inputsOrOptions as string].flat(),
     disableSearch = true,
     format = "d.json.ts",
-    watch = false,
-    deleteOriginal = false,
+    watchMode = false,
+    removeOriginal = false,
     silent = true,
     output,
     symbolName,
@@ -117,7 +118,7 @@ export async function generateDeclarations(
     throw "No input files or folders specified. Use --help for usage.";
   }
 
-  log(`Processing ${inputs.length} input file(s) or folder(s)... ${inputs.map(f => relative(currentFolder, f))}`);
+  log(`Processing... ${inputs.map(f => relative(currentFolder, f))}`);
 
   for (const input of inputs) {
     const stat = await fs.stat(input).catch(() => null);
@@ -130,8 +131,8 @@ export async function generateDeclarations(
         try {
           await generateDeclarations(join(file.parentPath, file.name), {
             disableSearch: true,
-            deleteOriginal,
-            watch: false,
+            watchMode: false,
+            removeOriginal,
             symbolName,
             format,
           });
@@ -139,16 +140,16 @@ export async function generateDeclarations(
           log(err);
         }
       }
-      if (watch) {
+      if (watchMode) {
         try {
-          const watcher = fsWatch(input, { recursive: true });
+          const watcher = watch(input, { recursive: true });
           watcher.on("change", (_, filename) => {
             if (!filename.toString().match(/\.json\w*$/)) return;
             try {
               generateDeclarations(join(input, filename.toString()), {
                 disableSearch: true,
-                deleteOriginal: false,
-                watch: false,
+                removeOriginal: false,
+                watchMode: false,
                 symbolName,
                 format,
               });
@@ -203,7 +204,7 @@ export async function generateDeclarations(
 
     try {
       await fs.writeFile(output, json, "utf-8");
-      if (deleteOriginal && input !== output) {
+      if (removeOriginal && input !== output) {
         try {
           await fs.unlink(input);
         } catch (err: any) {
@@ -214,18 +215,18 @@ export async function generateDeclarations(
       throw `Error writing output file "${output}": ${err.message}`;
     }
 
-    if (watch) {
+    if (watchMode) {
       try {
-        const watcher = fsWatch(input);
+        const watcher = watch(input);
         watcher.on("change", () => {
           try {
             generateDeclarations(input, {
-              deleteOriginal: false,
+              removeOriginal: false,
               disableSearch: true,
-              output,
+              watchMode: false,
               symbolName,
               format,
-              watch: false,
+              output,
             });
           } catch (err: any) {
             log(err);
