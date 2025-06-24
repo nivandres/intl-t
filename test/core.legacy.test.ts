@@ -158,9 +158,8 @@ describe("Translation object", () => {
       locales: {
         en: {
           n1: {
-            n2: {
-              base: "hello {name}",
-            },
+            n2: "hello {name}",
+            n3: "hello {nick}",
             values: {
               name: "2",
             },
@@ -172,6 +171,10 @@ describe("Translation object", () => {
       },
     });
     expect(t.n1.n2.base).toBe("hello 2");
+    expect(`${t.n1.n2({ name: "3" })}`).toBe("hello 3");
+    expect(`${t.n1.n2({ name: "4" })}`).toBe("hello 4");
+    expect(t("n1.n2", { name: "6" }).split(" ")).toEqual(["hello", "6"]);
+    expect(t({ nick: 5 }).n1.n3.base).toBe("hello 5");
   });
   it("should work string and array methods", () => {
     const t = ct({

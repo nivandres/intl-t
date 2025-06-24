@@ -16,6 +16,7 @@ import type {
   Join,
   TranslationFC,
   TranslationNodeFC,
+  Override,
 } from "./types";
 import type { GlobalTranslation } from "../global";
 import { injectVariables } from "../tools/inject";
@@ -45,6 +46,7 @@ abstract class TranslationProxy extends TranslationFunction {
           src = target;
         } else {
           if (Array.isArray(target.node)) src = target.children.map((c: string) => target[c]);
+          else if (p in String.prototype) src = target.base;
           else src = target.node || "";
           val = src[p];
         }
@@ -229,11 +231,11 @@ export class TranslationNode<
     const variables = path.at(-1)?.__proto__ === Object.prototype ? (path.pop() as Values) : undefined;
     if (typeof path[0] === "object") path = path[0];
     else if (path.length === 1) path = (path[0] as string)?.trim().split(this.settings.ps);
-    if (variables) Object.assign(this.variables || {}, variables);
+    this.set(variables as any);
     path = path?.filter?.(Boolean);
     if (!path?.length) return this;
     this.getNode();
-    return path.reduce(
+    const t = path.reduce(
       (o: TranslationNode, key, index) =>
         o?.[key] ??
         (() => {
@@ -249,9 +251,11 @@ export class TranslationNode<
         })(),
       this,
     );
+    t.set(variables as any);
+    return t;
   }
-  set<VV extends Values>(variables: Partial<Variables<N, V>> & VV = {} as any) {
-    Object.assign(this.variables as {}, variables);
+  set<VV extends Values>(variables?: Override<Variables<N, V>, VV>) {
+    if (variables) Object.assign(this.variables as {}, variables);
     return this as TranslationType<S, N, V & VV, L, R>;
   }
   setSource(source: any) {
