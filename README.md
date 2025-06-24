@@ -489,7 +489,11 @@ These keys are reserved and used to access some translations properties and meth
 - `then`
 
 [Continue with React section.](#react)
+
+[Continue with Next.js section.](#nextjs)
+
 [Continue with Tools section.](#tools)
+
 [Continue with TypeScript section.](#typescript)
 
 ## Declarations
@@ -541,7 +545,7 @@ Example in case you would like to generate declarations in Next.js from your nex
 // next.config.js
 import { generateDeclarations } from "intl-t/declarations";
 
-generateDeclarations("i18n/messages"); // translations folder
+generateDeclarations("i18n/messages", { watchMode: true }); // translations folder
 ```
 
 _Note: Running `generateDeclarations` in `next.config.js` may display ESM warnings in the console. You can safely ignore these warnings, or run the script separately to avoid them._
@@ -580,14 +584,14 @@ You can generate TypeScript declarations for your translations using the `declar
 
 ```
 
-Usage: declarations <files|folders>... [options]
+Usage: ${cmdName} <files|folders>... [options]
 
 Options:
   --out, --output     Output file or folder
   --watch             Watch files/folders for changes
-  --format=<fmt>      Output format: ts, d.ts, d.json.ts (default)
-  --symbol=<name>     Exported symbol name (default: data)
-  --delete            Delete original JSON files
+  --format <fmt>      Output format: ts, d.ts, d.json.ts (default)
+  --symbol <name>     Exported symbol name (default: data)
+  --del, --remove     Delete original JSON files
   --no-search         Disable default JSON search
   --recursive         Search recursively in specified folders
   --silent            Silence logs
