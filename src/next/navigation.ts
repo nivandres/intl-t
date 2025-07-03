@@ -19,11 +19,11 @@ export * from "./state";
 
 export function resolvedRedirect(href?: string, type?: RedirectType) {
   // @ts-ignore
-  return r(resolveHref.bind(this || {})({ href }), type);
+  return r(resolveHref.bind(this || {})(href), type);
 }
 export function resolvedPermanentRedirect(href?: string, type?: RedirectType) {
   // @ts-ignore
-  return pr(resolveHref.bind(this || {})({ href }), type);
+  return pr(resolveHref.bind(this || {})(href), type);
 }
 
 export const redirect: typeof r = resolvedRedirect;
