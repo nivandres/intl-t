@@ -46,47 +46,47 @@
   },
   "exports": {
     ".": {
-      "default": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./core": {
-      "default": "./dist/core/index.js",
-      "types": "./dist/core/index.d.ts"
+      "types": "./dist/core/index.d.ts",
+      "default": "./dist/core/index.js"
     },
     "./next": {
-      "default": "./dist/next/index.js",
-      "types": "./dist/next/index.d.ts"
+      "types": "./dist/next/index.d.ts",
+      "default": "./dist/next/index.js"
     },
     "./navigation": {
-      "default": "./dist/next/navigation.js",
-      "types": "./dist/next/navigation.d.ts"
+      "types": "./dist/next/navigation.d.ts",
+      "default": "./dist/next/navigation.js"
     },
     "./link": {
-      "default": "./dist/next/link/index.js",
-      "types": "./dist/next/link/index.d.ts"
+      "types": "./dist/next/link/index.d.ts",
+      "default": "./dist/next/link/index.js"
     },
     "./react": {
-      "default": "./dist/react/index.js",
-      "types": "./dist/react/index.d.ts"
+      "types": "./dist/react/index.d.ts",
+      "default": "./dist/react/index.js"
     },
     "./patch": {
       "default": "./dist/react/patch.js"
     },
     "./locales": {
-      "default": "./dist/locales/index.js",
-      "types": "./dist/locales/index.d.ts"
+      "types": "./dist/locales/index.d.ts",
+      "default": "./dist/locales/index.js"
     },
     "./tools": {
-      "default": "./dist/tools/index.js",
-      "types": "./dist/tools/index.d.ts"
+      "types": "./dist/tools/index.d.ts",
+      "default": "./dist/tools/index.js"
     },
     "./declarations": {
-      "default": "./dist/tools/declarations.js",
-      "types": "./dist/tools/declarations.d.ts"
+      "types": "./dist/tools/declarations.d.ts",
+      "default": "./dist/tools/declarations.js"
     },
     "./types": {
-      "default": "./dist/types.js",
-      "types": "./dist/types.d.ts"
+      "types": "./dist/types.d.ts",
+      "default": "./dist/types.js"
     }
   },
   "lint-staged": {
