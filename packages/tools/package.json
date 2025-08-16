@@ -1,0 +1,66 @@
+{
+  "name": "@intl-t/tools",
+  "description": "i18n utilities",
+  "version": "1.0.0-rc.104",
+  "type": "module",
+  "homepage": "https://github.com/nivandres/intl-t#readme",
+  "repository": {
+    "url": "https://github.com/nivandres/intl-t",
+    "type": "git",
+    "directory": "packages/tools"
+  },
+  "author": {
+    "name": "Ivan Vargas",
+    "email": "nivnnd@gmail.com",
+    "url": "https://nivan.dev"
+  },
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./declarations": {
+      "types": "./dist/declarations.d.ts",
+      "default": "./dist/declarations.js"
+    },
+    "./format": {
+      "types": "./dist/format.d.ts",
+      "default": "./dist/format.js"
+    },
+    "./inject": {
+      "types": "./dist/format.d.ts",
+      "default": "./dist/format.js"
+    },
+    "./resolvers": {
+      "types": "./dist/resolvers.d.ts",
+      "default": "./dist/resolvers.js"
+    },
+    "./negotiator": {
+      "types": "./dist/negotiator.d.ts",
+      "default": "./dist/negotiator.js"
+    },
+    "./match": {
+      "types": "./dist/match.d.ts",
+      "default": "./dist/match.js"
+    }
+  },
+  "keywords": [
+    "intl",
+    "formatter"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "bump": "bun pm version",
+    "release": "bun publish --access public"
+  },
+  "dependencies": {
+    "@intl-t/declarations": "workspace:*",
+    "@intl-t/format": "workspace:*",
+    "@intl-t/locales": "workspace:*",
+    "@intl-t/types": "workspace:*"
+  }
+}

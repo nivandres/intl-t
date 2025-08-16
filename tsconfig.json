@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "allowArbitraryExtensions": true,
-    "baseUrl": ".",
     "declaration": true,
     "jsx": "react-jsx",
     "lib": ["ESNext"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "outDir": "dist",
+    "rootDir": "src",
     "skipLibCheck": true,
     "strict": true,
     "target": "ESNext"

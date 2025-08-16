@@ -1,0 +1,21 @@
+{
+  "hello": "hello world",
+  "bye": "goodbye world",
+  "common": {
+    "yes": "yes",
+    "no": "no",
+    "hello": "Hello {name}",
+    "values": {
+      "name": "John"
+    }
+  },
+  "pages": {
+    "landing": {
+      "title": "Welcome",
+      "hero": {
+        "paragraph": "content",
+        "features": ["hi {name}. This is Feature 1", "hi {name}. This is Feature 2"]
+      }
+    }
+  }
+}

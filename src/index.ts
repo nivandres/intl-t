@@ -1,2 +1,1 @@
-export * from "./core";
-export * from "./state";
+export * from "@intl-t/core";

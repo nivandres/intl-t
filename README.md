@@ -271,13 +271,12 @@ Create a custom setup file for importing your JSON translation files. `./i18n/tr
 ```ts
 import en from "@/public/locales/en.json";
 import es from "@/public/locales/es.json";
-
-import { createTranslation } from "intl-t"; // intl-t/core | intl-t/react | intl-t/next. Default is core
+// intl-t/core | intl-t/react | intl-t/next. Default is core
+import { createTranslation } from "intl-t";
 
 const translation = createTranslation({
   locales: { en, es }, // It will be notify an Error in case of any difference between translation structure
-  mainLocale: "en",
-  // other settings like default variables, replacement placeholder strings, preferences, etc...
+  mainLocale: "en", // other settings like default variables, replacement placeholder strings, preferences, etc...
 });
 
 // or
@@ -555,9 +554,9 @@ After running the script, declaration files will appear in your locales folder w
 `*.d.json.ts`
 
 ```ts
+import { createTranslation } from "intl-t";
 import en from "./messages/en.json";
 import es from "./messages/es.json";
-import { createTranslation } from "intl-t";
 
 export const t = createTranslation({
   locales: { en, es },
@@ -630,7 +629,8 @@ const MyComponent = () => {
 Use provider to sync current locale across your application:
 
 ```jsx
-import { createTranslation } from "intl-t/react"; // Important: use intl-t/react
+// Important: use intl-t/react or @intl-t/react
+import { createTranslation } from "intl-t/react";
 
 export const { Translation, useTranslation } = createTranslation({ locales: { en, es } });
 
@@ -641,6 +641,7 @@ export default function Providers({ children }) {
 
 ```jsx
 import { useLocale } from "intl-t/react";
+
 export default function Providers({ children }) {
   const { locale, setLocale } = useLocale(); // handle locale state from client-side. From localStorage, cookie, navigator, etc...
   return (
@@ -742,10 +743,10 @@ You can do it by importing the patch function and passing the React, jsx and jsx
 
 ```ts
 //i18n/patch.ts
-import React from "react";
-import jsx from "react/jsx-runtime";
-import jsxDEV from "react/jsx-dev-runtime";
 import patch from "intl-t/patch";
+import React from "react";
+import jsxDEV from "react/jsx-dev-runtime";
+import jsx from "react/jsx-runtime";
 
 patch(React, jsx, jsxDEV);
 ```
@@ -755,6 +756,7 @@ And then import it at the top of your translation file
 ```ts
 //i18n/translation.ts
 import "./patch";
+
 // ...
 ```
 
@@ -773,9 +775,10 @@ In dynamic pages with just `await getTranslation()` you can get the translation 
 > Note: `intl-t/next` is for Next.js App with RSC. For Next.js Pages you should use `intl-t/react` instead, and `intl-t/navigation` for Next.js Navigation and Routing tools.
 
 ```ts
+// Important: use intl-t/next or @intl-t/next
+import { createTranslation } from "intl-t/next";
 import en from "./messages/en.json";
 import es from "./messages/es.json";
-import { createTranslation } from "intl-t/next"; // Important: use intl-t/next
 
 export const { Translation, useTranslation, getTranslation } = await createTranslation({ locales: { en, es } });
 ```
@@ -944,7 +947,6 @@ export const { middleware, Link, generateStaticParams, useRouter } = createNavig
 // i18n/translation.ts
 import en from "@/public/locales/en.json";
 import es from "@/public/locales/es.json";
-
 import { createTranslation } from "intl-t";
 
 export const { t } = createTranslation({
@@ -988,6 +990,7 @@ Then in a sub-component, setRequestLocale is not needed.
 
 ```tsx
 import { getTranslation } from "@/i18n/translation";
+
 export default function Component() {
   const { t } = getTranslation();
   return <div>{t("greeting", { name: "Ivan" })}</div>;
@@ -997,8 +1000,8 @@ export default function Component() {
 > New Next.js feature `rootParams` will be implemented. `setRequestLocale` will be no longer needed in pages and layout, except in the `rootLayout`
 
 ```ts
-import { getRootParamsLocale } from "intl-t/next";
 // Already available but not directly implemented in getTranslation logic
+import { getRootParamsLocale } from "intl-t/next";
 ```
 
 ### Dynamic Rendering
@@ -1060,9 +1063,9 @@ The previous problem only applies for [dynamic rendering with next](#dynamic-ren
 Read more about [React Patch](#react-patch) to understand how it works and limitations.
 
 ```ts
+import patch from "intl-t/react";
 import React from "react";
 import jsx from "react/jsx-runtime";
-import patch from "intl-t/react";
 
 process.env.NODE_ENV !== "development" && patch(React, jsx);
 ```
@@ -1126,7 +1129,8 @@ createTranslation({
 
 ```ts
 import { createTranslation, getLocales } from "intl-t";
-import { allowedLocales } from "./locales"; // as locale list, e.g. ["en", "es"] as const; !important use `as const`
+// `allowedLocales` as locale list, e.g. ["en", "es"] as const; !important use `as const`
+import { allowedLocales } from "./locales";
 
 const locales = await getLocales(locale => import(`./messages/${locale}.json`), allowedLocales); // Preload locales at server and dynamically imported at client
 
@@ -1343,6 +1347,7 @@ You can generate literal string declarations for your JSON files using [`generat
 ```ts
 // next.config.js
 import { generateDeclarations } from "intl-t/declarations";
+
 generateDeclarations("messages");
 ```
 
@@ -1350,9 +1355,9 @@ If you're using Next.js in production, you may need to patch React to support tr
 
 ```ts
 // i18n/patch.ts
+import patch from "intl-t/patch";
 import React from "react";
 import jsx from "react/jsx-runtime";
-import patch from "intl-t/patch";
 
 process.env.NODE_ENV !== "development" && patch(React, jsx);
 ```
@@ -1362,6 +1367,7 @@ Then import this patch at the top of your translation file:
 ```ts
 // i18n/translation.ts
 import "./patch";
+
 // ...
 ```
 
@@ -1468,6 +1474,7 @@ export function greeting() {
 
 ```tsx
 "use client";
+
 import { useTranslation } from "@/i18n/translation";
 
 export default function Component() {
@@ -1495,8 +1502,8 @@ export async function generateMetadata({ params }) {
 **Link Navigation Component:**
 
 ```tsx
-import { Translation } from "@/i18n/translation";
 import { Link } from "@/i18n/navigation";
+import { Translation } from "@/i18n/translation";
 
 export default function LanguageSwitcher() {
   const { Translation, t } = useTranslation("languages");
@@ -1666,6 +1673,7 @@ Simple function to extract the locale from HTTP headers.
 
 ```ts
 import { negotiator } from "intl-t/tools";
+
 negotiator({ headers });
 ```
 
@@ -1787,16 +1795,16 @@ Each of these files can export its own translation instance:
 
 ```ts
 // /protected/i18n/translation.ts
-import en from "./locales/en.json";
 import { createTranslation } from "intl-t";
+import en from "./locales/en.json";
 
 export const { t: protectedT } = createTranslation({ locales: { en } });
 ```
 
 ```ts
 // /docs/i18n/translation.ts
-import en from "./locales/en.json";
 import { createTranslation } from "intl-t";
+import en from "./locales/en.json";
 
 export const { t: docsT } = createTranslation({ locales: { en } });
 ```
@@ -1804,8 +1812,8 @@ export const { t: docsT } = createTranslation({ locales: { en } });
 You can then import and use the appropriate translation object in each part of your app:
 
 ```ts
-import { protectedT } from "../i18n/translation";
 import { docsT } from "../../docs/i18n/translation";
+import { protectedT } from "../i18n/translation";
 
 protectedT("dashboard.title");
 docsT("guide.intro");

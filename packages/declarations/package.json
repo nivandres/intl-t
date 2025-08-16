@@ -1,0 +1,38 @@
+{
+  "name": "@intl-t/declarations",
+  "description": "Generate type declaration files from JavaScript Object",
+  "version": "1.0.0-rc.104",
+  "type": "module",
+  "homepage": "https://github.com/nivandres/intl-t#readme",
+  "repository": {
+    "url": "https://github.com/nivandres/intl-t",
+    "type": "git",
+    "directory": "packages/declarations"
+  },
+  "author": {
+    "name": "Ivan Vargas",
+    "email": "nivnnd@gmail.com",
+    "url": "https://nivan.dev"
+  },
+  "files": [
+    "dist/*"
+  ],
+  "bin": {
+    "declarations": "./dist/bin.js"
+  },
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "keywords": [
+    "translation",
+    "json2dts",
+    "declarations",
+    "typescript",
+    "formatter"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "bump": "bun pm version",
+    "release": "bun publish --access public"
+  }
+}

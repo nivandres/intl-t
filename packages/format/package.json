@@ -1,0 +1,49 @@
+{
+  "name": "@intl-t/format",
+  "description": "Format utilities, variable injection, ICU Support",
+  "version": "1.0.0-rc.104",
+  "type": "module",
+  "homepage": "https://github.com/nivandres/intl-t#readme",
+  "repository": {
+    "url": "https://github.com/nivandres/intl-t",
+    "type": "git",
+    "directory": "packages/format"
+  },
+  "author": {
+    "name": "Ivan Vargas",
+    "email": "nivnnd@gmail.com",
+    "url": "https://nivan.dev"
+  },
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./inject": {
+      "types": "./dist/inject.d.ts",
+      "default": "./dist/inject.js"
+    }
+  },
+  "keywords": [
+    "translation",
+    "icu",
+    "formatter",
+    "inject",
+    "intl",
+    "translate",
+    "format"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "bump": "bun pm version",
+    "release": "bun publish --access public"
+  },
+  "dependencies": {
+    "@intl-t/global": "workspace:*",
+    "@intl-t/types": "workspace:*"
+  }
+}

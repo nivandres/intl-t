@@ -5,5 +5,7 @@
   "trailingComma": "all",
   "useTabs": false,
   "tabWidth": 2,
-  "semi": true
+  "semi": true,
+  "importOrder": ["^[^\\.](.*)$", "^\\.(.*)$"],
+  "plugins": ["@trivago/prettier-plugin-sort-imports"]
 }

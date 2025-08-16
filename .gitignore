@@ -1,5 +1,7 @@
 .DS_Store
-bun.lock*
+.next
+.source
 *lock.json
+bun.lock*
 dist
 node_modules

@@ -1,2 +1,1 @@
-export * from "./list";
-export * from "./types";
+export * from "@intl-t/locales";

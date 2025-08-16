@@ -1,0 +1,81 @@
+{
+  "name": "@intl-t/next",
+  "description": "A Fully-Typed Object-Based i18n Translation Library for Next.js",
+  "version": "1.0.0-rc.104",
+  "type": "module",
+  "homepage": "https://github.com/nivandres/intl-t#readme",
+  "repository": {
+    "url": "https://github.com/nivandres/intl-t",
+    "type": "git",
+    "directory": "packages/next"
+  },
+  "author": {
+    "name": "Ivan Vargas",
+    "email": "nivnnd@gmail.com",
+    "url": "https://nivan.dev"
+  },
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./translation": {
+      "types": "./dist/translation.d.ts",
+      "default": "./dist/translation.js"
+    },
+    "./link": {
+      "types": "./dist/link/index.d.ts",
+      "default": "./dist/link/index.js"
+    },
+    "./navigation": {
+      "types": "./dist/navigation.d.ts",
+      "default": "./dist/navigation.js"
+    },
+    "./hooks": {
+      "types": "./dist/hooks.d.ts",
+      "default": "./dist/hooks.js"
+    },
+    "./patch": {
+      "types": "./dist/patch.d.ts",
+      "default": "./dist/patch.js"
+    },
+    "./global": {
+      "types": "./dist/global.d.ts",
+      "default": "./dist/global.js"
+    }
+  },
+  "keywords": [
+    "translation",
+    "i18n",
+    "intl",
+    "typescript",
+    "react",
+    "node",
+    "nodes",
+    "object-based",
+    "node-based",
+    "translate",
+    "formatter",
+    "tree",
+    "next",
+    "next.js"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "bump": "bun pm version",
+    "release": "bun publish --access public"
+  },
+  "dependencies": {
+    "@intl-t/core": "workspace:*",
+    "@intl-t/react": "workspace:*",
+    "@intl-t/tools": "workspace:*"
+  },
+  "peerDependencies": {
+    "next": ">=14",
+    "react": ">=18 <20"
+  }
+}

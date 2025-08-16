@@ -1,0 +1,63 @@
+{
+  "name": "@intl-t/core",
+  "description": "A Fully-Typed Node-Based i18n Translation Library",
+  "version": "1.0.0-rc.104",
+  "type": "module",
+  "homepage": "https://github.com/nivandres/intl-t#readme",
+  "repository": {
+    "url": "https://github.com/nivandres/intl-t",
+    "type": "git",
+    "directory": "packages/core"
+  },
+  "author": {
+    "name": "Ivan Vargas",
+    "email": "nivnnd@gmail.com",
+    "url": "https://nivan.dev"
+  },
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./translation": {
+      "types": "./dist/translation.d.ts",
+      "default": "./dist/translation.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts"
+    },
+    "./dynamic": {
+      "types": "./dist/dynamic.d.ts",
+      "default": "./dist/dynamic.js"
+    },
+    "./global": "./dist/global.js"
+  },
+  "keywords": [
+    "translation",
+    "i18n",
+    "intl",
+    "typescript",
+    "object-based",
+    "node-based",
+    "translate",
+    "tree"
+  ],
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "bump": "bun pm version",
+    "release": "bun publish --access public"
+  },
+  "dependencies": {
+    "@intl-t/format": "workspace:*",
+    "@intl-t/global": "workspace:*",
+    "@intl-t/locales": "workspace:*"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

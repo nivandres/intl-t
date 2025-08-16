@@ -1,2 +1,1 @@
-export * from "./dynamic";
-export * from "./translation";
+export * from "@intl-t/core";

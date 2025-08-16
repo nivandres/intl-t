@@ -1,26 +1,37 @@
 {
   "name": "intl-t",
-  "description": "A Fully-Typed Node-Based i18n Translation Library",
-  "version": "1.0.0-rc.95",
+  "description": "A Fully-Typed Object-Based i18n Translation Library",
+  "version": "1.0.0-rc.104",
   "type": "module",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
   "homepage": "https://github.com/nivandres/intl-t#readme",
   "repository": {
     "url": "https://github.com/nivandres/intl-t",
     "type": "git"
   },
+  "workspaces": {
+    "packages": [
+      ".",
+      "app",
+      "assets",
+      "packages/*"
+    ]
+  },
   "scripts": {
-    "start": "bun tsc --noEmit --watch",
+    "start": "tsc --noEmit --watch",
     "dev": "bun run test:watch",
-    "build": "bun tsc",
+    "build": "bun install && bun run --filter '@intl-t/*' build && tsc",
+    "build:app": "bun run --filter 'intl-t-app' build",
     "test": "bun test",
     "test:watch": "bun test --watch",
-    "format": "bun prettier --write .",
-    "lint": "bun oxlint --fix",
-    "typecheck": "bun tsc --noEmit",
+    "setup": "bash ./scripts/setup.sh",
+    "format": "prettier --write .",
+    "lint": "oxlint --fix",
+    "typecheck": "bun run --filter '@intl-t/*' build && tsc --noEmit",
+    "check": "bun run format && bun run lint && bun run typecheck",
     "prepare": "bun husky",
-    "prepublishOnly": "bun run build"
+    "prepublishOnly": "bun run build",
+    "bump": "bun run --filter '@intl-t/*' bump",
+    "release": "bun run --filter '@intl-t/*' release"
   },
   "keywords": [
     "translation",
@@ -30,20 +41,22 @@
     "react",
     "node",
     "nodes",
+    "object-based",
     "node-based",
     "translate",
-    "formatting",
+    "formatter",
     "tree",
     "next",
-    "next.js",
-    "javascript",
-    "browser"
+    "next.js"
   ],
-  "author": "Ivan Vargas <nivnnd@gmail.com>",
-  "license": "MIT",
-  "bin": {
-    "declarations": "./dist/bin/declarations.js"
+  "author": {
+    "name": "Ivan Vargas",
+    "email": "nivnnd@gmail.com",
+    "url": "https://nivan.dev"
   },
+  "files": [
+    "dist/*"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -69,7 +82,12 @@
       "types": "./dist/react/index.d.ts",
       "default": "./dist/react/index.js"
     },
+    "./hooks": {
+      "types": "./dist/hooks/index.d.ts",
+      "default": "./dist/hooks/index.js"
+    },
     "./patch": {
+      "types": "./dist/react/patch.d.ts",
       "default": "./dist/react/patch.js"
     },
     "./locales": {
@@ -79,6 +97,22 @@
     "./tools": {
       "types": "./dist/tools/index.d.ts",
       "default": "./dist/tools/index.js"
+    },
+    "./format": {
+      "types": "./dist/tools/format.d.ts",
+      "default": "./dist/tools/format.js"
+    },
+    "./inject": {
+      "types": "./dist/tools/inject.d.ts",
+      "default": "./dist/tools/inject.js"
+    },
+    "./match": {
+      "types": "./dist/tools/match.d.ts",
+      "default": "./dist/tools/match.js"
+    },
+    "./resolvers": {
+      "types": "./dist/tools/resolvers.d.ts",
+      "default": "./dist/tools/resolvers.js"
     },
     "./declarations": {
       "types": "./dist/tools/declarations.d.ts",
@@ -93,7 +127,13 @@
     "*.{json,md,js,ts,tsx}": "bunx prettier --check",
     "*.{js,ts,tsx}": "bunx oxlint"
   },
+  "dependencies": {
+    "@intl-t/core": "workspace:*",
+    "@intl-t/next": "workspace:*",
+    "@intl-t/react": "workspace:*"
+  },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/bun": "^1.2.0",
     "@types/react": "^19",
     "husky": "^9",
