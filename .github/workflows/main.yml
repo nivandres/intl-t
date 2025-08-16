@@ -1,4 +1,4 @@
-name: CI
+name: Check
 on: [push]
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
         run: bun install
       - name: Lint
         run: bun run lint
-      - name: Test
-        run: bun test
       - name: Build
         run: bun run build
+      - name: Test
+        run: bun test
