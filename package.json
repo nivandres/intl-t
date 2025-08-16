@@ -11,8 +11,6 @@
   "workspaces": {
     "packages": [
       ".",
-      "app",
-      "assets",
       "packages/*"
     ]
   },
