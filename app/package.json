@@ -23,7 +23,7 @@
     "fumadocs-twoslash": "^3.1.4",
     "fumadocs-typescript": "^4.0.6",
     "fumadocs-ui": "15.6.9",
-    "intl-t": "latest",
+    "intl-t": "intl-t@1.0.0-rc.104",
     "lucide-react": "^0.537.0",
     "next": "15.4.5",
     "react": "^19.1.1",
