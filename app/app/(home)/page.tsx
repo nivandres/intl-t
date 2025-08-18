@@ -28,7 +28,7 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-        <div className="w-150 [&_pre]:h-60 mx-12">
+        <div className="w-150 max-w-full [&_pre]:h-60 mx-12">
           <HeroCode components={getMDXComponents()} />
         </div>
       </section>
@@ -57,9 +57,9 @@ export default function HomePage() {
         />
       </section>
 
-      <section className="max-w-screen-xl mx-auto px-6 my-24 flex items-center gap-16">
+      <section className="max-w-screen-xl mx-auto my-24 flex flex-wrap justify-center items-center gap-16">
         <Image
-          className="max-w-xl"
+          className="w-xl max-w-full"
           src="https://raw.githubusercontent.com/nivandres/intl-t/main/assets/banner.webp"
           alt="banner"
           width={1366}
@@ -68,7 +68,7 @@ export default function HomePage() {
         <div className="flex flex-col items-center gap-2">
           <h2 className="text-3xl font-bold text-center">Installing</h2>
           <p className="text-fd-muted-foreground text-center">Use your preferred package manager.</p>
-          <div className="w-sm">
+          <div className="w-sm max-w-full">
             <InstallCode components={getMDXComponents()} />
           </div>
           <div className="flex gap-3">
