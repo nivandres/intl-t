@@ -5,9 +5,7 @@ description: Migrate from other i18n libraries to Intl‑T
 
 Before migrating, make sure you understand the core concepts of intl-t. See the [Basic Usage](/docs/node) section for details.
 
-## Next.js with Static Rendering and Dynamic Importing
-
-1. **Prepare your translations**
+## 1. **Prepare your translations**
 
 `intl-t` supports flexible JSON files with deeply nested nodes. However, you should review the [Reserved Keywords](/docs/node#reserved-keywords) before using them in your translations. All locale translation files must have the same structure, keys, and nodes. `intl-t` will warn you if there are any discrepancies.
 
@@ -33,7 +31,7 @@ It's recommended to have a central translation meta file for general data, such 
 export const allowedLocales = ["en", "es"];
 ```
 
-2. **Set up your translation configuration**
+## 2. **Set up your translation configuration**
 
 Use async createTranslation with the `locales` option as a function to preload locales on the server and dynamically import them on the client.
 
@@ -95,7 +93,7 @@ import "./patch";
 // ...
 ```
 
-3. **Configure navigation**
+## 3. **Configure navigation**
 
 ```ts
 // i18n/navigation.ts
@@ -118,7 +116,7 @@ export const config = {
 
 [See the complete navigation documentation in the Navigation section.](/docs/next#navigation)
 
-4. **Set up your root layout**
+## 4. **Set up your root layout**
 
 By default, the locale is managed using the `[locale]` route parameter. However, you can fully customize this behavior. For example, you can get the locale dynamically from headers, detect the domain, geolocation, or custom HTTP Request. See the [Navigation](/docs/next#navigation) section for more details. There is also a mini example in the [dynamic rendering with Next.js](/docs/next#dynamic-rendering) section that shows how to avoid using the `[locale]` param by detecting the locale from headers.
 
@@ -150,7 +148,7 @@ export default async function RootLayout({ children, params }: Props) {
 }
 ```
 
-5. **Use translations in your code**
+## 5. **Use translations in your code**
 
 **With React Server Components (Static):**
 

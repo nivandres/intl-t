@@ -283,7 +283,7 @@ export default function RootLayout({ children }) {
 
 ## Usage
 
-**With React Server Components (Static):**
+### **With React Server Components (Static):**
 
 ```tsx
 import { getTranslation } from "@/i18n/translation";
@@ -296,7 +296,7 @@ export default function Component() {
 
 [Read more about static rendering with Intl-T](/docs/next#static-rendering)
 
-**With React Server Components (Dynamic):**
+### **With React Server Components (Dynamic):**
 
 If you don't provide a Translation Provider or don't use `setRequestLocale` if required, you can use `await getTranslation()` for dynamic rendering in Next.js.
 
@@ -311,7 +311,7 @@ export default function Component() {
 
 [Read more about dynamic rendering with Intl-T](/docs/next#dynamic-rendering)
 
-**With Server Actions:**
+### **With Server Actions:**
 
 The locale is automatically detected from headers.
 
@@ -325,7 +325,7 @@ export function greeting() {
 }
 ```
 
-**With Client Components (Hydration):**
+### **With Client Components (Hydration):**
 
 ```tsx
 "use client";
@@ -342,7 +342,7 @@ For easier migration from other i18n libraries, you can use the `getTranslations
 
 You can also use them as translation object directly, e.g., `useTranslation.greeting.es({ name: "Ivan" })`—it's modular, type-safe, and flexible.
 
-**With metadata:**
+### **With metadata:**
 
 ```tsx
 // layout.tsx
@@ -354,7 +354,7 @@ export async function generateMetadata({ params }) {
 }
 ```
 
-**Link Navigation Component:**
+### **Link Navigation Component:**
 
 ```tsx
 import { Link } from "@/i18n/navigation";
@@ -377,7 +377,7 @@ export default function LanguageSwitcher() {
 }
 ```
 
-**Router Hook:**
+### **Router Hook:**
 
 ```tsx
 import { useRouter } from "@/i18n/navigation";
