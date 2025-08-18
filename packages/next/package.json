@@ -1,7 +1,7 @@
 {
   "name": "@intl-t/next",
   "description": "A Fully-Typed Object-Based i18n Translation Library for Next.js",
-  "version": "1.0.0-rc.104",
+  "version": "1.0.0-rc.105",
   "type": "module",
   "homepage": "https://intl-t.dev",
   "repository": {

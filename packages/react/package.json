@@ -1,7 +1,7 @@
 {
   "name": "@intl-t/react",
   "description": "A Fully-Typed Object-Based i18n Translation Library for React",
-  "version": "1.0.0-rc.104",
+  "version": "1.0.0-rc.105",
   "type": "module",
   "homepage": "https://intl-t.dev",
   "repository": {

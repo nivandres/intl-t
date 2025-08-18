@@ -1,7 +1,7 @@
 {
   "name": "@intl-t/tools",
   "description": "i18n utilities",
-  "version": "1.0.0-rc.104",
+  "version": "1.0.0-rc.105",
   "type": "module",
   "homepage": "https://intl-t.dev",
   "repository": {
