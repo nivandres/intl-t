@@ -94,7 +94,7 @@ export function injectVariables<T extends string, V extends Values>(
         else if (action.match(/^(medium|md)$/im)) options.style = "medium";
         else if (action.match(/^(long|lg|verbose)$/im)) options.style = "long";
         else if (action.match(/^(full|xl)$/im)) options.style = "full";
-        if (/^verbose$/im.test(action)) (options.timeStyle ??= options.style), (options.dateStyle ??= options.style);
+        if (/^verbose$/im.test(action)) ((options.timeStyle ??= options.style), (options.dateStyle ??= options.style));
         else if (!options.timeStyle && !/^(date|fecha|today)s?$/im.test(action) && /^(time|now|tiempo|hou?ra?)s?$/im.test(action))
           options.timeStyle = options.style || "short";
         else options.dateStyle ??= options.style;

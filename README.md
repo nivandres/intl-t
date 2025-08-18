@@ -895,7 +895,6 @@ interface Config {
 ```
 
 - **`pathPrefix`**: Controls how the locale appears in the URL path.
-
   - `"always"`: The locale is always included as a path prefix.
   - `"default"`: The default locale is hidden in the path, while other locales are shown.
   - `"optional"`: The locale prefix can be present or absent, depending on the accessed URL.
@@ -903,7 +902,6 @@ interface Config {
     _Default is `"default"`._
 
 - **`pathBase`**: Determines the behavior when no locale is specified in the path.
-
   - `"always-default"`: The path base `/` always routes to the default locale.
   - `"detect-default"`: On the first visit, the user's locale is detected and redirected; subsequent visits at path base go to the default locale.
   - `"detect-latest"`: On the first visit, the user's locale is detected and redirected; subsequent visits at path base go to the most recently used locale.  

@@ -59,7 +59,7 @@ export function middleware<L extends Locale>(req: NextRequest, ev: NextFetchEven
   let url = nextUrl.clone();
   let [, locale, ...path] = nextUrl.pathname.split("/") as string[];
   if (!allowedLocales.includes(locale as L)) {
-    if (locale == redirectPath) (pathBase = "detect-latest"), (pathPrefix = "always"), (strategy = "param"), (res = undefined);
+    if (locale == redirectPath) ((pathBase = "detect-latest"), (pathPrefix = "always"), (strategy = "param"), (res = undefined));
     else path.unshift(locale);
     if (pathBase == "always-default") locale = defaultLocale;
     else if (pathBase == "always-detect" || !(locale = cookies.get(LOCALE_COOKIE_KEY)?.value as string))

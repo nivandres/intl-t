@@ -190,7 +190,7 @@ export class TranslationNode<
           get() {
             Object.defineProperty(t, locale, { value: t, configurable: true, enumerable: false });
             if (settings.preload && t == settings.t && t.hasOwnProperty("then")) delete settings.t.then;
-            return t.node === node && t.getNode(t[Symbol.for("preload")] ?? true), t;
+            return (t.node === node && t.getNode(t[Symbol.for("preload")] ?? true), t);
           },
         });
       }
@@ -419,7 +419,7 @@ export function createTranslationSettings<
 >(settings: Partial<TranslationSettings<L, M, T, V, PS, N>> = {}) {
   type S = TranslationSettings<L, M, T, V, PS, N>;
   if (typeof settings.locales === "function")
-    (settings.getLocale = settings.locales as any), (settings.locales = void 0), (settings.preload = !isClient);
+    ((settings.getLocale = settings.locales as any), (settings.locales = void 0), (settings.preload = !isClient));
   settings.locales ??= {} as any;
   settings.allowedLocales ??= Object.keys(settings.locales as object) as [M, ...L[]];
   settings.mainLocale ??= settings.defaultLocale ??= settings.allowedLocales[0] as M;

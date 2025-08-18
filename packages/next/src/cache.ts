@@ -18,6 +18,6 @@ export function getCachedRequestLocale() {
 export function setCachedRequestLocale(locale?: string) {
   getCache().locale = locale;
   // @ts-ignore
-  if (this?.settings) (this.settings.locale = locale), this?.t?.then?.();
+  if (this?.settings) ((this.settings.locale = locale), this?.t?.then?.());
   return locale;
 }
