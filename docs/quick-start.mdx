@@ -1,0 +1,183 @@
+---
+title: Quick Start
+description: Get started quickly with Intl-T
+---
+
+## Installation
+
+Install with your favorite package manager:
+
+```package-install
+intl-t
+```
+
+## Setup
+
+<Steps>
+  <Step>
+
+### Translations
+
+Set up your translation files. Create a directory for your translations, e.g., `i18n/messages/`, and add your translation files in JSON format.
+
+```jsonc title="i18n/messages/en.json"
+{
+  "homepage": {
+    "welcome": "Welcome, {user}!",
+  },
+}
+```
+
+  </Step>
+  <Step>
+  
+### Configuration
+
+Create a translation instance and configure it with your translation files.
+
+<Tabs items={["As class", "As function"]} defaultIndex={0}>
+  <Tab value="As class">
+    
+```ts title="i18n/translation.ts"
+import en from "./messages/en.json";
+import es from "./messages/es.json";
+
+import { Translation } from "intl-t";
+
+export const t = new Translation({ locales: { en, es } });
+```
+
+  </Tab>
+  <Tab value="As function">
+    
+```ts title="i18n/translation.ts"
+import en from "./messages/en.json";
+import es from "./messages/es.json";
+
+import { createTranslation } from "intl-t";
+
+export const t = createTranslation({ locales: { en, es } });
+```
+
+  </Tab>
+</Tabs>
+
+  </Step>
+  <Step>
+
+### Integration
+
+Depending on your framework, you may need to integrate the translation instance into your application.
+
+<Tabs items={["React", "Next.js"]} defaultIndex={0}>
+  <Tab value="React">
+
+```tsx title="i18n/translation.tsx"
+import { Translation } from "intl-t/react";
+
+export const { Translation, useTranslation } = new Translation(/* ... */);
+```
+
+```tsx title="App.tsx"
+import { Translation } from "./i18n/translation";
+
+export default function App() {
+  return (
+    <Translation>
+      <Content />
+    </Translation>
+  );
+}
+```
+
+  </Tab>
+  <Tab value="Next.js">
+
+```tsx title="i18n/translation.tsx"
+import { Translation } from "intl-t/next";
+
+export const { Translation, useTranslation } = new Translation({/* ... */});
+```
+
+```ts title="i18n/navigation.ts"
+import { createNavigation } from "intl-t/navigation";
+import { allowedLocales } from "./locales";
+
+export const { middleware, generateStaticParams, Link, redirect, useRouter } = createNavigation({ allowedLocales: ["en", "es"] as const });
+```
+
+```tsx title="app/layout.tsx"
+import { setRequestLocale } from "intl-t/next";
+import { Translation } from "@/i18n/translation";
+
+export { generateStaticParams } from "@/i18n/navigation"
+
+interface Props {
+  children: React.ReactNode;
+  params: Promise<{ locale: typeof Translation.locale }>
+}
+
+export default function RootLayout({ children, params }: Props) {
+  const { locale } = await params;
+  if (!Translation.locales.includes(locale)) return;
+  setRequestLocale(locale);
+
+  return (
+    <html lang={locale}>
+      <body>
+        <Translation>
+          {children}
+        </Translation>
+      </body>
+    </html>
+  );
+}
+```
+
+```ts title="middleware.ts"
+export { middleware as default } from "@/i18n/navigation";
+
+export const config = {
+  matcher: ["/((?!api|static|.*\\..*|_next).*)"],
+};
+```
+
+```ts title="i18n/patch.ts"
+import patch from "intl-t/patch";
+import React from "react";
+import jsx from "react/jsx-runtime";
+
+process.env.NODE_ENV !== "development" && patch(React, jsx);
+```
+
+  </Tab>
+</Tabs>
+
+  </Step>
+</Steps>
+
+## Usage
+
+Now you can use the translation instance in your code:
+
+```ts twoslash
+import { Translation } from "intl-t";
+
+const en = {
+  homepage: {
+    title: "Homepage",
+    welcome: "Welcome, {user}!",
+    hero: {
+      cta: "Get started",
+    },
+  },
+} as const;
+
+const t = new Translation({ locales: { en } });
+
+// ---cut---
+t("");
+// ^|
+```
+
+---

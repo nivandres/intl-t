@@ -3,7 +3,7 @@
   "description": "A Fully-Typed Object-Based i18n Translation Library",
   "version": "1.0.0-rc.104",
   "type": "module",
-  "homepage": "https://github.com/nivandres/intl-t#readme",
+  "homepage": "https://intl-t.dev",
   "repository": {
     "url": "https://github.com/nivandres/intl-t",
     "type": "git"
@@ -11,12 +11,15 @@
   "workspaces": {
     "packages": [
       ".",
+      "app",
+      "assets",
       "packages/*"
     ]
   },
   "scripts": {
     "start": "tsc --noEmit --watch",
     "dev": "bun run test:watch",
+    "dev:app": "bun run --filter 'intl-t-app' dev",
     "build": "bun install && bun run --filter '@intl-t/*' build && tsc",
     "build:app": "bun run --filter 'intl-t-app' build",
     "test": "bun test",

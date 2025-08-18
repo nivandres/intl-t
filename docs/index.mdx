@@ -1,0 +1,224 @@
+---
+title: Overview
+description: Introduction for Intl-T
+---
+
+import { GithubInfo } from "fumadocs-ui/components/github-info";
+
+## Intl-T
+
+`intl-t` is a fully-typed, object-based internationalization (i18n) library for TypeScript, React, and Next.js. It offers a type-safe and amazing developer experience for managing translations in modern applications.
+
+![Banner](https://raw.githubusercontent.com/nivandres/intl-t/main/assets/banner.webp)
+
+> A Fully-Typed Object-Based i18n Translation Library for TypeScript, React, and Next.js.
+
+<GithubInfo owner="nivandres" repo="intl-t" />
+
+### Features
+
+- 🎯 Fully-Typed for TypeScript with autocomplete for translation variables
+- 🌲 Node-based translations for easy organization and management
+- ✨ Type-safe translation keys, values and all sub-nodes
+- 🚚 Supports JSON files and dynamic remote imports
+- 🪄 Flexible syntax integrating all the best parts of other i18n libraries
+- 🧩 ICU message format support and extended for complex and nested pluralization and formatting
+- ⚛️ React components injections out of the box with translation variables
+- 🚀 Supports server-side rendering and static rendering with Next.js and React
+- 🔄 Dynamic importing of locales for optimized bundle size and on-demand language loading
+- ⚙️ Modular and agnostic to any framework or library
+- 📦 Lightweight bundle with no dependencies and Tree-Shakable
+
+## Demo
+
+<div className="hidden">
+
+```ts twoslash include demo
+import { Translation } from "@intl-t/core";
+
+// ---cut-start---
+const en = {
+  title: "Homepage",
+  welcome: "Welcome, {user}!",
+  summary: "{count, plural, =0 {no items} one {# item} other {# items}}",
+  main: "It is {now, date, sm}",
+  features: [
+    "Hi {name}. This is Feature 1",
+    "Hi {name}. This is Feature 2",
+    "Hi {name}. This is Feature 3",
+    {
+      base: "Hi {name}. This is Feature 4 with html title",
+      title: "Feature 4",
+    },
+  ],
+  page1: {
+    section1: {
+      article1: {
+        title: "Article 1",
+      },
+    },
+  },
+  account: {
+    options: {
+      change: "Change your account settings. Your account id is {accountId}",
+    },
+    values: {
+      accountId: 0,
+    },
+  },
+  copyright: "Copyright © 2025",
+  values: {
+    user: "World",
+    name: "{user}",
+    now: "{(Date.now())}",
+  },
+} as const;
+// ---cut-end---
+export const { useTranslation } = new Translation({ locales: { en } });
+// - config
+// ---cut---
+// - usage
+```
+
+</div>
+
+<Tabs items={["Usage", "Source", "Config"]} defaultIndex={0}>
+  <Tab value="Usage">
+
+```tsx twoslash title="page.tsx"
+import React from "react";
+
+interface Props {
+  data: {};
+}
+
+// @include: demo-usage
+export default function HomePage({ data }: Props) {
+  const { t } = useTranslation();
+  return (
+    <>
+      <h1>{t("title")}</h1>
+      {/* Get translations as an object or function */}
+      <h2>{t.title}</h2>
+
+      {/* Use variables in your translations */}
+      <span>{t("welcome", { user: "Ivan" })}</span>
+      <span>{t.summary(data)}</span>
+      {/* Flexible syntax */}
+
+      <p>{t("main", { now: Date.now() })}</p>
+      <ul>
+        {/* Array of translations */}
+        {t.features.map(t => (
+          <li key={t.id} title={t("title")}>
+            {t}
+          </li>
+        ))}
+      </ul>
+      <ul>
+        <li>{t.features[0]}</li>
+        <li>{t("features.1", { name: "Ivan V" })}</li>
+        <li>{t("features")[2]({ name: "Ivan V" })}</li>
+        <li>{t({ name: "Ivan V" }).features("3")}</li>
+      </ul>
+      {/* Node-based translations */}
+      <p>{t.page1.section1.article1.title}</p>
+      <p>{t("page1.section1").article1("title")}</p>
+      {/* Full typesafe with completion for variables */}
+      <p>{t({ day: "Monday" }).account(data).options.change}</p>
+      <t.Trans i18nKey="copyright" variables={data} />
+    </>
+  );
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+
+```jsonc title="en.json"
+{
+  "title": "Homepage",
+  "welcome": "Welcome, {user}!", // support ICU message format
+  "summary": "{count, plural, =0 {no items} one {# item} other {# items}}", // ICU Format Extended
+  "main": "It is {now, date, sm}",
+  "features": [
+    "Hi {name}. This is Feature 1",
+    "Hi {name}. This is Feature 2",
+    "Hi {name}. This is Feature 3",
+    {
+      "base": "Hi {name}. This is Feature 4 with html title", // base is default text for objects
+      "title": "Feature 4",
+    },
+  ],
+  "page1": {
+    "section1": {
+      "article1": {
+        "title": "Article 1",
+      },
+    },
+  },
+  "account": {
+    "options": {
+      "change": "Change your account settings. Your account id is {accountId}",
+    },
+    "values": {
+      // default values for this node
+      "accountId": 0,
+    },
+  },
+  "copyright": "Copyright © 2025",
+  "values": {
+    // default values
+    "user": "World",
+    "name": "{user}",
+    // inject code
+    "now": "{(Date.now())}",
+  },
+}
+```
+
+  </Tab>
+  <Tab value="Config">
+
+```ts twoslash title="translation.ts"
+// @include: demo-config
+```
+
+  </Tab>
+</Tabs>
+
+## Why Intl-T?
+
+> Why Intl-T instead of Other i18n Libraries
+
+Intl-T was created out of frustration with the limitations and poor DX of existing i18n solutions. Although they offer different features, none of them deliver the optimal developer experience. Many require excessive boilerplate code, lack robust type safety, or lack key conveniences. Intl-T combines the best features of all of them to provide a super robust, solid, fully-typed, and streamlined solution that focuses on providing the best possible developer experience that we all want.
+
+Intl-T is designed to be:
+
+- **Fully type-safe**: Enjoy 100% TypeScript autocompletion everywhere for translations, keys, variables and more.
+- **Minimal and dependency-free**: No extra dependencies or complex setup. Just import and use.
+- **Node-based and flexible**: Organize translations in a powerful, deeply nested object structure.
+- **Seamless with React and Next.js**: Integrates out of the box with modern frameworks. Such as React with super powerful [Component Injection](/docs/react#react-component-injection) and Next.js with [Navigation](/docs/next#navigation).
+- **Lightweight**: Small bundle size, optimized for performance.
+- **Rich API**: Access translations as functions, objects, or strings, with dynamic variable injection and ICU support.
+- **Easy migration and adaptation**: Supports most popular i18n formats, key aliases, and usage patterns, making it simple to migrate from other libraries or integrate with existing translation files.
+
+If you want a simple, robust, and modern i18n library that puts developer experience first, give Intl-T a try. Feedback is welcome!
+
+```tsx
+// Flexible Syntax
+t("welcome");
+t.welcome
+<T path="welcome" />
+```
+
+---
+
+<Cards>
+  <Card title="GitHub" href="https://github.com/nivandres/intl-t" />
+  <Card title="NPM" href="https://www.npmjs.com/package/intl-t" />
+  <Card title="Discord" href="https://discord.gg/5EbCXKpdyw" />
+  <Card title="Web" href="https://intl-t.dev/" />
+</Cards>
+
+---

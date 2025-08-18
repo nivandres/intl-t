@@ -1,0 +1,164 @@
+---
+title: React
+description: React integration for Intl-T
+---
+
+## Overview
+
+intl-t provides seamless integration with React through the `useTranslation` hook:
+
+```jsx
+import { useTranslation } from "@/i18n/translation";
+
+const MyComponent = () => {
+  const { t, locale, setLocale } = useTranslation("common");
+
+  return (
+    <div>
+      <h1>{t("title")}</h1>
+      <p>{t("welcome", { name: "User" })}</p>
+      <button onClick={() => setLocale("es")}>Switch to Spanish</button>
+    </div>
+  );
+};
+```
+
+## Provider
+
+Use provider to sync current locale across your application:
+
+```jsx
+// Important: use intl-t/react or @intl-t/react
+import { createTranslation } from "intl-t/react";
+
+export const { Translation, useTranslation } = createTranslation({ locales: { en, es } });
+
+export default function Providers({ children }) {
+  return <Translation>{children}</Translation>;
+}
+```
+
+```jsx
+import { useLocale } from "intl-t/react";
+
+export default function Providers({ children }) {
+  const { locale, setLocale } = useLocale(); // handle locale state from client-side. From localStorage, cookie, navigator, etc...
+  return (
+    // Only use locale, and onLocaleChange when you want to handle locale manually.
+    <Translation locale={locale} onLocaleChange={setLocale}>
+      {children}
+    </Translation>
+  );
+  // When you don't specify locale or onLocaleChange, it already uses `useLocale` hook internally.
+  // So don't specify locale prop, if you want to set default locale, set it from createTranslation settings.
+}
+```
+
+Also Translation component can be used as `{t("hello")}` like `<Translation path="hello" />` or `<Translation.hello />` will work too.
+
+Each node has its Translation component, `const { Translation } = t.hello;`
+
+TranslationProvider from translation node also have some other aliases, `Tr`, `Trans`, `TranslationProvider`
+
+```tsx
+<Translation path="hello" />
+<Translation.hello />
+<Trans.hello variables={{ name: "Ivan" }} />
+```
+
+If this component contains children it will work as provider, if not it will return the translation node text.
+
+> Note: This component works with Next.js and React Server Components
+
+## `useTranslation` Hook
+
+Hook for accessing translations within components.
+
+```ts
+const { t, locale, setLocale } = useTranslation(path?: string);
+```
+
+### Returns:
+
+- `t`: The translation function for the current locale.
+- `locale`: The current language code.
+- `setLocale`: A function to change the current language.
+
+The `useTranslation` function is also the `t` object itself, making it extremely flexible. For example, you can perform `useTranslation("hello").greeting({ name: "Ivan" }).es`. You can set a default locale by using the locale prefix, such as `useTranslation.es("hello").t`. Remember, `t` is a sub-property of itself. You can use the `t` object as a string, object, or function.
+
+`useTranslation` also has `useTranslations` as an alias.
+
+These hooks can be used independently, even outside of the [`Translation Provider`](#provider) component.
+
+The main purpose of using the Translation Provider is to synchronize the current locale across your application or to send translations dynamically to the client through [`dynamic import`](/docs/dynamic-import).
+
+## React Component Injection
+
+React chunk injection out of the box
+
+```jsx
+{
+  welcome: "Welcome to <b>{site}</b><globe />. <Link href='{startLink}'>Get started</Link>!. <br /><h3 className=\"title\">Title</h3>";
+}
+
+const Welcome = () => (
+  <div>
+    {t("welcome", {
+      site: "My Awesome Site",
+      startLink: "/start",
+      globe: () => <Globe />,
+      Link: props => <a href={props.href}>{props.children}</a>,
+    })}
+  </div>
+);
+```
+
+Props for React Chunk Injection
+
+```ts
+export interface ReactChunkProps {
+  children: ReactNode;
+  tagName: string;
+  tagAttributes: string;
+  tagContent: string;
+  value?: Base | null;
+  key: ReactKey;
+  [key: string]: unknown; // custom props injected from translation strings
+}
+```
+
+By default, if a variable is not specified, it will be injected as an HTML element with the corresponding `tagName`, `tagAttributes`, and `tagContent` (`children`).
+
+For example, if your translation is `Go to <a href="/" className="font-bold">Home</a>` it will be literally rendered as `Go to <a href="/" className="font-bold">Home</a>`. HTML Element with its attributes, children and custom props will be injected and working. Also this chunks can be nested.
+
+[Continue with the Next.js section.](/docs/next)
+
+## Warning
+
+Translation Nodes are not plain strings. Although they have special properties and methods such as `toString()`, `toJSON()`, string prototype via proxy, and [`React Patch`](#patch), they do not behave exactly like strings in all contexts. In some cases, you may need to use `t.base`, `t.raw`, or `t.toString()` to obtain the actual string with injected variables. This is fully type-safe. For example, you should use these methods when passing values to JSX element attributes or to function parameters that do not accept functions. Note that `typeof t === 'function'`, so while it can act like a string, it is not exactly a string.
+
+## Patch
+
+If you are using React, in some frameworks you may need to patch React to support translation function objects. (Farmfe and Next.js builds)
+You can do it by importing the patch function and passing the React, jsx and jsxDEV modules directly to it.
+
+```ts
+//i18n/patch.ts
+import patch from "intl-t/patch";
+import React from "react";
+import jsxDEV from "react/jsx-dev-runtime";
+import jsx from "react/jsx-runtime";
+
+patch(React, jsx, jsxDEV);
+```
+
+And then import it at the top of your translation file
+
+```ts
+//i18n/translation.ts
+import "./patch";
+
+// ...
+```
+
+This patch will allow you to use translation function objects in JSX children and attributes.

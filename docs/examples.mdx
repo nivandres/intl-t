@@ -1,0 +1,129 @@
+---
+title: Examples & Strategies
+description: Practical patterns and edge cases
+---
+
+## Locales metadata
+
+You can include metadata in your translation files to help you with localization and translation management.
+
+For example
+
+```jsonc
+{
+  "meta": {
+    // It is a normal node
+    "code": "en",
+    "name": "English",
+    "dir": "ltr",
+  },
+  // ...
+}
+```
+
+And then you can access it from your translations.
+
+```tsx
+import { Translation, t } from "@/i18n/translation";
+import { match } from "intl-t/tools";
+
+interface Props {
+  params: Promise<{ locale: typeof Translation.locale }>;
+}
+
+export default function RootLayout({ children, params }) {
+  let { locale } = await params;
+  locale = match(locale, t.allowedLocales);
+  const { meta } = await t[locale]; // Preload if you are using dynamic import without TranslationProvider that will preload translations
+  return (
+    <html lang={locale} dir={meta.dir}>
+      <body>
+        <Translation>{children}</Translation>
+      </body>
+    </html>
+  );
+}
+```
+
+## Fallbacks
+
+When a translation node is executed and the translation is not found, it will fall back to the input text with injected variables. This could be useful when you receive a string from an external API or server. You might get either a translation key or the direct text.
+
+```ts
+t("Please try again"); // falls back to "Please try again"
+t("messages.try_again"); // outputs the translation
+t("Please try again, {name}", { name: "John" }); // falls back to "Please try again, John"
+// these fallbacks are also type safe
+typeof t("Please try again, {name}"); // `Please try again, ${string}`
+```
+
+## String Methods
+
+```tsx
+<motion.p initial="hidden" animate="visible" transition={{ staggerChildren: 0.04 }}>
+  {t.description.split(" ").map((word, index, words) => {
+    return (
+      <motion.span key={word + index} transition={transition} variants={variants}>
+        {word + " "}
+      </motion.span>
+    );
+  })}
+</motion.p>
+```
+
+## Template Strings
+
+```tsx
+async function Greeting() {
+  "use server";
+  return t`greeting`({ name: await getName() });
+}
+```
+
+## Namespaces
+
+Namespaces are a way to simulate isolated translation contexts in your application. While intl-t does not natively support namespaces as a built-in feature, you can achieve similar separation by organizing your translation files and configuration per feature or section.
+
+For example, you might have:
+
+```
+/protected/i18n/translation.ts
+/i18n/translation.ts
+/docs/i18n/translation.ts
+```
+
+Each of these files can export its own translation instance:
+
+```ts
+// /protected/i18n/translation.ts
+import { createTranslation } from "intl-t";
+import en from "./locales/en.json";
+
+export const { t: protectedT } = createTranslation({ locales: { en } });
+```
+
+```ts
+// /docs/i18n/translation.ts
+import { createTranslation } from "intl-t";
+import en from "./locales/en.json";
+
+export const { t: docsT } = createTranslation({ locales: { en } });
+```
+
+You can then import and use the appropriate translation object in each part of your app:
+
+```ts
+import { docsT } from "../../docs/i18n/translation";
+import { protectedT } from "../i18n/translation";
+
+protectedT("dashboard.title");
+docsT("guide.intro");
+```
+
+Renaming is not required; this is just for demonstration purposes. Simply import from the appropriate folders.
+
+If you are sending translations dynamically to the client via React, you must use a [`TranslationProvider`](/docs/react#provider) for each isolated translation instance.
+
+You can also implement different strategies for each isolated translation, such as using only [dynamic](/docs/next/dynamic-rendering) translation loading or preloading at server-side and dynamically importing at client-side.
+
+**This approach keeps translations isolated. In the future, intl-t may support merging or extending translations dynamically, but for now, this pattern allows you to simulate namespaces effectively.**

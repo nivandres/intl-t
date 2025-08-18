@@ -1,0 +1,146 @@
+---
+title: TypeScript
+description: TypeScript Optimal Config for Intl-T
+---
+
+## Declarations
+
+TypeScript does not infer the literal strings directly from JSON, but you can generate them automatically using the `generateDeclarations` function or the `declarations` script.
+
+This will generate declarations files for JSON (.d.json.ts) including the literal strings and structured types.
+
+```ts
+// i18n/declarations.ts
+import { generateDeclarations } from "intl-t/declarations";
+
+generateDeclarations("./en.json"); // string | string[]
+```
+
+You can also generate declarations from a specific JSON folder, it will scan all JSON files in the folder and generate declarations for each one.
+
+```ts
+generateDeclarations("./i18n/messages");
+```
+
+This function is asynchronous and it will run once per process, for example when running build or dev mode.
+
+You can use it as a script in your `package.json` to generate declarations whenever needed, for example, by checking for updates to your locales or as part of a build script or initialization entry point. For example, you can import it in your `next.config.js` file in a Next.js project.
+
+```jsonc
+// package.json
+{
+  "scripts": {
+    "declarations": "bun ./i18n/declarations.ts",
+  },
+}
+```
+
+Before using these declarations, it is recommended to enable `allowArbitraryExtensions` in your `tsconfig.json`:
+
+```jsonc
+// tsconfig.json
+{
+  "compilerOptions": {
+    "allowArbitraryExtensions": true,
+  },
+}
+```
+
+Example in case you would like to generate declarations in Next.js from your next.config file:
+
+```ts
+// next.config.js
+import { generateDeclarations } from "intl-t/declarations";
+
+generateDeclarations("i18n/messages", { watchMode: true }); // translations folder
+```
+
+_Note: Running `generateDeclarations` in `next.config.js` may display ESM warnings in the console. You can safely ignore these warnings, or run the script separately to avoid them._
+
+After running the script, declaration files will appear in your locales folder with the corresponding types. These types are not needed for production or development runtime, so you can ignore them in your git repository:
+
+`*.d.json.ts`
+
+```ts
+import { createTranslation } from "intl-t";
+import en from "./messages/en.json";
+import es from "./messages/es.json";
+
+export const t = createTranslation({
+  locales: { en, es },
+});
+```
+
+Alternatively, you can import the declarations and assert them in your translation settings file, but it is not recommended in order to use generated declarations.
+
+```ts
+// i18n/translation.ts
+import { createTranslation } from "intl-t/core";
+
+type Locale = typeof import("./messages/en.d.json.ts");
+
+export const t = createTranslation({
+  locales: () => import("./messages/en.json") as Promise<Locale>,
+  allowedLocales: ["en", "es"],
+});
+```
+
+### Script
+
+You can generate TypeScript declarations for your translations using the `declarations` command.
+
+```
+
+Usage: ${cmdName} <files|folders>... [options]
+
+Options:
+  --out, --output     Output file or folder
+  --watch             Watch files/folders for changes
+  --format <fmt>      Output format: ts, d.ts, d.json.ts (default)
+  --symbol <name>     Exported symbol name (default: data)
+  --del, --remove     Delete original JSON files
+  --no-search         Disable default JSON search
+  --recursive         Search recursively in specified folders
+  --silent            Silence logs
+  -h, --help          Show help
+
+```
+
+This converts your JSON files into TypeScript declarations, which can be used to type your translations and enhance the developer experience.
+
+If no files or folders are specified, the command will search for JSON files in the current directory and its subdirectories.
+
+There is also a watch mode that will automatically update the declarations when the JSON files change.
+
+## Recommendations
+
+It is recommended to use TypeScript with intl-t. You may find the following configuration useful, especially when using [`declarations`](#declarations):
+
+```jsonc
+{
+  "compilerOptions": {
+    "allowArbitraryExtensions": true,
+    "paths": {
+      "@i18n/*": ["./i18n/*"],
+    },
+  },
+}
+```
+
+## Augmentation
+
+If you want to import functions, methods, etc. from the `intl-t/*` package directly instead of your custom i18n folder (`@/i18n/*`), you can declare `intl-t` module with TypeScript. However, this is not recommended, as the intended approach is for intl-t to infer everything from your created translations at `@/i18n/*`, which you then import with bound values and functions. If you import directly from the `intl-t` module, the value will be shared globally, but the types will not. If you want to enforce global type consistency, you can do so as follows:
+
+```ts
+import { t } from "@/i18n/translation";
+
+declare module "intl-t" {
+  export interface Global {
+    Translation: typeof t;
+  }
+}
+```
+
+In this way you can then import from the `intl-t` module with inferred types.
+
+> This is not necessary. `intl-t` is designed to infer translations from your custom files in `@/i18n/*`, which you import with their bound values and functions.

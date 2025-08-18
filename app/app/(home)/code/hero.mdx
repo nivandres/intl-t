@@ -1,0 +1,95 @@
+<div className="hidden">
+
+```ts twoslash include demo
+import { Translation } from "@intl-t/core";
+
+// ---cut-start---
+const en = {
+  homepage: {
+    title: "Homepage",
+    welcome: "Welcome, {name}!",
+    features: ["feat 1", "feat 2", "feat 3"],
+    counter: "{count, plural, =0 {Count is zero} =1 {Count is one} other {Count is #}}",
+  },
+} as const;
+const es = en;
+// ---cut-end---
+export const { useTranslation } = new Translation({ locales: { en } });
+// - config
+// ---cut---
+// - usage
+```
+
+</div>
+
+<Tabs items={["Usage", "Source", "Config", "Output"]} defaultIndex={0}>
+  <Tab value="Usage">
+
+```tsx twoslash title="page.tsx"
+import React from "react";
+
+interface Props {}
+
+// @include: demo-usage
+export default function HomePage() {
+  const { t } = useTranslation("homepage");
+  return (
+    <main>
+      <h1>{t("title")}</h1>
+      <span>{t.welcome({ name: "Ivan" })}</span>
+      <ol>
+        {t.features.map(t => (
+          <li key={t.key}>{t}</li>
+        ))}
+      </ol>
+      <span>{t("", { /* type-safe */ }).toLowerCase()}</span>
+      //        ^|
+    </main>
+  );
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+
+```jsonc title="en.json"
+{
+  "homepage": {
+    "title": "Homepage",
+    "welcome": "Welcome, {name}!",
+    "features": ["feat 1", "feat 2", "feat 3"],
+    "counter": "{count, plural,
+                  =0 {Count is zero}
+                  =1 {Count is one}
+                  other {Count is #}
+                }"
+  },
+  /* other pages */
+}
+```
+
+  </Tab>
+  <Tab value="Config">
+
+```ts twoslash title="translation.ts"
+// @include: demo-config
+```
+
+  </Tab>
+  <Tab value="Output">
+
+```html title="html"
+<main>
+  <h1>Homepage</h1>
+  <span>Welcome, Ivan!</span>
+  <ol>
+    <li>feat 1</li>
+    <li>feat 2</li>
+    <li>feat 3</li>
+  </ol>
+  <span>count is zero</span>
+</main>
+```
+
+  </Tab>
+</Tabs>

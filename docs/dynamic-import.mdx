@@ -1,0 +1,203 @@
+---
+title: Dynamic Import
+description: Load locales dynamically
+---
+
+> Dynamic Import
+
+There are several ways to dynamically import locales. Dynamic locale importing consists in loading only the translations you actually need. You may not need to use dynamic importing, but if you do, please read this section carefully for a complete overview.
+
+## Nodes as dynamic functions
+
+To dynamically import locales, set node values as functions to be called when needed.
+
+```ts
+import { Translation } from "intl-t";
+
+export const t = new Translation({
+  locales: {
+    en: () => import("./en.json"),
+    es: () => import("./es.json"),
+  },
+});
+
+await t; // Automatically imports the locale that is needed at client or server
+```
+
+```ts
+import { createTranslation } from "intl-t";
+
+// use await at createTranslation to preload default locale
+export const { t } = await createTranslation({
+  locales: {
+    en: () => import("./en.json"),
+    es: () => import("./es.json"),
+  },
+  hydration: false, // disable hydration to automatically load the correct client locale
+}); // This is not recommended for hydration environments
+```
+
+Or you can import the locales dynamically and assert the type in this way.
+
+```ts
+type Locale = typeof import("./en.json");
+
+createTranslation({
+  locales: locale => import(`./${locale}.json`) as Promise<Locale>, // default type is inferred
+  allowedLocales: ["en", "es"], // It is important to specify locales
+});
+```
+
+## `getLocales` function
+
+`getLocales` function is a way to preload locales dynamically depending if it is client or server. If you are invoking from server it preloads with a top-level await, but if you are invoking from client it will dynamically import the locales. If you are using [static rendering](/docs/next#static-rendering) with [React Provider](/docs/react#provider), the right locale will be automatically handled and sent to the client.
+
+```ts
+import { createTranslation, getLocales } from "intl-t";
+// `allowedLocales` as locale list, e.g. ["en", "es"] as const; !important use `as const`
+import { allowedLocales } from "./locales";
+
+const locales = await getLocales(locale => import(`./messages/${locale}.json`), allowedLocales); // Preload locales at server and dynamically imported at client
+
+export const { t } = createTranslation({ locales });
+```
+
+`getLocales(cb, locales, preload?)`
+
+If your import function doesn't return the type directly, you can assert it in this way.
+
+```ts
+type Locale = typeof import("./messages/en.json");
+
+await getLocales(locale => import(`./messages/${locale}.json`) as Promise<Locale>, allowedLocales);
+```
+
+`getLocales` function also supports preloading locales with locales record. `{ en: [AsyncFunction] }`
+
+`getLocales(locales record, list?, preload?)`
+
+## Preload Locales
+
+Preload option is a way to implement `getLocales` function directly at create translation, instead of using `await getLocales` you will use `await` directly on the translation object.
+
+```ts
+await createTranslation({
+  locales: locale => import(`./messages/${locale}.json`) as Promise<typeof import("./messages/en.json")>,
+  preload: true, // e. g. preload all locales depending if is server or whichever condition
+});
+```
+
+Actually when using locales as callback, it will automatically turn on preload and use !isClient as default condition.
+
+```ts
+await createTranslation({
+  locales: {
+    en: () => ({ hello: "Hello World!" }),
+    es: new Promise(r => r({ hello: "¡Hola Mundo!" })) as { hello: "¡Hola Mundo!" }, // intl-t supports promises but it is need to assert the type
+    fr: async () => ({ hello: "Bonjour le monde!" }),
+    ja: { hello: "こんにちは世界！" },
+  },
+  preload: true, // preloads all locales when using `await`
+});
+```
+
+When `preload` is enabled, the first `await` invocation will preload all locales. By default, if `preload` is not specified and you use `await`, only the current locale is preloaded. Additionally, if you provide a callback for `locales`, `preload` is enabled automatically and all locales are preloaded on the server by default.
+
+Enabling `preload` turns the top-level translation object into a promise that resolves when all locales are loaded. Therefore, if you enable `preload`, remember to use `await` with `createTranslation`. In this case, you cannot use the `new Translation` syntax, as you cannot use `await` with `new`.
+
+However, intl-t is flexible: if you enable `preload` but do not use `await`, it will behave as a normal translation object without preloading. You can simply use `await` on the specific locales you need. (But it is the same as having `preload: false`)
+
+```ts
+const t = createTranslation({
+  locales: {
+    en: async () => ({ hello: "Hello World!" }),
+    es: async () => ({ hello: "¡Hola Mundo!" }),
+    fr: () => ({ hello: "Bonjour le monde!" }),
+    ja: async () => ({ hello: "こんにちは世界！" }),
+  },
+  preload: false, // preloads all locales when using top-level `await`
+});
+
+t.hello; // undefined
+(await t.es).hello; // "¡Hola Mundo!"
+t.fr.hello; // "Bonjour le monde!" // It works because it is just a function without promise
+(await t.en).hello; // "Hello World!"
+// `t.en` It is being preloaded without preloading the rest of locales, even when preload is on, because it is being used after accessing the specific locale
+(await t.es).hello; // "¡Hola Mundo!" // Already resolved, it doesn't do unnecessary reloads
+```
+
+You can test and debug the locale loads in the console and you can see the locales being loaded and resolved.
+Not repeated nodes, not unnecessary reloads, just the same independent nodes, proxies, instances, values and locales.
+
+## Server-Side importing
+
+A way to preload all locales at server is to separate the translations into different files and import them at the server.
+
+Client or server file:
+
+```ts
+// i18n/translation.ts
+import { createTranslation } from "intl-t/next";
+
+export const { t } = await createTranslation({
+  locales: {} as {
+    es: typeof import("./messages/es.json");
+    en: typeof import("./messages/en.json");
+  },
+  allowedLocales: ["en", "es"], // It is important to specify in this case
+});
+```
+
+Only server file:
+
+```ts
+// i18n/server.ts
+import en from "./messages/en.json";
+import es from "./messages/es.json";
+import { t } from "./translation";
+
+t.en.setSource(en);
+t.es.setSource(es);
+// or
+t.settings.getLocale = locale => import(`./messages/${locale}.json`);
+```
+
+Then in your server-side code. It could be only the root layout, API endpoints and server actions.
+
+```tsx
+import { Translation } from "./i18n/server";
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        {/* Automatically send the translations to the client */}
+        <Translation>{children}</Translation>
+      </body>
+    </html>
+  );
+}
+```
+
+This method is not totally recommended due to some errors when building with Next.js. It is a example of how flexible you can handle your translations and dynamic loads and imports.
+
+If you're getting started with `intl-t` and dynamic imports, you may want to begin by [setting nodes as dynamic functions](#nodes-as-dynamic-functions).
+
+Some of these dynamic locales importing strategies are unstable and may not work as expected. You may find the next error when building with Next.js:
+
+> Linting and checking validity of types ..Debug Failure. False expression.
+> Next.js build worker exited with code: 1 and signal: null
+> error: script "build" exited with code 1
+
+This occurs when using `import("...")` and `bundle` module resolution in `tsconfig.json`. In this case, you can disable typescript check with Next.js
+
+```ts
+// next.config.js
+const nextConfig = {
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+};
+```
+
+Or use `import en from "./en.json"` instead of `await import("./en.json")`.

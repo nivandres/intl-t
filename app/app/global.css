@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/black.css";
+@import "fumadocs-ui/css/preset.css";
+@import "fumadocs-twoslash/twoslash.css";
+
+:root {
+  --fd-layout-width: 2000px;
+  main {
+    @apply bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1.5px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1.5px)] bg-[size:6rem_4rem];
+  }
+}
+.dark {
+  --color-fd-secondary: #0a0a0d;
+  main {
+    @apply bg-[linear-gradient(to_right,#0f0f0f_1px,transparent_1.5px),linear-gradient(to_bottom,#0f0f0f_1px,transparent_1.5px)] bg-[size:6rem_4rem];
+  }
+}

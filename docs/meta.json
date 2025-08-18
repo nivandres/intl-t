@@ -1,0 +1,22 @@
+{
+  "pages": [
+    "---Introduction---",
+    "index",
+    "quick-start",
+    "---Usage---",
+    "...",
+    "tools",
+    "---Integrations---",
+    "react",
+    "next",
+    "edge",
+    "---Guides---",
+    "dynamic-import",
+    "migration",
+    "examples",
+    "---",
+    "contributing",
+    "acknowledgment",
+    "support"
+  ]
+}

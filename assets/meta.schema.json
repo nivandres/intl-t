@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Name of the folder"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Icon name for the folder"
+    },
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Order of items in the folder"
+    },
+    "defaultOpen": {
+      "type": "boolean",
+      "description": "Force folder to open by default"
+    },
+    "root": {
+      "type": "boolean",
+      "description": "Mark folder as a root"
+    }
+  }
+}

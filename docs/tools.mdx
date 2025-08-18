@@ -1,0 +1,87 @@
+---
+title: Tools
+description: Tools and utilities for Intl-T
+---
+
+Intl-t provides a set of tools to help you with your translations. You can use each of them independently from `intl-t/tools`.
+
+```ts
+import { /* tools */ } "intl-t/tools";
+```
+
+## Inject
+
+Inject variables into content, with built-in support for the ICU message format.
+
+```ts
+import { inject } from "intl-t/tools";
+
+const str = inject("Hello, {user}!", { user: "Ivan" }); // "Hello, Ivan!"
+
+// TypeScript Support
+typeof str; // `Hello, ${string}`
+
+// Full support for ICU message format
+
+// Extended keeping syntax and performance
+inject("One plus one equals {(1+1), =2 {two (#)} other {# (#)}}"); // "One plus one equals two (2)"
+inject("{a} plus {b} {(a+b), (typeof # != 'number') {is not a number. #} <0 {is negative. #} other {equals {(a+b)}. {a}+{b}=#}}");
+// nested injections
+```
+
+## React Injection
+
+To use the [React Chunk Injection](/docs/react#react-component-injection) function, import it from `intl-t/react`.
+
+```ts
+import { injectReactChunk } from "intl-t/react";
+```
+
+## Match
+
+Function to match the best locale from the available ones.
+
+```ts
+import { match } from "intl-t/tools";
+
+const availableLocales = navigator.languages.split(","); // ["es", "en"]; // can be string | string[]
+const allowedLocales = ["en-US", "es-MX", "fr-FR", "zh-Hant"];
+const defaultLocale = "en-US";
+
+const locale = match(availableLocales, allowedLocales, defaultLocale); // "es-MX"
+```
+
+It finds the best locale by comparing the available locales with the allowed locales. Try it yourself.
+
+## Negotiator
+
+Simple function to extract the locale from HTTP headers.
+
+```ts
+import { negotiator } from "intl-t/tools";
+
+negotiator({ headers });
+```
+
+## Formatters
+
+Formatters are used internally by the [inject](#inject) function, but they can also be used directly.
+
+```ts
+import { format } from "intl-t/tools";
+```
+
+```ts
+// format params
+format.list(value: string[], options?: Intl.ListFormatOptions);
+format.number(value: number = 0, options?: Intl.NumberFormatOptions);
+format.currency(value: number = 0, options: Intl.NumberFormatOptions = {});
+format.date(value: Date = new Date(), options?: Intl.DateTimeFormatOptions);
+format.relative(value: Date | number = 0, options: Intl.RelativeTimeFormatOptions & Record<string, any> = {}); // relative time inferred from value
+format.time(value: Date = new Date(), options?: Intl.DateTimeFormatOptions);
+format.price(value: number = 0, options: Intl.NumberFormatOptions = {}); // uses USD by default
+```
+
+## Resolvers
+
+Resolver functions are best used via [createNavigation](/docs/next#navigation), but you can also import them directly from `intl-t/tools` without bound values and types.

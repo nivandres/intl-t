@@ -1,0 +1,265 @@
+---
+title: Migration Guide
+description: Migrate from other i18n libraries to Intl‑T
+---
+
+Before migrating, make sure you understand the core concepts of intl-t. See the [Basic Usage](/docs/node) section for details.
+
+## Next.js with Static Rendering and Dynamic Importing
+
+1. **Prepare your translations**
+
+`intl-t` supports flexible JSON files with deeply nested nodes. However, you should review the [Reserved Keywords](/docs/node#reserved-keywords) before using them in your translations. All locale translation files must have the same structure, keys, and nodes. `intl-t` will warn you if there are any discrepancies.
+
+```jsonc
+// en.json
+{
+  "homepage": {
+    "welcome": "Welcome, {user}!",
+  }
+}
+// es.json
+{
+  "homepage": {
+    "welcome": "Bienvenido, {user}!",
+  }
+}
+```
+
+It's recommended to have a central translation meta file for general data, such as `allowedLocales` and `defaultLocale`. This is useful for navigation and middleware.
+
+```ts
+// i18n/locales.ts
+export const allowedLocales = ["en", "es"];
+```
+
+2. **Set up your translation configuration**
+
+Use async createTranslation with the `locales` option as a function to preload locales on the server and dynamically import them on the client.
+
+```ts
+// i18n/translation.ts
+import { createTranslation, getLocales } from "intl-t/next";
+import { allowedLocales } from "./locales";
+
+type Locale = typeof import("./messages/en.json");
+
+export const { Translation, useTranslation, getTranslation } = await createTranslation({
+  allowedLocales,
+  locales: locale => import(`./messages/${locale}.json`) as Promise<Locale>,
+});
+```
+
+If you want to use type declarations for each locale, you should set up the configuration as follows:
+
+```ts
+// i18n/translation.ts
+import { createTranslation, getLocales } from "intl-t/next";
+import { allowedLocales } from "./locales";
+
+export const t = createTranslation({
+  locales: {
+    en: () => import("./messages/en.json"),
+    es: () => import("./messages/es.json"),
+    // ...
+  },
+});
+```
+
+You can generate literal string declarations for your JSON files using [`generateDeclarations`](/docs/typescript#declarations) function.
+
+```ts
+// next.config.js
+import { generateDeclarations } from "intl-t/declarations";
+
+generateDeclarations("messages");
+```
+
+If you're using Next.js in production, you may need to patch React to support translation objects:
+
+```ts
+// i18n/patch.ts
+import patch from "intl-t/patch";
+import React from "react";
+import jsx from "react/jsx-runtime";
+
+process.env.NODE_ENV !== "development" && patch(React, jsx);
+```
+
+Then import this patch at the top of your translation file:
+
+```ts
+// i18n/translation.ts
+import "./patch";
+
+// ...
+```
+
+3. **Configure navigation**
+
+```ts
+// i18n/navigation.ts
+import { createNavigation } from "intl-t/navigation";
+import { allowedLocales } from "./locales";
+
+export const { middleware, generateStaticParams, Link, redirect, useRouter } = createNavigation({ allowedLocales });
+```
+
+```ts
+// middleware.ts
+export { middleware as default } from "@/i18n/navigation";
+
+export const config = {
+  matcher: ["/((?!api|static|.*\\..*|_next).*)"],
+};
+```
+
+> To customize the `intl-t` middleware, you can extract `withMiddleware` function to wrap the function in a chain or as needed. `middleware(request, event, response)`
+
+[See the complete navigation documentation in the Navigation section.](/docs/next#navigation)
+
+4. **Set up your root layout**
+
+By default, the locale is managed using the `[locale]` route parameter. However, you can fully customize this behavior. For example, you can get the locale dynamically from headers, detect the domain, geolocation, or custom HTTP Request. See the [Navigation](/docs/next#navigation) section for more details. There is also a mini example in the [dynamic rendering with Next.js](/docs/next#dynamic-rendering) section that shows how to avoid using the `[locale]` param by detecting the locale from headers.
+
+`/app/[locale]/...`
+
+```tsx
+// app/[locale]/layout.tsx
+import { Translation } from "@/i18n/translation";
+import { setRequestLocale } from "intl-t/next";
+
+export { generateStaticParams } from "@/i18n/navigation";
+
+interface Props {
+  params: Promise<{ locale: typeof Translation.locale }>;
+  children: React.ReactNode;
+}
+
+export default async function RootLayout({ children, params }: Props) {
+  const { locale } = await params;
+  if (!Translation.locales.includes(locale)) return;
+  setRequestLocale(locale);
+  return (
+    <html lang={locale}>
+      <body>
+        <Translation>{children}</Translation>
+      </body>
+    </html>
+  );
+}
+```
+
+5. **Use translations in your code**
+
+**With React Server Components (Static):**
+
+```tsx
+import { getTranslation } from "@/i18n/translation";
+
+export default function Component() {
+  const t = getTranslation();
+  return <div>{t("greeting", { name: "Ivan" })}</div>;
+}
+```
+
+[Read more about static rendering with Intl-T](/docs/next#static-rendering)
+
+**With React Server Components (Dynamic):**
+
+If you don't provide a Translation Provider or don't use `setRequestLocale` if required, you can use `await getTranslation()` for dynamic rendering in Next.js.
+
+```tsx
+import { getTranslation } from "@/i18n/translation";
+
+export default function Component() {
+  const t = await getTranslation();
+  return <div>{t("greeting", { name: "Ivan" })}</div>;
+}
+```
+
+[Read more about dynamic rendering with Intl-T](/docs/next#dynamic-rendering)
+
+**With Server Actions:**
+
+The locale is automatically detected from headers.
+
+```ts
+"use server";
+import { getTranslation } from "@/i18n/translation";
+
+export function greeting() {
+  const t = await getTranslation(); // use await to get locale from headers
+  return t("greeting", { name: "Ivan" });
+}
+```
+
+**With Client Components (Hydration):**
+
+```tsx
+"use client";
+
+import { useTranslation } from "@/i18n/translation";
+
+export default function Component() {
+  const { t } = useTranslation();
+  return <div>{t("greeting", { name: "Ivan" })}</div>;
+}
+```
+
+For easier migration from other i18n libraries, you can use the `getTranslations` and `useTranslations` aliases, exactly the same and keep type safety. `getTranslation` and `useTranslation` are functionally the same and adapt depending on the environment.
+
+You can also use them as translation object directly, e.g., `useTranslation.greeting.es({ name: "Ivan" })`—it's modular, type-safe, and flexible.
+
+**With metadata:**
+
+```tsx
+// layout.tsx
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslation();
+  return t.metadata.toJSON();
+}
+```
+
+**Link Navigation Component:**
+
+```tsx
+import { Link } from "@/i18n/navigation";
+import { Translation } from "@/i18n/translation";
+
+export default function LanguageSwitcher() {
+  const { Translation, t } = useTranslation("languages");
+  return (
+    <nav>
+      <h2>{t("title")}</h2>
+      <ul>
+        {t.allowedLocales.map(locale => (
+          <Link locale={locale} key={locale}>
+            <Translation.change variable={{ locale }} /> {/* example of Translation component */}
+          </Link>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+```
+
+**Router Hook:**
+
+```tsx
+import { useRouter } from "@/i18n/navigation";
+
+export default function Component() {
+  const router = useRouter();
+  function onClick() {
+    router.push("/hello", { locale: "fr" });
+  }
+  return (
+    <div onClick={onClick}>
+      {router.locale} {router.pathname}
+    </div>
+  );
+}
+```

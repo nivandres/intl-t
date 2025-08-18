@@ -1,0 +1,286 @@
+---
+title: Node Logic
+description: Understand Intl-T Node Logic
+---
+
+## JSON
+
+First, create JSON files for each of your supported languages.
+
+`en.json` `es.json` `fr.json` `etc...`
+
+```json
+{
+  "greeting": "Hello {user}!"
+}
+```
+
+Your JSON files their keys and values can be **nested** in a multiple layer deep tree structure, so that each translation is an unique node in the tree with its mutable variables and base text.
+
+Your translations also can have multiple placeholders, that can be replaced with variables. For example, `Hello, {user}!` has a user placeholder, that can be replaced. These values can be inferred by typescript through declarations, or you can specify them manually in json structure through `values` property. There you specify the default values for the node.
+
+```json
+{
+  "greeting": "Hello {user}!",
+  "items": {
+    // nested translations
+    "count": "Hey {user}, you have {count} items!",
+    "values": {
+      "count": 0
+    }
+  },
+  "values": {
+    // default value
+    "user": "World"
+  }
+}
+```
+
+Each node can herit varaibles from its parent node, so that we can define default values for all nodes in the tree and override them in each node, or just define isolated variables for each node. Also them can be inferred by typescript, but if you want to specify them manually with its right type and declarations, you can do it through `values` property.
+
+```json
+{
+  "greeting": {
+    "base": "Hello {user}!",
+    "values": {
+      "user": "World"
+    }
+  }
+}
+```
+
+Through typescript we can get autocomplete for the variables in each translation node. How it works? In Object nodes, base refers to the translation text of the current node ("Hello \{user\}!"), and values refers to the variables of the current node and its heritage ("\{user\}"). Base nodes can only have base text, and their values can only be inherited. Values is an object with the variable names (keys) and their default values (values). Anyway, you can run the replace functions without declaring variables, but it won't have autocomplete.
+
+Remember all your JSON files for each language should have the same structure, keys, values and all its node in each tree. In case there is some difference between the json files, typescript will detect it and warn you.
+
+```jsonc
+// en.json
+{
+  "homepage": {
+    "welcome": "Welcome, {user}!"
+  }
+}
+
+// es.json
+{
+  "homepage": {
+    "welcome": "Bienvenido, {user}!"
+  }
+}
+```
+
+In these case variables are not declared manually, typescript will try to infer them, partial autocomplete will work. But there no will be any problem in injection through JavaScript. The unique purpose of `values` property, types and declarations, is to help you with autocomplete and validation.
+
+```json
+{
+  "store": {
+    "product_title": ["sunglasses", "watch", "chain"], // you can put complex nodes into lists too
+    "product_description": {
+      "base": [
+        // base is the default text string for the curren node
+        "These stylish sunglasses cost ${price} and offer 100% UV protection.",
+        "The elegant watch is priced at just ${price} and comes with a stainless steel strap.",
+        // Each node inherits the values from its parent
+        "Our fashionable chains are available for just ${price} and make a perfect accessory."
+      ],
+      "values": {
+        "price": 10 // nodes can be numbers | string | node arrays | record of arrays (object)
+        // or even React Components with `intl-t/react` or `intl-t/next`
+      }
+    }
+  }
+}
+```
+
+You can access all nodes individually with all their methods for mutate and modify their branches.
+
+## Nodes
+
+Translation will be based on translation nodes, each translation node have its base value, default variables, children, parent, etc. The translation core object is the tree of all these nodes. The root of the object will be the default locale tree with properties for all locale tree. All in this tree are nodes, so all of them have the same methods. But for typescript, depending if is root o has base text the methods will differ.
+
+Each node can be callable and usable directly. They work like a function, object and string as needed.
+
+```ts
+{
+  base: "hello";
+  child: "hello";
+} // nodes can have base value and children
+"hello"["hello"][ // nodes can be only text too // or lists
+  // You can put this raw values when createTranslation
+  [[["hello"]]]
+]; // You can make it as complex as you want
+t[0][0][0][0];
+```
+
+```ts
+// Type-safe
+t.public.page1.section1.article1.lines[0].htmltitle[0];
+t("public.page1.section1.lines.0.htmltitle.0");
+t.settings.ps = "/"; // You can change the path separator
+t("public/page1");
+```
+
+Remember that you can nest many mutation methods as you want.
+
+```ts
+t(v1).p1("s4.a2").n3(v2);
+```
+
+Also the nodes in its properties have some general data, like its current variables, locale details, its locale, its children property names, its keyname in parent property, the main locale, parent reference access, global reference access, etc.
+
+```ts
+const {
+  global: {
+    pages: { title },
+  },
+} = t;
+title === t.g("pages.title"); // true
+```
+
+### Implementation
+
+```ts
+console.log(t("greeting", { name: "John" })); // Output: Hello, John!
+console.log(t("items.count", { count: 2 })); // Output: You have 2 items.
+
+// Switch language
+console.log(t.es("greeting", { name: "Juan" })); // Output: ¡Hola, Juan!
+```
+
+#### Nested out of the box
+
+```ts
+{
+  user: {
+    profile: {
+      title: "User Profile",
+      greeting: "Welcome back, {name}!"
+    }
+  }
+};
+
+console.log(t("user.profile.title")); // Output: User Profile
+console.log(t("user.profile.greeting", { name: 'Alice' })); // Output: Welcome back, Alice!
+```
+
+#### Dynamic Keys
+
+```ts
+const key = "user.profile.greeting";
+console.log(t(key, { name: "Bob" })); // Output: Welcome back, Bob!
+```
+
+#### Pluralization
+
+```ts
+{
+  items: "You have {count, plural, =0 {no items} one {# item} other {# items}}.";
+}
+
+console.log(t("items", { count: 0 })); // Output: You have no items.
+console.log(t("items", { count: 1 })); // Output: You have 1 item.
+console.log(t("items", { count: 5 })); // Output: You have 5 items.
+```
+
+#### Date and Number Formatting
+
+```ts
+{
+  date: "Today is {now, date, full}",
+  price: "The total is {amount, number, currency}"
+};
+
+console.log(t("date", { now: new Date() })); // Output: Today is Wednesday, April 7, 2023
+console.log(t("price", { amount: 123.45 })); // Output: The total is $123.45
+```
+
+#### Nested Variable Injection with operations.
+
+```ts
+{
+  "greeting": "Hello, {user}! {age, <9 {you are lying about your age, you are at least {#+3, =10 {ten} !=10{#}}, {user}}, #>123 'you are lying, you are not # years old', other{you're # years old, ok} }",
+}
+
+console.log(t("greeting", { user: "John", age: 7 })); // Output: Hello, John! You are lying about your age, you are at least ten, John
+
+```
+
+## API Reference
+
+### `createTranslation(options)`
+
+Creates a translation instance with the given options.
+
+```typescript
+interface TranslationSettings<L extends Locale, M extends L, T extends Node, V extends Values> {
+  locales: Record<L, T> | L[];
+  mainLocale?: M;
+  variables?: V;
+  pathSeparator?: string; // default is ".". And yes, it doesn't affect type safety
+  // ... other options
+}
+
+const { t } = createTranslation<TranslationSettings>(options);
+```
+
+Options:
+
+- `locales`: An object containing locale keys and their corresponding translation trees, or an array of allowed locales.
+- `mainLocale`: The main locale for the default application locale.
+- `variables`: Global variables available in all translations.
+- `plugins`: An array of plugins to extend functionality.
+
+### Translation Function: `t`
+
+The main translation function returned by `createTranslation`.
+
+```typescript
+t(key: string, variables?: Values)
+t[locale](key: string, variables?: Values)
+t(variables: Values)
+t`key`
+t(key[])
+```
+
+#### Methods:
+
+- `t(key, variables?)`: Translates the given key with optional variables.
+- `t[locale](key, variables?)`: Translates using a specific locale.
+- `t(variables)`: Creates a new translation instance with the given variables.
+
+### TranslationNode Interface
+
+The core interface representing a node in the translation tree.
+
+```typescript
+interface TranslationNode<S extends TranslationSettings, N extends Node, V extends Values, L extends S["allowedLocale"]> {
+  t: TranslationNode<S, N, V, L>;
+  tr: TranslationNode<S, N, V, L>;
+  parent: TranslationNode<S, N, V, L>;
+  values: V;
+  lang: L;
+  path: string[];
+  id: string;
+  node: N;
+  settings: S;
+  // ... other properties and methods
+}
+```
+
+### Reserved Keywords
+
+These keys are reserved and used to access some translations properties and methods.
+
+- `base`
+- `values`
+- `children`
+- `current`
+- `parent`
+- `settings`
+- `node`
+- `path`
+- `settings`
+- `key`
+- `default`
+- `catch`
+- `then`

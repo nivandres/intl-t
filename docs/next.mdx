@@ -1,0 +1,430 @@
+---
+title: Next.js
+description: Next.js integration for Intl-T
+---
+
+## Overview
+
+intl-t offers special integration with Next.js for server-side rendering and routing:
+
+For Static Rendering you will need to generate static params for each locale.
+
+In dynamic pages with just `await getTranslation()` you can get the translation with current locale from headers.
+
+`getTranslation` also has `getTranslations` as an alias.
+
+> Note: `intl-t/next` is for Next.js App with RSC. For Next.js Pages you should use `intl-t/react` instead, and `intl-t/navigation` for Next.js Navigation and Routing tools.
+
+```ts
+// Important: use intl-t/next or @intl-t/next
+import { createTranslation } from "intl-t/next";
+import en from "./messages/en.json";
+import es from "./messages/es.json";
+
+export const { Translation, useTranslation, getTranslation } = await createTranslation({ locales: { en, es } });
+```
+
+## Navigation
+
+Import `createNavigation` from `intl-t/navigation` and pass the allowed locales. Don't import createNavigation from `intl-t/next` in order to use it from middleware.
+
+```ts
+//i18n/navigation.ts
+import { createNavigation } from "intl-t/navigation";
+
+export const { middleware, Link, generateStaticParams } = createNavigation({ allowedLocales: ["en", "es"], defaultLocale: "en" });
+```
+
+```tsx
+//app/[locale]/layout.tsx
+import { Translation } from "@/i18n/translation";
+
+export { generateStaticParams } from "@/i18n/navigation";
+
+interface Props {
+  params: Promise<{ locale: typeof Translation.locale }>;
+  children: React.ReactNode;
+}
+
+export default async function RootLayout({ children, params }: Props) {
+  const { locale } = await params;
+  if (!Translation.locales.includes(locale)) return;
+  return (
+    <html lang={locale}>
+      <body>
+        <Translation>{children}</Translation>
+      </body>
+    </html>
+  );
+}
+```
+
+That translation component is a React Server Component that handles the current locale and the corresponding translations to be sent to the client and its context.
+
+Also, `Translation` will work too as a client-side translation component.
+
+```ts
+//middleware.ts
+export { middleware as default } from "@/i18n/navigation";
+
+export const config = {
+  // middleware matcher config
+};
+```
+
+If you need to customize your middleware or chain multiple middlewares, you can use the `withMiddleware` function to wrap your middleware in a chain.
+
+```ts
+// i18n/navigation.ts
+import { createNavigation } from "intl-t/navigation";
+
+export const { withMiddleware, Link, generateStaticParams, useRouter } = createNavigation({ allowedLocales, defaultLocale });
+
+// middleware.ts
+import { withMiddleware } from "intl-t/navigation";
+
+function middleware(request, event) {
+  // do something
+}
+
+export default withMiddleware(middleware);
+```
+
+`withMiddleware` and `middleware` both return the response. `middleware` function also can receive the response as the last argument, so you can configure it in a flexible way.
+
+```ts
+middleware(request, event, response);
+```
+
+From `createNavigation` you can get:
+
+- `middleware`: Middleware function to be used in `middleware.ts`
+- `generateStaticParams`: Function to generate static params
+- `useRouter`: React hook to get router config with binded `locale` and `pathname` values
+- `Link`: React component to create links with binded `locale` and `pathname` values
+- `redirect`: Binded Next.js `redirect` function
+- `permanentRedirect`: Binded Next.js `permanentRedirect` function
+- `getLocale`: Function to get current locale at server
+- `useLocale`: React hook to get current locale
+- `usePathname`: React hook to get current pathname without locale prefix if exist
+- `getPathname`: Function to get current pathname without locale prefix if exist
+
+### Router Hook
+
+`useRouter` hook is a wrapper for Next.js `useRouter` hook, but it will resolve the locale and pathname at client and server dynamically.
+
+```ts
+const router = useRouter();
+router.push("/hello", { locale: "fr" }); // Handles automatically the locale
+router.pathname; // "/fr/hello"
+router.locale; // "fr"
+```
+
+Pathname and locale are resolved through other hooks with getters, so you can use them dynmically when need, like old Next.js `useRouter` hook.
+
+### **Resolvers Config**
+
+When creating navigation, you can configure the routing structure using resolvers like `resolvePath` and `resolveHref` to match the correct locale and path.
+
+```ts
+interface Config {
+  pathPrefix?: "always" | "default" | "optional" | "hidden";
+  pathBase?: "always-default" | "detect-default" | "detect-latest";
+  strategy?: "domain" | "param" | "headers";
+  redirectPath?: string;
+}
+```
+
+- **`pathPrefix`**: Controls how the locale appears in the URL path.
+  - `"always"`: The locale is always included as a path prefix.
+  - `"default"`: The default locale is hidden in the path, while other locales are shown.
+  - `"optional"`: The locale prefix can be present or absent, depending on the accessed URL.
+  - `"hidden"`: The locale is never shown in the path prefix.  
+    _Default is `"default"`._
+
+- **`pathBase`**: Determines the behavior when no locale is specified in the path.
+  - `"always-default"`: The path base `/` always routes to the default locale.
+  - `"detect-default"`: On the first visit, the user's locale is detected and redirected; subsequent visits at path base go to the default locale.
+  - `"detect-latest"`: On the first visit, the user's locale is detected and redirected; subsequent visits at path base go to the most recently used locale.  
+    _Default is `"detect-default"`._
+
+- **`strategy`**: Specifies how to match the locale and path.
+  The default is to use the `[locale]` param with Next.js, but you can determine it, including the parameter name.
+
+- **`redirectPath`**: Sets a custom path for redirecting users to the appropriate locale.  
+  For example, if you are sending an email and don't know the user's locale, you can use a prefix path like `/r` to redirect to the default locale, or set it to any path you prefer.
+
+- **`detect`**: Callback function to detect the locale from the Next Request. E. g. from domain, geolocation, etc.
+
+All these configurations are compatible and are used internally throughout the intl-t tools.
+
+You can set these options in the `createNavigation` function.
+
+There are also additional configuration options you may want to explore.
+
+```
+/i18n
+  /navigation.ts
+  /translation.ts
+```
+
+```ts
+// i18n/navigation.ts
+import { createNavigation } from "intl-t/navigation";
+
+export const { middleware, Link, generateStaticParams, useRouter } = createNavigation({
+  allowedLocales: ["en", "es"],
+  defaultLocale: "en",
+
+  // custom
+  pathPrefix: "hidden",
+  pathBase: "always-default",
+});
+```
+
+```ts
+// i18n/translation.ts
+import en from "@/public/locales/en.json";
+import es from "@/public/locales/es.json";
+import { createTranslation } from "intl-t";
+
+export const { t } = createTranslation({
+  locales: {
+    en,
+    es,
+  },
+});
+```
+
+## NotFound Page Warning
+
+When using the param strategy (`[locale]`) with middleware in Next.js, you may encounter unexpected behavior when a page is not found: Next.js will redirect to `app/not-found.tsx`, which is outside the `[locale]` wrapper. To resolve this, use a `[...404]` dynamic param inside `[locale]` to catch all unmatched routes. Then, call the `notFound` function from Next.js to redirect users to the correct `not-found.tsx` page within the expected locale folder.
+
+This workaround will likely not be needed in future versions of Next.js.
+
+## Static Rendering
+
+```ts
+//i18n/translation.ts
+import { Translation } from "intl-t/next";
+
+export const { getTranslation, setLocale } = new Translation({ locales: { en: "Hello world" } });
+```
+
+```jsx
+import { getTranslation, setLocale } from "@/i18n/translation";
+import { setRequestLocale /* or setLocale */ } from "intl-t/next";
+
+export default function Page({ params }) {
+  const { locale } = await params;
+  setRequestLocale(locale); // required if not using server TranslationProvider
+  // or
+  // setLocale(locale); Same as setRequestLocale but typed with available locales (Absolutely not needed)
+  const t = getTranslation(); // It works like useTranslation
+  return <div>{t}</div>; // hello world
+}
+```
+
+Then in a sub-component, setRequestLocale is not needed.
+
+```tsx
+import { getTranslation } from "@/i18n/translation";
+
+export default function Component() {
+  const { t } = getTranslation();
+  return <div>{t("greeting", { name: "Ivan" })}</div>;
+}
+```
+
+> New Next.js feature `rootParams` will be implemented. `setRequestLocale` will be no longer needed in pages and layout, except in the `rootLayout`
+
+```ts
+// Already available but not directly implemented in getTranslation logic
+import { getRootParamsLocale } from "intl-t/next";
+```
+
+## Dynamic Rendering
+
+Same configuration. No need any more to set locale in dynamic pages.
+
+```tsx
+export default async function Page() {
+  const t = await getTranslation(); // Get locale from headers from middleware with its navigation settings
+  return <div>{t}</div>; // hello world
+}
+```
+
+If you want to use your own strategy to load locales dynamically, you can and avoid the `[locale]` param in your app routes.
+
+When creating navigation, you can configure its strategy to load locales always dinamically and don't route to the locale path with param. (Also it can be shown or hidden as you want configuring the `pathPrefix` and `pathBase` options)
+
+```tsx
+createNavigation({ allowedLocales, strategy: "headers" });
+```
+
+Then is no more needed to wrap your application routes into `[locale]` param.
+
+```tsx
+// app/layout.tsx
+import { Translation } from "@/i18n/translation";
+import { getRequestLocale /* or getLocale */ } from "intl-t/next";
+
+export default function RootLayout({ children }) {
+  const locale = getRequestLocale();
+  return (
+    <html lang={locale}>
+      <body>
+        <Translation>{children}</Translation>
+      </body>
+    </html>
+  );
+}
+```
+
+## Usage
+
+**With React Server Components (Static):**
+
+```tsx
+import { getTranslation } from "@/i18n/translation";
+
+export default function Component() {
+  const t = getTranslation();
+  return <div>{t("greeting", { name: "Ivan" })}</div>;
+}
+```
+
+[Read more about static rendering with Intl-T](/docs/next#static-rendering)
+
+**With React Server Components (Dynamic):**
+
+If you don't provide a Translation Provider or don't use `setRequestLocale` if required, you can use `await getTranslation()` for dynamic rendering in Next.js.
+
+```tsx
+import { getTranslation } from "@/i18n/translation";
+
+export default function Component() {
+  const t = await getTranslation();
+  return <div>{t("greeting", { name: "Ivan" })}</div>;
+}
+```
+
+[Read more about dynamic rendering with Intl-T](/docs/next#dynamic-rendering)
+
+**With Server Actions:**
+
+The locale is automatically detected from headers.
+
+```ts
+"use server";
+import { getTranslation } from "@/i18n/translation";
+
+export function greeting() {
+  const t = await getTranslation(); // use await to get locale from headers
+  return t("greeting", { name: "Ivan" });
+}
+```
+
+**With Client Components (Hydration):**
+
+```tsx
+"use client";
+
+import { useTranslation } from "@/i18n/translation";
+
+export default function Component() {
+  const { t } = useTranslation();
+  return <div>{t("greeting", { name: "Ivan" })}</div>;
+}
+```
+
+For easier migration from other i18n libraries, you can use the `getTranslations` and `useTranslations` aliases, exactly the same and keep type safety. `getTranslation` and `useTranslation` are functionally the same and adapt depending on the environment.
+
+You can also use them as translation object directly, e.g., `useTranslation.greeting.es({ name: "Ivan" })`—it's modular, type-safe, and flexible.
+
+**With metadata:**
+
+```tsx
+// layout.tsx
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslation();
+  return t.metadata.toJSON();
+}
+```
+
+**Link Navigation Component:**
+
+```tsx
+import { Link } from "@/i18n/navigation";
+import { Translation } from "@/i18n/translation";
+
+export default function LanguageSwitcher() {
+  const { Translation, t } = useTranslation("languages");
+  return (
+    <nav>
+      <h2>{t("title")}</h2>
+      <ul>
+        {t.allowedLocales.map(locale => (
+          <Link locale={locale} key={locale}>
+            <Translation.change variable={{ locale }} /> {/* example of Translation component */}
+          </Link>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+```
+
+**Router Hook:**
+
+```tsx
+import { useRouter } from "@/i18n/navigation";
+
+export default function Component() {
+  const router = useRouter();
+  function onClick() {
+    router.push("/hello", { locale: "fr" });
+  }
+  return (
+    <div onClick={onClick}>
+      {router.locale} {router.pathname}
+    </div>
+  );
+}
+```
+
+[Continue with Dynamic Import](/docs/dynamic-import)
+
+## Advanced Technical Warning.
+
+_Warning: When calling directly the `t` object from `getTranslation("...")` with [dynamic rendering](#dynamic-rendering) in a React Server Component (RSC) without `await`, and the `locale` is not yet loaded or cached, and t is not destructured, and the t expected is not the translation root t, you may find unexpected behaviour when calling:_
+
+> Translation did not load correctly through the Proxy. Try using `await getTranslation`, `t.t(...args)` or `const { t } = getTranslation()`"
+
+_This only occurs in this specific case, as it returns an incorrect `t` object when called due to how proxies work. If you use `await getTranslation()` or set request locale as normal, there will be no problem._
+
+_The recommended approach is to use `await getTranslation()` when there is no `locale` so that the `locale` is loaded dynamically from headers in order to use [dynamic rendering](#dynamic-rendering). The warning above only applies to this example of flexible usage pattern of `getTranslation`. The `getTranslation` when is not awaited works as a fallback that is not callable if you don't destructure `const { t } = getTranslation()`._
+
+## Static Rendering together with Dynamic Import Warning
+
+The previous problem only applies for [dynamic rendering with next](#dynamic-rendering), but if you are using [static rendering](#static-rendering) with [dynamic import](/docs/dynamic-import), keep in mind that sometimes pages load before the layout. Therefore, you may need to `await getTranslation` at the top of your static page to preload your locale translations (It keeps static). After this initial preload, you won't need to await the `getTranslation` in your components.
+
+## Next.js React patch
+
+Read more about [React Patch](/docs/react#patch) to understand how it works and limitations.
+
+```ts
+import patch from "intl-t/react";
+import React from "react";
+import jsx from "react/jsx-runtime";
+
+process.env.NODE_ENV !== "development" && patch(React, jsx);
+```
+
+```ts
+import "./patch";
+```
+
+_Warning: The only situation where you may encounter unexpected behavior with this Patch is when passing Translation Nodes as JSX attributes from a React Server Component (RSC) to a React Client Component. In this case, you cannot send the `function object` directly. Instead, convert the translation node to a string using `t.toString()`, `t.base`, or to JSON with `t.toJSON()`._

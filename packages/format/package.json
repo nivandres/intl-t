@@ -3,7 +3,7 @@
   "description": "Format utilities, variable injection, ICU Support",
   "version": "1.0.0-rc.104",
   "type": "module",
-  "homepage": "https://github.com/nivandres/intl-t#readme",
+  "homepage": "https://intl-t.dev",
   "repository": {
     "url": "https://github.com/nivandres/intl-t",
     "type": "git",
