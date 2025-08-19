@@ -1,8 +1,9 @@
 {
   "name": "@intl-t/tools",
   "description": "i18n utilities",
-  "version": "1.0.0-rc.105",
+  "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
   "homepage": "https://intl-t.dev",
   "repository": {
     "url": "https://github.com/nivandres/intl-t",

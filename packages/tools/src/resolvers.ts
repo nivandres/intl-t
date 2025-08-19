@@ -1,6 +1,6 @@
 import { locale as l } from "@intl-t/global";
+import { match } from "@intl-t/tools/match";
 import type { Locale, Awaitable } from "@intl-t/types";
-import { match } from "./match";
 
 // @ts-ignore-error optional binding
 export function resolveLocale<L extends Locale>(path: string = "", locales: L[] = this?.allowedLocales || []) {

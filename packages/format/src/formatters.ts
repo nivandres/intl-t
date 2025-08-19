@@ -1,5 +1,5 @@
+import { inject } from "@intl-t/format/inject";
 import { type State, state } from "@intl-t/global";
-import { inject } from "./inject";
 
 // @ts-ignore
 export function list(value: string[] = [], options?: Intl.ListFormatOptions, { locale }: State = this) {

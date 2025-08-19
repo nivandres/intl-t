@@ -1,8 +1,9 @@
 {
   "name": "@intl-t/format",
   "description": "Format utilities, variable injection, ICU Support",
-  "version": "1.0.0-rc.105",
+  "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
   "homepage": "https://intl-t.dev",
   "repository": {
     "url": "https://github.com/nivandres/intl-t",
@@ -25,6 +26,10 @@
     "./inject": {
       "types": "./dist/inject.d.ts",
       "default": "./dist/inject.js"
+    },
+    "./formatters": {
+      "types": "./dist/formatters.d.ts",
+      "default": "./dist/formatters.js"
     }
   },
   "keywords": [

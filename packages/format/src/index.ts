@@ -1,2 +1,2 @@
-export * from "./inject";
-export * from "./formatters";
+export * from "@intl-t/format/inject";
+export * from "@intl-t/format/formatters";

@@ -1,8 +1,9 @@
 {
   "name": "@intl-t/core",
   "description": "A Fully-Typed Node-Based i18n Translation Library",
-  "version": "1.0.0-rc.105",
+  "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
   "homepage": "https://intl-t.dev",
   "repository": {
     "url": "https://github.com/nivandres/intl-t",
@@ -33,7 +34,10 @@
       "types": "./dist/dynamic.d.ts",
       "default": "./dist/dynamic.js"
     },
-    "./global": "./dist/global.js"
+    "./global": {
+      "types": "./dist/global.d.ts",
+      "default": "./dist/global.js"
+    }
   },
   "keywords": [
     "translation",
@@ -58,6 +62,15 @@
     "@intl-t/locales": "workspace:*"
   },
   "peerDependencies": {
+    "@intl-t/react": "workspace:*",
     "typescript": "^5"
+  },
+  "peerDependenciesMeta": {
+    "@intl-t/react": {
+      "optional": true
+    },
+    "typescript": {
+      "optional": true
+    }
   }
 }

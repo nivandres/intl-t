@@ -2,10 +2,10 @@
 
 import { hydration as h } from "@intl-t/global";
 import { Locale } from "@intl-t/locales";
+import { getClientLocale, setClientLocale, LOCALE_CLIENT_KEY } from "@intl-t/react/client";
+import { TranslationContext } from "@intl-t/react/context";
+import { ReactState, ReactSetState } from "@intl-t/react/types";
 import { useState, useEffect, useContext, useMemo } from "react";
-import { getClientLocale, setClientLocale, LOCALE_CLIENT_KEY } from "./client";
-import { TranslationContext } from "./context";
-import { ReactState, ReactSetState } from "./types";
 
 export function useLocale<L extends Locale = Locale>(
   // @ts-ignore-error optional binding

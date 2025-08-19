@@ -1,8 +1,9 @@
 {
   "name": "@intl-t/types",
   "description": "Intl-T Type Definitions",
-  "version": "1.0.0-rc.105",
+  "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
   "homepage": "https://intl-t.dev",
   "repository": {
     "url": "https://github.com/nivandres/intl-t",

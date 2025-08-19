@@ -1,8 +1,8 @@
-import "./patch";
+import "@intl-t/react/patch";
 
-export * from "./translation";
-export * from "./context";
-export * from "./client";
-export * from "./hooks";
-export * from "./inject";
-export * from "./types";
+export * from "@intl-t/react/translation";
+export * from "@intl-t/react/context";
+export * from "@intl-t/react/client";
+export * from "@intl-t/react/hooks";
+export * from "@intl-t/react/inject";
+export * from "@intl-t/react/types";

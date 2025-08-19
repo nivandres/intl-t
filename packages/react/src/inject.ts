@@ -1,6 +1,6 @@
 import type { Values, Base } from "@intl-t/core/types";
+import type { ReactChunk, ReactChunkProps } from "@intl-t/react/types";
 import { createElement, type ReactNode } from "react";
-import type { ReactChunk, ReactChunkProps } from "./types";
 
 const regex = /<(\w+)([^<>/]+)?(?:\/\s*>|>(?:(.*)<\s*\/\s*\1\s*>)?)/gm;
 const attributesRegex = /(\w+)(?:=(\w+|".*?"|'.*?'|{(.+?)}))?/g;

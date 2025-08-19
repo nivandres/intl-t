@@ -1,8 +1,9 @@
 {
   "name": "@intl-t/next",
   "description": "A Fully-Typed Object-Based i18n Translation Library for Next.js",
-  "version": "1.0.0-rc.105",
+  "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
   "homepage": "https://intl-t.dev",
   "repository": {
     "url": "https://github.com/nivandres/intl-t",
@@ -42,6 +43,10 @@
       "types": "./dist/patch.d.ts",
       "default": "./dist/patch.js"
     },
+    "./cache": {
+      "types": "./dist/cache.d.ts",
+      "default": "./dist/cache.js"
+    },
     "./global": {
       "types": "./dist/global.d.ts",
       "default": "./dist/global.js"
@@ -71,11 +76,20 @@
   },
   "dependencies": {
     "@intl-t/core": "workspace:*",
+    "@intl-t/locales": "workspace:*",
     "@intl-t/react": "workspace:*",
     "@intl-t/tools": "workspace:*"
   },
   "peerDependencies": {
     "next": ">=14",
     "react": ">=18 <20"
+  },
+  "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
   }
 }

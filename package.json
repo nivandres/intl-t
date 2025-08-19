@@ -1,8 +1,9 @@
 {
   "name": "intl-t",
   "description": "A Fully-Typed Object-Based i18n Translation Library",
-  "version": "1.0.0-rc.105",
+  "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
   "homepage": "https://intl-t.dev",
   "repository": {
     "url": "https://github.com/nivandres/intl-t",
@@ -25,12 +26,13 @@
     "test": "bun test",
     "test:watch": "bun test --watch",
     "setup": "bash ./scripts/setup.sh",
+    "clean": "bash ./scripts/clean.sh",
     "format": "prettier --write .",
     "lint": "oxlint --fix",
     "typecheck": "bun run --filter '@intl-t/*' build && tsc --noEmit",
     "check": "bun run format && bun run lint && bun run typecheck",
     "prepare": "bun husky",
-    "prepublishOnly": "bun run build",
+    "prepublishOnly": "bun run build && bun run release",
     "bump": "bun run --filter '@intl-t/*' bump",
     "release": "bun run --filter '@intl-t/*' release"
   },
@@ -84,16 +86,16 @@
       "default": "./dist/react/index.js"
     },
     "./hooks": {
-      "types": "./dist/hooks/index.d.ts",
-      "default": "./dist/hooks/index.js"
+      "types": "./dist/react/hooks.d.ts",
+      "default": "./dist/react/hooks.js"
     },
     "./patch": {
       "types": "./dist/react/patch.d.ts",
       "default": "./dist/react/patch.js"
     },
     "./locales": {
-      "types": "./dist/locales/index.d.ts",
-      "default": "./dist/locales/index.js"
+      "types": "./dist/locales.d.ts",
+      "default": "./dist/locales.js"
     },
     "./tools": {
       "types": "./dist/tools/index.d.ts",
@@ -124,14 +126,21 @@
       "default": "./dist/types.js"
     }
   },
+  "sideEffects": false,
   "lint-staged": {
     "*.{json,md,js,ts,tsx}": "bunx prettier --check",
     "*.{js,ts,tsx}": "bunx oxlint"
   },
   "dependencies": {
     "@intl-t/core": "workspace:*",
+    "@intl-t/declarations": "workspace:*",
+    "@intl-t/format": "workspace:*",
+    "@intl-t/global": "workspace:*",
+    "@intl-t/locales": "workspace:*",
     "@intl-t/next": "workspace:*",
-    "@intl-t/react": "workspace:*"
+    "@intl-t/react": "workspace:*",
+    "@intl-t/tools": "workspace:*",
+    "@intl-t/types": "workspace:*"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",

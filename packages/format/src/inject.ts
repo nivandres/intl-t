@@ -1,6 +1,6 @@
+import { format } from "@intl-t/format/formatters";
 import { isEdge, state as globalState } from "@intl-t/global";
 import type { Values, Content, Variables } from "@intl-t/types";
-import { format } from "./formatters";
 
 export const ev = (expr: string, state = globalState) => {
   if (isEdge || state?.enableEval === false) return undefined as any;

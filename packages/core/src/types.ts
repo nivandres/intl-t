@@ -1,7 +1,7 @@
+import type { TranslationNode, invalidKeys } from "@intl-t/core/translation";
 import type { State, GlobalPathSeparator } from "@intl-t/global";
 import type { Locale } from "@intl-t/locales";
 import type { ReactChunk } from "@intl-t/react";
-import type { TranslationNode, invalidKeys } from "./translation";
 
 export type { TranslationNode, Locale, State };
 export type { TranslationProps, ReactNode, TranslationFC, TranslationNodeFC } from "@intl-t/react";

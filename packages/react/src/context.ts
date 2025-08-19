@@ -2,9 +2,9 @@
 
 import type { isArray, SearchWays, ArrayToString, Locale, TranslationProps as TP } from "@intl-t/core/types";
 import type { GlobalTranslation } from "@intl-t/global";
+import { useLocale } from "@intl-t/react/hooks";
+import { TranslationNode } from "@intl-t/react/translation";
 import { createElement, createContext, useContext, useMemo, useState, useEffect } from "react";
-import { useLocale } from "./hooks";
-import { TranslationNode } from "./translation";
 import type { ReactState, ReactSetState } from "./types";
 
 export type TranslationContext = null | {

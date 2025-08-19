@@ -1,1 +1,1 @@
-export * from "./core/types";
+export type * from "./core/types";

@@ -1,8 +1,9 @@
 {
   "name": "@intl-t/global",
   "description": "Intl-T Global State",
-  "version": "1.0.0-rc.105",
+  "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
   "homepage": "https://intl-t.dev",
   "repository": {
     "url": "https://github.com/nivandres/intl-t",
@@ -17,8 +18,12 @@
   "files": [
     "dist/*"
   ],
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
@@ -26,7 +31,14 @@
     "release": "bun publish --access public"
   },
   "dependencies": {
-    "@intl-t/locales": "workspace:*",
-    "@intl-t/types": "workspace:*"
+    "@intl-t/locales": "workspace:*"
+  },
+  "peerDependencies": {
+    "@intl-t/core": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@intl-t/core": {
+      "optional": true
+    }
   }
 }

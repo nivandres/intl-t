@@ -1,5 +1,5 @@
+import type { Locale, Node, Promisable, ResolveNode } from "@intl-t/core/types";
 import { isClient } from "@intl-t/global";
-import type { Locale, Node, Promisable, ResolveNode } from "./types";
 
 export function getLocale<const N extends Node>(
   node: N | Promisable<N> | ((locale?: Locale) => Promisable<N>),

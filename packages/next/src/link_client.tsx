@@ -1,7 +1,7 @@
 "use client";
 
 import type { Locale } from "@intl-t/locales";
-import { resolveHref } from "@intl-t/tools";
+import { resolveHref } from "@intl-t/tools/resolvers";
 import NL from "next/link";
 import type { ComponentProps } from "react";
 import { LinkProps } from "./link";

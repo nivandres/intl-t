@@ -1,8 +1,4 @@
-import { injectVariables } from "@intl-t/format";
-import { type GlobalTranslation, hydration, isClient, isEdge } from "@intl-t/global";
-import type { Locale } from "@intl-t/locales";
-import type { TranslationFC, TranslationNodeFC } from "@intl-t/react";
-import { getLocales } from "./dynamic";
+import { getLocales } from "@intl-t/core/dynamic";
 import type {
   Node,
   Values,
@@ -19,9 +15,13 @@ import type {
   TranslationKeys,
   Join,
   Override,
-} from "./types";
+} from "@intl-t/core/types";
+import { injectVariables } from "@intl-t/format";
+import { type GlobalTranslation, hydration, isClient, isEdge } from "@intl-t/global";
+import type { Locale } from "@intl-t/locales";
+import type { TranslationNodeFC, TranslationFC } from "@intl-t/react";
 
-export { Locale };
+export type { Locale };
 
 const TranslationBase = (isEdge ? Object : Function) as FunctionConstructor;
 
