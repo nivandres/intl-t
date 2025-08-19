@@ -12,9 +12,10 @@ const en = {
     counter: "{count, plural, =0 {Count is zero} =1 {Count is one} other {Count is #}}",
   },
 } as const;
-const es = en;
 // ---cut-end---
-export const { useTranslation } = new Translation({ locales: { en } });
+export const { useTranslation } = new Translation({
+  locales: { en },
+});
 // - config
 // ---cut---
 // - usage

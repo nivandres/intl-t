@@ -1,8 +1,8 @@
 .DS_Store
 .next
 .source
+.vercel
 *lock.json
 bun.lock*
 dist
 node_modules
-.vercel
