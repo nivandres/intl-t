@@ -142,8 +142,7 @@ Translation Nodes are not plain strings. Although they have special properties a
 If you are using React, in some frameworks you may need to patch React to support translation function objects. (Farmfe and Next.js builds)
 You can do it by importing the patch function and passing the React, jsx and jsxDEV modules directly to it.
 
-```ts
-//i18n/patch.ts
+```ts title="i18n/patch.ts"
 import patch from "intl-t/patch";
 import React from "react";
 import jsxDEV from "react/jsx-dev-runtime";
@@ -154,8 +153,7 @@ patch(React, jsx, jsxDEV);
 
 And then import it at the top of your translation file
 
-```ts
-//i18n/translation.ts
+```ts title="i18n/translation.ts"
 import "./patch";
 
 // ...

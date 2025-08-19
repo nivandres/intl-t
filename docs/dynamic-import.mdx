@@ -135,8 +135,7 @@ A way to preload all locales at server is to separate the translations into diff
 
 Client or server file:
 
-```ts
-// i18n/translation.ts
+```ts title="i18n/translation.ts"
 import { createTranslation } from "intl-t/next";
 
 export const { t } = await createTranslation({
@@ -150,8 +149,7 @@ export const { t } = await createTranslation({
 
 Only server file:
 
-```ts
-// i18n/server.ts
+```ts title="i18n/server.ts"
 import en from "./messages/en.json";
 import es from "./messages/es.json";
 import { t } from "./translation";
@@ -191,8 +189,7 @@ Some of these dynamic locales importing strategies are unstable and may not work
 
 This occurs when using `import("...")` and `bundle` module resolution in `tsconfig.json`. In this case, you can disable typescript check with Next.js
 
-```ts
-// next.config.js
+```ts title="next.config.js"
 const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,

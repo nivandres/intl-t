@@ -9,8 +9,7 @@ TypeScript does not infer the literal strings directly from JSON, but you can ge
 
 This will generate declarations files for JSON (.d.json.ts) including the literal strings and structured types.
 
-```ts
-// i18n/declarations.ts
+```ts title="i18n/declarations.ts"
 import { generateDeclarations } from "intl-t/declarations";
 
 generateDeclarations("./en.json"); // string | string[]
@@ -26,8 +25,7 @@ This function is asynchronous and it will run once per process, for example when
 
 You can use it as a script in your `package.json` to generate declarations whenever needed, for example, by checking for updates to your locales or as part of a build script or initialization entry point. For example, you can import it in your `next.config.js` file in a Next.js project.
 
-```jsonc
-// package.json
+```jsonc title="package.json"
 {
   "scripts": {
     "declarations": "bun ./i18n/declarations.ts",
@@ -37,8 +35,7 @@ You can use it as a script in your `package.json` to generate declarations whene
 
 Before using these declarations, it is recommended to enable `allowArbitraryExtensions` in your `tsconfig.json`:
 
-```jsonc
-// tsconfig.json
+```jsonc title="tsconfig.json"
 {
   "compilerOptions": {
     "allowArbitraryExtensions": true,
@@ -48,8 +45,7 @@ Before using these declarations, it is recommended to enable `allowArbitraryExte
 
 Example in case you would like to generate declarations in Next.js from your next.config file:
 
-```ts
-// next.config.js
+```ts title="next.config.js"
 import { generateDeclarations } from "intl-t/declarations";
 
 generateDeclarations("i18n/messages", { watchMode: true }); // translations folder
@@ -61,7 +57,7 @@ After running the script, declaration files will appear in your locales folder w
 
 `*.d.json.ts`
 
-```ts
+```ts title="i18n/translation.ts"
 import { createTranslation } from "intl-t";
 import en from "./messages/en.json";
 import es from "./messages/es.json";
@@ -73,8 +69,7 @@ export const t = createTranslation({
 
 Alternatively, you can import the declarations and assert them in your translation settings file, but it is not recommended in order to use generated declarations.
 
-```ts
-// i18n/translation.ts
+```ts title="i18n/translation.ts"
 import { createTranslation } from "intl-t/core";
 
 type Locale = typeof import("./messages/en.d.json.ts");
@@ -87,10 +82,9 @@ export const t = createTranslation({
 
 ### Script
 
-You can generate TypeScript declarations for your translations using the `declarations` command.
+You can generate TypeScript declarations for your translations using the `declarations` command from `@intl-t/declarations` package with binary script.
 
-```
-
+```bash title="declarations"
 Usage: ${cmdName} <files|folders>... [options]
 
 Options:
@@ -103,7 +97,6 @@ Options:
   --recursive         Search recursively in specified folders
   --silent            Silence logs
   -h, --help          Show help
-
 ```
 
 This converts your JSON files into TypeScript declarations, which can be used to type your translations and enhance the developer experience.
@@ -116,7 +109,7 @@ There is also a watch mode that will automatically update the declarations when 
 
 It is recommended to use TypeScript with intl-t. You may find the following configuration useful, especially when using [`declarations`](#declarations):
 
-```jsonc
+```jsonc title="tsconfig.json"
 {
   "compilerOptions": {
     "allowArbitraryExtensions": true,

@@ -26,8 +26,7 @@ Before migrating, make sure you understand the core concepts of intl-t. See the 
 
 It's recommended to have a central translation meta file for general data, such as `allowedLocales` and `defaultLocale`. This is useful for navigation and middleware.
 
-```ts
-// i18n/locales.ts
+```ts title="i18n/locales.ts"
 export const allowedLocales = ["en", "es"];
 ```
 
@@ -35,8 +34,7 @@ export const allowedLocales = ["en", "es"];
 
 Use async createTranslation with the `locales` option as a function to preload locales on the server and dynamically import them on the client.
 
-```ts
-// i18n/translation.ts
+```ts title="i18n/translation.ts"
 import { createTranslation, getLocales } from "intl-t/next";
 import { allowedLocales } from "./locales";
 
@@ -50,8 +48,7 @@ export const { Translation, useTranslation, getTranslation } = await createTrans
 
 If you want to use type declarations for each locale, you should set up the configuration as follows:
 
-```ts
-// i18n/translation.ts
+```ts title="i18n/translation.ts"
 import { createTranslation, getLocales } from "intl-t/next";
 import { allowedLocales } from "./locales";
 
@@ -66,8 +63,7 @@ export const t = createTranslation({
 
 You can generate literal string declarations for your JSON files using [`generateDeclarations`](/docs/typescript#declarations) function.
 
-```ts
-// next.config.js
+```ts title="next.config.js"
 import { generateDeclarations } from "intl-t/declarations";
 
 generateDeclarations("messages");
@@ -75,8 +71,7 @@ generateDeclarations("messages");
 
 If you're using Next.js in production, you may need to patch React to support translation objects:
 
-```ts
-// i18n/patch.ts
+```ts title="i18n/patch.ts"
 import patch from "intl-t/patch";
 import React from "react";
 import jsx from "react/jsx-runtime";
@@ -86,8 +81,7 @@ process.env.NODE_ENV !== "development" && patch(React, jsx);
 
 Then import this patch at the top of your translation file:
 
-```ts
-// i18n/translation.ts
+```ts title="i18n/translation.ts"
 import "./patch";
 
 // ...
@@ -95,16 +89,14 @@ import "./patch";
 
 ## 3. **Configure navigation**
 
-```ts
-// i18n/navigation.ts
+```ts title="i18n/navigation.ts"
 import { createNavigation } from "intl-t/navigation";
 import { allowedLocales } from "./locales";
 
 export const { middleware, generateStaticParams, Link, redirect, useRouter } = createNavigation({ allowedLocales });
 ```
 
-```ts
-// middleware.ts
+```ts title="middleware.ts"
 export { middleware as default } from "@/i18n/navigation";
 
 export const config = {
@@ -122,8 +114,7 @@ By default, the locale is managed using the `[locale]` route parameter. However,
 
 `/app/[locale]/...`
 
-```tsx
-// app/[locale]/layout.tsx
+```tsx title="app/[locale]/layout.tsx"
 import { Translation } from "@/i18n/translation";
 import { setRequestLocale } from "intl-t/next";
 

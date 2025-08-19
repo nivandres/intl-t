@@ -3,6 +3,8 @@ title: Next.js
 description: Next.js integration for Intl-T
 ---
 
+import { File, Folder, Files } from "fumadocs-ui/components/files";
+
 ## Overview
 
 intl-t offers special integration with Next.js for server-side rendering and routing:
@@ -28,15 +30,13 @@ export const { Translation, useTranslation, getTranslation } = await createTrans
 
 Import `createNavigation` from `intl-t/navigation` and pass the allowed locales. Don't import createNavigation from `intl-t/next` in order to use it from middleware.
 
-```ts
-//i18n/navigation.ts
+```ts title="i18n/navigation.ts"
 import { createNavigation } from "intl-t/navigation";
 
 export const { middleware, Link, generateStaticParams } = createNavigation({ allowedLocales: ["en", "es"], defaultLocale: "en" });
 ```
 
-```tsx
-//app/[locale]/layout.tsx
+```tsx title="app/[locale]/layout.tsx"
 import { Translation } from "@/i18n/translation";
 
 export { generateStaticParams } from "@/i18n/navigation";
@@ -63,8 +63,7 @@ That translation component is a React Server Component that handles the current 
 
 Also, `Translation` will work too as a client-side translation component.
 
-```ts
-//middleware.ts
+```ts title="middleware.ts"
 export { middleware as default } from "@/i18n/navigation";
 
 export const config = {
@@ -74,8 +73,7 @@ export const config = {
 
 If you need to customize your middleware or chain multiple middlewares, you can use the `withMiddleware` function to wrap your middleware in a chain.
 
-```ts
-// i18n/navigation.ts
+```ts title="i18n/navigation.ts"
 import { createNavigation } from "intl-t/navigation";
 
 export const { withMiddleware, Link, generateStaticParams, useRouter } = createNavigation({ allowedLocales, defaultLocale });
@@ -162,14 +160,15 @@ You can set these options in the `createNavigation` function.
 
 There are also additional configuration options you may want to explore.
 
-```
-/i18n
-  /navigation.ts
-  /translation.ts
-```
+<Files>
+  <Folder name="i18n" defaultOpen>
+    <File name="navigation.ts" />
+    <File name="translation.ts" />
+  </Folder>
+  <File name="middleware.ts" />
+</Files>
 
-```ts
-// i18n/navigation.ts
+```ts title="i18n/navigation.ts"
 import { createNavigation } from "intl-t/navigation";
 
 export const { middleware, Link, generateStaticParams, useRouter } = createNavigation({
@@ -182,8 +181,7 @@ export const { middleware, Link, generateStaticParams, useRouter } = createNavig
 });
 ```
 
-```ts
-// i18n/translation.ts
+```ts title="i18n/translation.ts"
 import en from "@/public/locales/en.json";
 import es from "@/public/locales/es.json";
 import { createTranslation } from "intl-t";
@@ -204,8 +202,7 @@ This workaround will likely not be needed in future versions of Next.js.
 
 ## Static Rendering
 
-```ts
-//i18n/translation.ts
+```ts title="i18n/translation.ts"
 import { Translation } from "intl-t/next";
 
 export const { getTranslation, setLocale } = new Translation({ locales: { en: "Hello world" } });
@@ -264,8 +261,7 @@ createNavigation({ allowedLocales, strategy: "headers" });
 
 Then is no more needed to wrap your application routes into `[locale]` param.
 
-```tsx
-// app/layout.tsx
+```tsx title="app/layout.tsx"
 import { Translation } from "@/i18n/translation";
 import { getRequestLocale /* or getLocale */ } from "intl-t/next";
 
@@ -415,7 +411,7 @@ The previous problem only applies for [dynamic rendering with next](#dynamic-ren
 
 Read more about [React Patch](/docs/react#patch) to understand how it works and limitations.
 
-```ts
+```ts title="i18n/patch.ts"
 import patch from "intl-t/react";
 import React from "react";
 import jsx from "react/jsx-runtime";
@@ -423,7 +419,7 @@ import jsx from "react/jsx-runtime";
 process.env.NODE_ENV !== "development" && patch(React, jsx);
 ```
 
-```ts
+```ts title="i18n/translation.ts"
 import "./patch";
 ```
 

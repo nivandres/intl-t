@@ -5,7 +5,7 @@ const withMDX = createMDX();
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
-  serverExternalPackages: ["typescript", "twoslash", "shiki", "ts-morph", "oxc-transform", "intl-t"],
+  serverExternalPackages: ["typescript", "twoslash"],
   images: {
     remotePatterns: [
       { hostname: "raw.githubusercontent.com" },

@@ -53,21 +53,32 @@ Through typescript we can get autocomplete for the variables in each translation
 
 Remember all your JSON files for each language should have the same structure, keys, values and all its node in each tree. In case there is some difference between the json files, typescript will detect it and warn you.
 
-```jsonc
-// en.json
-{
-  "homepage": {
-    "welcome": "Welcome, {user}!"
-  }
-}
+<Tabs items={["en.json", "es.json"]} defaultIndex={0}>
+  <Tab value="en.json">
 
-// es.json
+```jsonc
 {
   "homepage": {
-    "welcome": "Bienvenido, {user}!"
-  }
+    "welcome": "Welcome, {user}!",
+  },
 }
 ```
+
+  </Tab>
+  <Tab value="es.json" >
+
+```jsonc
+{
+  "homepage": {
+    "welcome": "Bienvenido, {user}!",
+  },
+}
+```
+
+  </Tab>
+</Tabs>
+
+// es.json
 
 In these case variables are not declared manually, typescript will try to infer them, partial autocomplete will work. But there no will be any problem in injection through JavaScript. The unique purpose of `values` property, types and declarations, is to help you with autocomplete and validation.
 

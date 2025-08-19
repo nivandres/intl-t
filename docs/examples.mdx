@@ -3,6 +3,8 @@ title: Examples & Strategies
 description: Practical patterns and edge cases
 ---
 
+import { File, Folder, Files } from "fumadocs-ui/components/files";
+
 ## Locales metadata
 
 You can include metadata in your translation files to help you with localization and translation management.
@@ -86,24 +88,48 @@ Namespaces are a way to simulate isolated translation contexts in your applicati
 
 For example, you might have:
 
-```
-/protected/i18n/translation.ts
-/i18n/translation.ts
-/docs/i18n/translation.ts
-```
+<Files>
+  <Folder name="app" defaultOpen>
+   
+    <Folder name="protected" defaultOpen>
+    
+      <Folder name="i18n" defaultOpen>
+        <Folder name="messages" />
+        <File name="translation.ts" />
+      </Folder>
+
+    </Folder>
+
+    <Folder name="docs">
+    
+      <Folder name="i18n" defaultOpen>
+        <Folder name="messages" />
+        <File name="translation.ts" />
+      </Folder>
+
+    </Folder>
+
+  </Folder>
+  <Folder name="i18n" defaultOpen>
+    <Folder name="messages" />
+    <File name="translation.ts" />
+  </Folder>
+</Files>
+
+`app/protected/i18n/translation.ts`
+`i18n/translation.ts`
+`app/docs/i18n/translation.ts`
 
 Each of these files can export its own translation instance:
 
-```ts
-// /protected/i18n/translation.ts
+```ts title="protected/i18n/translation.ts"
 import { createTranslation } from "intl-t";
 import en from "./locales/en.json";
 
 export const { t: protectedT } = createTranslation({ locales: { en } });
 ```
 
-```ts
-// /docs/i18n/translation.ts
+```ts title="docs/i18n/translation.ts"
 import { createTranslation } from "intl-t";
 import en from "./locales/en.json";
 
