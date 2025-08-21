@@ -1,7 +1,7 @@
 {
   "name": "@intl-t/tools",
   "description": "i18n utilities",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "license": "MIT",
   "homepage": "https://intl-t.dev",
@@ -59,9 +59,9 @@
     "release": "bun publish --access public"
   },
   "dependencies": {
-    "@intl-t/declarations": "workspace:*",
-    "@intl-t/format": "workspace:*",
-    "@intl-t/locales": "workspace:*",
-    "@intl-t/types": "workspace:*"
+    "@intl-t/declarations": "workspace:^",
+    "@intl-t/format": "workspace:^",
+    "@intl-t/locales": "workspace:^",
+    "@intl-t/types": "workspace:^"
   }
 }

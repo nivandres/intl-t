@@ -1,7 +1,7 @@
 {
   "name": "@intl-t/global",
   "description": "Intl-T Global State",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "license": "MIT",
   "homepage": "https://intl-t.dev",
@@ -31,10 +31,10 @@
     "release": "bun publish --access public"
   },
   "dependencies": {
-    "@intl-t/locales": "workspace:*"
+    "@intl-t/locales": "workspace:^"
   },
   "peerDependencies": {
-    "@intl-t/core": "workspace:*"
+    "@intl-t/core": "workspace:^"
   },
   "peerDependenciesMeta": {
     "@intl-t/core": {

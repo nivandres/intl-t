@@ -1,7 +1,7 @@
 {
   "name": "@intl-t/next",
   "description": "A Fully-Typed Object-Based i18n Translation Library for Next.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "license": "MIT",
   "homepage": "https://intl-t.dev",
@@ -75,10 +75,10 @@
     "release": "bun publish --access public"
   },
   "dependencies": {
-    "@intl-t/core": "workspace:*",
-    "@intl-t/locales": "workspace:*",
-    "@intl-t/react": "workspace:*",
-    "@intl-t/tools": "workspace:*"
+    "@intl-t/core": "workspace:^",
+    "@intl-t/locales": "workspace:^",
+    "@intl-t/react": "workspace:^",
+    "@intl-t/tools": "workspace:^"
   },
   "peerDependencies": {
     "next": ">=14",
