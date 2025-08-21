@@ -48,7 +48,8 @@
       "default": "./dist/hooks.js"
     },
     "./types": {
-      "types": "./dist/types.d.ts"
+      "types": "./dist/types.d.ts",
+      "default": "./dist/types.js"
     }
   },
   "keywords": [

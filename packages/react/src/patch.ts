@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { TranslationNode } from "@intl-t/core";
 import _React from "react";
 import _jsxDEV from "react/jsx-dev-runtime";
 import _jsx from "react/jsx-runtime";

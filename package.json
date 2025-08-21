@@ -126,7 +126,6 @@
       "default": "./dist/types.js"
     }
   },
-  "sideEffects": false,
   "lint-staged": {
     "*.{json,md,js,ts,tsx}": "bunx prettier --check",
     "*.{js,ts,tsx}": "bunx oxlint"
