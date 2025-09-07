@@ -101,12 +101,13 @@ export const { Translation, useTranslation } = new Translation({/* ... */});
 
 ```ts title="i18n/navigation.ts"
 import { createNavigation } from "intl-t/navigation";
-import { allowedLocales } from "./locales";
 
 export const { middleware, generateStaticParams, Link, redirect, useRouter } = createNavigation({ allowedLocales: ["en", "es"] as const });
 ```
 
-```tsx title="app/layout.tsx"
+Wrap your application files inside `/app/[locale]`.
+
+```tsx title="app/[locale]/layout.tsx"
 import { setRequestLocale } from "intl-t/next";
 import { Translation } from "@/i18n/translation";
 
@@ -143,12 +144,14 @@ export const config = {
 ```
 
 ```ts title="i18n/patch.ts"
-import patch from "intl-t/patch";
+import patch from "@intl-t/react/patch";
 import React from "react";
 import jsx from "react/jsx-runtime";
 
 process.env.NODE_ENV !== "development" && patch(React, jsx);
 ```
+
+Then import the patch file from `i18n/translation.ts` as `import "./patch";`.
 
   </Tab>
 </Tabs>
