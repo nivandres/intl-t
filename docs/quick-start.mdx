@@ -94,9 +94,9 @@ export default function App() {
   <Tab value="Next.js">
 
 ```tsx title="i18n/translation.tsx"
-import { Translation } from "intl-t/next";
+import { createTranslation } from "intl-t/next";
 
-export const { Translation, useTranslation } = new Translation({/* ... */});
+export const { Translation, useTranslation } = createTranslation({/* ... */});
 ```
 
 ```ts title="i18n/navigation.ts"
@@ -151,7 +151,7 @@ import jsx from "react/jsx-runtime";
 process.env.NODE_ENV !== "development" && patch(React, jsx);
 ```
 
-Then import the patch file from `i18n/translation.ts` as `import "./patch";`.
+Then import the patch file in `i18n/translation.ts` as `import "./patch";`.
 
   </Tab>
 </Tabs>
