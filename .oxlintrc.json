@@ -1,8 +1,12 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["import", "jest", "jsdoc", "node", "oxc", "promise", "regex", "typescript", "unicorn", "vitest"],
   "rules": {
+    "no-async-promise-executor": "off",
+    "no-callback-in-promise": "off",
+    "no-unused-expressions": "off",
     "typescript/no-this-alias": "off",
     "unicorn/no-thenable": "off",
-    "no-async-promise-executor": "off"
+    "valid-params": "off"
   }
 }
