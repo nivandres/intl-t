@@ -70,6 +70,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "test": "bun test",
     "typecheck": "tsc --noEmit",
     "bump": "bun pm version",
     "release": "bun publish --access public"
