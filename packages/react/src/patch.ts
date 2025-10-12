@@ -4,17 +4,19 @@ import _React from "react";
 import _jsxDEV from "react/jsx-dev-runtime";
 import _jsx from "react/jsx-runtime";
 
-const createElement_ = _React.createElement;
-const jsx_ = _jsx.jsx;
-const jsxs_ = _jsx.jsxs;
-const jsxDEV_ = _jsxDEV.jsxDEV;
+export { _React, _jsx, _jsxDEV };
 
-const isArray = Array.isArray;
-const check = child => (typeof child === "function" && child instanceof TranslationNode ? child.base : child);
-const checkProps = props => (Object.entries(props || {}).forEach(([key, value]) => (props[key] = check(value))), props);
+export const createElement_ = _React.createElement;
+export const jsx_ = _jsx.jsx;
+export const jsxs_ = _jsx.jsxs;
+export const jsxDEV_ = _jsxDEV.jsxDEV;
 
-export function patch({ React, jsx, jsxDEV }: { React?: any; jsx?: any; jsxDEV?: any } = {});
-export function patch(React?: any, jsx?: any, jsxDEV?: any);
+export const isArray = Array.isArray;
+export const check = child => (typeof child === "function" && child instanceof TranslationNode ? child.base : child);
+export const checkProps = props => (Object.entries(props || {}).forEach(([key, value]) => (props[key] = check(value))), props);
+
+export function patch({ React, jsx, jsxDEV }: { React?: any; jsx?: any; jsxDEV?: any }): void;
+export function patch(React?: any, jsx?: any, jsxDEV?: any): void;
 export function patch(React = _React as any, jsx = _jsx as any, jsxDEV = _jsxDEV as any) {
   if (React.React) return patch(React.React, React.jsx, React.jsxDEV);
   try {
@@ -35,6 +37,7 @@ export function patch(React = _React as any, jsx = _jsx as any, jsxDEV = _jsxDEV
     };
   } catch {}
 }
+
 export default patch;
 
 patch();
