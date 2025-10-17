@@ -6,8 +6,8 @@
   "license": "MIT",
   "homepage": "https://intl-t.dev",
   "repository": {
-    "url": "https://github.com/nivandres/intl-t",
-    "type": "git"
+    "type": "git",
+    "url": "git+https://github.com/nivandres/intl-t"
   },
   "workspaces": {
     "packages": [
@@ -73,8 +73,8 @@
     }
   },
   "lint-staged": {
-    "*.{json,md,js,ts,tsx}": "bunx prettier --check",
-    "*.{js,ts,tsx}": "bunx oxlint"
+    "*.{json,md,js,ts,tsx}": "prettier --check",
+    "*.{js,ts,tsx}": "oxlint"
   },
   "dependencies": {
     "@intl-t/core": "workspace:*",
