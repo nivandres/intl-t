@@ -1,9 +1,9 @@
 "use client";
 
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { cva } from "class-variance-authority";
 import { buttonVariants } from "fumadocs-ui/components/ui/button";
-import { Collapsible, CollapsibleContent } from "fumadocs-ui/components/ui/collapsible";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { type SyntheticEvent, useEffect, useState, useTransition } from "react";

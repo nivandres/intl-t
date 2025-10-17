@@ -1,9 +1,9 @@
+import { GithubInfo } from "@/components/github-info";
+import { ImageZoom } from "@/components/image-zoom";
 import { Button } from "@/components/ui/button";
 import { getMDXComponents } from "@/mdx-components";
 import "fumadocs-ui/components/banner";
-import { GithubInfo } from "fumadocs-ui/components/github-info";
 import { Book, Github, Shield, Zap, Globe, Package, Layers, Code } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import HeroCode from "./code/hero.mdx";
@@ -58,7 +58,7 @@ export default function HomePage() {
       </section>
 
       <section className="max-w-screen-xl mx-auto my-24 flex flex-wrap justify-center items-center gap-16">
-        <Image
+        <ImageZoom
           className="w-xl max-w-full"
           src="https://raw.githubusercontent.com/nivandres/intl-t/main/assets/banner.webp"
           alt="banner"
