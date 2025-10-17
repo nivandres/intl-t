@@ -1,1 +1,1 @@
-export * from "@intl-t/react";
+export * from "@intl-t/react/hooks";

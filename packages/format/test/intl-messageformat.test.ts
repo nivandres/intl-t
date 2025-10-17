@@ -2,9 +2,8 @@
 // import { MissingValueError } from "../src/error";
 // import { PART_TYPE } from "../src/formatters";
 // import { parse } from "@formatjs/icu-messageformat-parser";
-import { Values } from "@intl-t/core/types";
 import { describe, expect, it } from "bun:test";
-import { injectVariables as iv } from "../src";
+import { injectVariables as iv, type Values } from "../src";
 
 function parse(value: string): string {
   return value;

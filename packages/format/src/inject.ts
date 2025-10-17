@@ -1,13 +1,13 @@
 import { format } from "@intl-t/format/formatters";
-import { isEdge, state as globalState } from "@intl-t/global";
-import type { Values, Content, Variables } from "@intl-t/types";
+import type { Values, Content, Variables } from "@intl-t/format/types";
+import { state as globalState, type State } from "@intl-t/global";
 
-export const ev = (expr: string, state = globalState) => {
-  if (isEdge || state?.enableEval === false) return undefined as any;
+export const ev = (expr: string, state: Partial<State> = globalState) => {
+  if ((state.enabledEval ??= globalState.enabledEval) === false) return undefined as never;
   try {
     return globalThis.eval(expr);
   } catch {
-    return undefined as any;
+    return void 0 as never;
   }
 };
 
@@ -48,7 +48,7 @@ export function injectVariables<T extends string, V extends Values>(
   content: T = "" as T,
   variables: Partial<Variables<T>> & V = {} as any,
   // @ts-ignore
-  state: State = this || {},
+  state: Partial<State> = this || {},
 ) {
   if (!content || !variables) return content as never;
   const { formatFallback = "", formatOptions } = state;
@@ -161,7 +161,7 @@ export function injectVariables<T extends string, V extends Values>(
     value = value?.replace(/(?<!`)#/, String(v)) ?? v;
     content = content.replaceAll(target, String(value)) as T;
   }
-  return content.replace(/`(.)/, "$1") as Content<T> | (string & {});
+  return content.replace(/`(.)/, "$1") as Content<T>;
 }
 
 export { injectVariables as inject };

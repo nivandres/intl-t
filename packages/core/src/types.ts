@@ -1,14 +1,14 @@
+import type { Chunk } from "@intl-t/core/chunk";
+import type { State, GlobalPathSeparator } from "@intl-t/core/global";
 import type { TranslationNode, invalidKeys } from "@intl-t/core/translation";
-import type { State, GlobalPathSeparator } from "@intl-t/global";
 import type { Locale } from "@intl-t/locales";
-import type { ReactChunk } from "@intl-t/react";
 
-export type { TranslationNode, Locale, State };
-export type { TranslationProps, ReactNode, TranslationFC, TranslationNodeFC } from "@intl-t/react";
+export type { TranslationNode, Locale, State, Chunk };
+export * from "@intl-t/core/chunk";
 
 export type Base = string | number;
-export type Key = string | number | symbol;
-export type Value = Base | null | undefined | boolean | Base[] | Date | ReactChunk;
+export type Key = Base | symbol;
+export type Value = Base | null | undefined | boolean | Base[] | Date | Chunk;
 export type Values = Record<Key, Value>;
 export type Stringable = string | number | boolean | null | undefined;
 
@@ -50,7 +50,7 @@ export type Children<N> = N extends object
 type VFSO<V extends string, C extends string = string, T extends any = Value> = {
   [K in V]: T;
 } & VFS1<C>;
-type VFSR<S extends string, C extends string> = VFSO<S extends `/${infer V}` | `${infer V} ${string}` ? V : S, C, ReactChunk>;
+type VFSR<S extends string, C extends string> = VFSO<S extends `/${infer V}` | `${infer V} ${string}` ? V : S, C, Chunk>;
 type VFS2<S extends string> = S extends `${infer V},${string}` ? V : S;
 type VFS1<S extends string> = S extends `${string}{{${infer V}}}${infer C}`
   ? VFSO<VFS2<V>, C>
@@ -167,7 +167,7 @@ export interface TranslationSettings<
   mainLocale: MainLocale;
   defaultLocale: MainLocale;
   currentLocale: AllowedLocale;
-  allowedLocales: AllowedLocale[] & [MainLocale, ...AllowedLocale[]];
+  allowedLocales: readonly AllowedLocale[] & readonly [MainLocale, ...AllowedLocale[]];
   allowedLocale: AllowedLocale;
   pathSeparator: PathSeparator;
   variables: Variables;

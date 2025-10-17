@@ -1,4 +1,4 @@
-import { LocaleMapping } from "./generated/locales";
+import { LocaleMapping } from "@intl-t/locales/generated";
 
 export type LocaleMapper<T> = T extends [infer L extends string, ...infer R extends string[]] ? L | `${L}-${R[number]}` : never;
 

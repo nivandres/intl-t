@@ -6,8 +6,8 @@
   "license": "MIT",
   "homepage": "https://intl-t.dev",
   "repository": {
-    "url": "https://github.com/nivandres/intl-t",
     "type": "git",
+    "url": "git+https://github.com/nivandres/intl-t.git",
     "directory": "packages/format"
   },
   "author": {
@@ -23,13 +23,9 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./inject": {
-      "types": "./dist/inject.d.ts",
-      "default": "./dist/inject.js"
-    },
-    "./formatters": {
-      "types": "./dist/formatters.d.ts",
-      "default": "./dist/formatters.js"
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
     }
   },
   "keywords": [
@@ -42,14 +38,13 @@
     "format"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "bump": "bun pm version",
     "release": "bun publish --access public"
   },
   "dependencies": {
-    "@intl-t/global": "workspace:^",
-    "@intl-t/types": "workspace:^"
+    "@intl-t/global": "workspace:^"
   }
 }

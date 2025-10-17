@@ -111,7 +111,7 @@ describe("Translation object", () => {
     expect(t.hello.settings).toBe(t.settings);
     expect(t.hello.locale).toBe("en");
     expect(t.hello.path).toEqual(["hello"]);
-    expect(t.key).toBeOneOf(["en", "", undefined]);
+    expect(t.key).toBeOneOf(["en", "", void 0 as any]);
     expect(t.hello.key).toBe("hello");
     expect(t.child).toBe("greeting");
     expect(t.children);

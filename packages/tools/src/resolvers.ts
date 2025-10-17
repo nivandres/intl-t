@@ -1,6 +1,8 @@
-import { locale as l } from "@intl-t/global";
+import { state } from "@intl-t/global";
+import type { Locale } from "@intl-t/locales";
 import { match } from "@intl-t/tools/match";
-import type { Locale, Awaitable } from "@intl-t/types";
+
+type Awaitable<T> = T & Promise<T>;
 
 // @ts-ignore-error optional binding
 export function resolveLocale<L extends Locale>(path: string = "", locales: L[] = this?.allowedLocales || []) {
@@ -36,7 +38,7 @@ export function resolveHref<L extends Locale>(
     allowedLocales = config.allowedLocales,
     pathPrefix = config.pathPrefix || "always",
     defaultLocale = config.defaultLocale,
-    getLocale = () => match(l, allowedLocales, undefined),
+    getLocale = () => match(state.locale, allowedLocales, undefined),
   }: // @ts-ignore-error optional binding
   LocalizedHref<L> = this || {},
 ): Awaitable<`/${L | ""}${string}`> {

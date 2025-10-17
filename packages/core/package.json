@@ -6,8 +6,8 @@
   "license": "MIT",
   "homepage": "https://intl-t.dev",
   "repository": {
-    "url": "https://github.com/nivandres/intl-t",
     "type": "git",
+    "url": "git+https://github.com/nivandres/intl-t.git",
     "directory": "packages/core"
   },
   "author": {
@@ -23,20 +23,9 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./translation": {
-      "types": "./dist/translation.d.ts",
-      "default": "./dist/translation.js"
-    },
-    "./types": {
-      "types": "./dist/types.d.ts"
-    },
-    "./dynamic": {
-      "types": "./dist/dynamic.d.ts",
-      "default": "./dist/dynamic.js"
-    },
-    "./global": {
-      "types": "./dist/global.d.ts",
-      "default": "./dist/global.js"
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
     }
   },
   "keywords": [
@@ -50,8 +39,7 @@
     "tree"
   ],
   "scripts": {
-    "dev": "tsc --watch",
-    "build": "tsc",
+    "build": "tsc -b",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "bump": "bun pm version",
@@ -63,13 +51,9 @@
     "@intl-t/locales": "workspace:^"
   },
   "peerDependencies": {
-    "@intl-t/react": "workspace:^",
     "typescript": "^5"
   },
   "peerDependenciesMeta": {
-    "@intl-t/react": {
-      "optional": true
-    },
     "typescript": {
       "optional": true
     }

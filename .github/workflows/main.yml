@@ -14,7 +14,6 @@ jobs:
       - name: Lint
         run: bun run lint
       - name: Build
-        run: bun run build || true
-        continue-on-error: true
+        run: bun run build
       - name: Test
         run: bun test

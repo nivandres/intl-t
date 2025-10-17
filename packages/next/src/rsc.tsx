@@ -1,6 +1,6 @@
 import { TranslationNode } from "@intl-t/core";
+import type { GlobalTranslation } from "@intl-t/core/global";
 import type { isArray, SearchWays, ArrayToString } from "@intl-t/core/types";
-import type { GlobalTranslation } from "@intl-t/global";
 import { TranslationProvider as TranslationClientProvider, TranslationProviderProps } from "@intl-t/react";
 import { Suspense } from "react";
 import { getCache } from "./cache";
@@ -37,6 +37,7 @@ export { T as Tr, T as Trans };
 
 export const TranslationDynamicRendering: typeof TranslationProvider = async ({ children, ...props }) => {
   props.locale ||= (await getRequestLocale.call(props.t)) as string;
+  // @ts-ignore TS2589
   return <TranslationProvider {...props}>{children}</TranslationProvider>;
 };
 

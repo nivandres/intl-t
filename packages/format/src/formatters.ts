@@ -2,24 +2,24 @@ import { inject } from "@intl-t/format/inject";
 import { type State, state } from "@intl-t/global";
 
 // @ts-ignore
-export function list(value: string[] = [], options?: Intl.ListFormatOptions, { locale }: State = this) {
+export function list(value: string[] = [], options?: Intl.ListFormatOptions, { locale = state.locale }: Partial<State> = this) {
   return new Intl.ListFormat(locale, options).format(value);
 }
 
 // @ts-ignore
-export function number(value: number = 0, options?: Intl.NumberFormatOptions, { locale }: State = this) {
+export function number(value: number = 0, options?: Intl.NumberFormatOptions, { locale = state.locale }: Partial<State> = this) {
   return new Intl.NumberFormat(locale, options).format(value);
 }
 
 // @ts-ignore
-export function currency(value: number = 0, options: Intl.NumberFormatOptions = {}, { locale }: State = this) {
+export function currency(value: number = 0, options: Intl.NumberFormatOptions = {}, { locale = state.locale }: Partial<State> = this) {
   options.style = "currency";
   options.currency ??= "USD";
   return new Intl.NumberFormat(locale, options).format(value);
 }
 
 // @ts-ignore
-export function date(value: Date = new Date(), options?: Intl.DateTimeFormatOptions, { locale }: State = this) {
+export function date(value: Date = new Date(), options?: Intl.DateTimeFormatOptions, { locale = state.locale }: Partial<State> = this) {
   return new Intl.DateTimeFormat(locale, options).format(value);
 }
 
@@ -38,7 +38,7 @@ export function relative(
   value: Date | number = 0,
   options: Intl.RelativeTimeFormatOptions & Record<string, any> = {},
   // @ts-ignore
-  { locale, now }: State = this,
+  { locale = state.locale, now = state.now }: Partial<State> = this,
 ) {
   let { unit } = options;
   if (value instanceof Date) {
@@ -53,4 +53,4 @@ export function relative(
   return new Intl.RelativeTimeFormat(locale, options).format(value, unit);
 }
 
-export const format = { ...state, list, number, currency, date, relative, time: date, price: currency, inject };
+export const format = Object.assign(state, { list, number, currency, date, relative, time: date, price: currency, inject });

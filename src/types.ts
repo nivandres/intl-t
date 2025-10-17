@@ -1,1 +1,1 @@
-export type * from "./core/types";
+export type * from "@intl-t/core/types";

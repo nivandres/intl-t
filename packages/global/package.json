@@ -6,8 +6,8 @@
   "license": "MIT",
   "homepage": "https://intl-t.dev",
   "repository": {
-    "url": "https://github.com/nivandres/intl-t",
     "type": "git",
+    "url": "git+https://github.com/nivandres/intl-t.git",
     "directory": "packages/global"
   },
   "author": {
@@ -25,20 +25,9 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "typecheck": "tsc --noEmit",
     "bump": "bun pm version",
     "release": "bun publish --access public"
-  },
-  "dependencies": {
-    "@intl-t/locales": "workspace:^"
-  },
-  "peerDependencies": {
-    "@intl-t/core": "workspace:^"
-  },
-  "peerDependenciesMeta": {
-    "@intl-t/core": {
-      "optional": true
-    }
   }
 }

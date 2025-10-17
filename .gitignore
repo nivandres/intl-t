@@ -4,5 +4,7 @@
 .vercel
 *lock.json
 bun.lock*
+desktop.ini
 dist
 node_modules
+tsconfig.tsbuildinfo

@@ -1,35 +1,37 @@
 import type {
-  TranslationSettings,
-  Node,
-  Base,
-  Values,
-  isArray,
-  SearchWays,
   ArrayToString,
-  FollowWayWithValues,
-  State,
+  Base,
   Children,
   Content,
+  FollowWayWithValues,
+  isArray,
+  Node,
+  SearchWays,
+  State,
+  TranslationSettings,
   TranslationType,
+  Values,
 } from "@intl-t/core/types";
 import type { ReactNode, Key as ReactKey, Dispatch, SetStateAction } from "react";
+
+// export * from "@intl-t/react/types";
 
 export type { ReactNode, ReactKey };
 
 export type ReactSetState<T> = Dispatch<SetStateAction<T>>;
 export type ReactState<T> = [T, ReactSetState<T>];
 
-export interface ReactChunkProps {
+export interface ChunkProps {
   children: ReactNode;
   tagName: string;
   tagAttributes: string;
   tagContent: string;
   value?: Base | null;
   key: ReactKey;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
-export type ReactChunk = (props: ReactChunkProps) => ReactNode | void;
+export type Chunk = (props: ChunkProps) => ReactNode | void;
 
 export interface TranslationProps<
   S extends TranslationSettings = TranslationSettings,

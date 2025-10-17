@@ -10,19 +10,23 @@ describe("variable injection", () => {
     expect(iv("{a}a{a}y", { a: "b" })).toBe("baby");
   });
   it("should work with plurals", () => {
-    expect(iv("{a, plural, one {# item} other {# items}}", { a: 1 })).toBe("1 item");
-    expect(iv("{a, plural, one {# item} other {# items}}", { a: 8 })).toBe("8 items");
-    expect(iv("{a, plural, one {# item} other {# items}}", { a: 0 })).toBe("0 items");
+    expect(iv("{a, plural, one {# item} other {# items}}", { a: 1 }) as string).toBe("1 item");
+    expect(iv("{a, plural, one {# item} other {# items}}", { a: 8 }) as string).toBe("8 items");
+    expect(iv("{a, plural, one {# item} other {# items}}", { a: 0 }) as string).toBe("0 items");
   });
   it("should work with selection ", () => {
-    expect(iv("{a, select, yes {Yes} no {No}}, sir", { a: true })).toBe("Yes, sir");
-    expect(iv("{a, select, yes {Yes} no {No}}, sir", { a: 0 })).toBe("No, sir");
+    expect(iv("{a, select, yes {Yes} no {No}}, sir", { a: true }) as string).toBe("Yes, sir");
+    expect(iv("{a, select, yes {Yes} no {No}}, sir", { a: 0 }) as string).toBe("No, sir");
   });
   it("should work with complex conditions", () => {
-    expect(iv("{a, plural, one {# item} other {# items}}, {b, select, yes {Yes} no {No}}", { a: 1, b: true })).toBe("1 item, Yes");
-    expect(iv("{a, plural, =0 {no items} =1 {# item} >1 {# items}}", { a: 0 })).toBe("no items");
-    expect(iv("{a, plural, =0 {no items} =1 {# item} =7 {exactly seven items #} >1 {# items}}", { a: 7 })).toBe("exactly seven items 7");
-    expect(iv("{a, =0 {no items} =1 {one item} >1&<10 {many items} >=10 {lots of items}}", { a: 10 })).toBe("lots of items");
+    expect(iv("{a, plural, one {# item} other {# items}}, {b, select, yes {Yes} no {No}}", { a: 1, b: true }) as string).toBe(
+      "1 item, Yes",
+    );
+    expect(iv("{a, plural, =0 {no items} =1 {# item} >1 {# items}}", { a: 0 }) as string).toBe("no items");
+    expect(iv("{a, plural, =0 {no items} =1 {# item} =7 {exactly seven items #} >1 {# items}}", { a: 7 }) as string).toBe(
+      "exactly seven items 7",
+    );
+    expect(iv("{a, =0 {no items} =1 {one item} >1&<10 {many items} >=10 {lots of items}}", { a: 10 }) as string).toBe("lots of items");
     expect(iv("Hola {gender, select, ='male' 'señor' 'female' 'señorita'}", { gender: "female" })).toBe("Hola señorita");
     expect(iv("{name, juan juanito sofia sofi laura lau other #}", { name: "laura" })).toBe("lau");
     expect(iv("{name, juan juanito sofia sofi laura lau other #}", { name: "alex" })).toBe("alex");
@@ -41,7 +45,7 @@ describe("variable injection", () => {
       iv(
         "{a, plural, one {# item} !=1 {# items}}, {b, select, a>40 {a lot} Boolean(#)&&{a}>3 {Absolutely yes there is {a, =1 '1 item' >10 '# ITEMS' other {# items}}.} yes {Yes} no {No}}",
         { a: 11, b: 1 },
-      ),
+      ) as string,
     ).toBe("11 items, Absolutely yes there is 11 ITEMS.");
   });
   it("should work with operations", () => {
@@ -58,7 +62,7 @@ describe("variable injection", () => {
           host: "Ivan",
           guest: "Juan",
         },
-      ),
+      ) as string,
     ).toBe("Ivan, Juan and 3 people went to the party");
     expect(
       iv(
@@ -87,14 +91,14 @@ describe("variable injection", () => {
           host: "Ivan",
           guest: "Juan",
         },
-      ),
+      ) as string,
     ).toBe("Ivan invites Juan and 3 other people to his party.");
     expect(
       iv(`On {takenDate, date, short} {name} took {numPhotos, plural, =0 {no photos} =1 {one photo} other {# photos}}.`, {
         name: "John",
         takenDate: new Date(0),
         numPhotos: 0,
-      }),
+      }) as string,
     ).toBe(`On ${new Intl.DateTimeFormat("en", { dateStyle: "short" }).format(new Date(0))} John took no photos.`);
     expect(
       iv(
@@ -104,7 +108,7 @@ describe("variable injection", () => {
       other {# followers}
       }`,
         { count: 1 },
-      ),
+      ) as string,
     ).toBe("One follower");
   });
 });

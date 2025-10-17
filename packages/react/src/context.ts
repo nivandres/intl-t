@@ -1,11 +1,11 @@
 "use client";
 
-import type { isArray, SearchWays, ArrayToString, Locale, TranslationProps as TP } from "@intl-t/core/types";
-import type { GlobalTranslation } from "@intl-t/global";
+import type { GlobalTranslation } from "@intl-t/core/global";
+import type { isArray, SearchWays, ArrayToString, Locale, TranslationProps as TP, Content } from "@intl-t/core/types";
 import { useLocale } from "@intl-t/react/hooks";
 import { TranslationNode } from "@intl-t/react/translation";
+import type { ReactState, ReactSetState, ReactNode } from "@intl-t/react/types";
 import { createElement, createContext, useContext, useMemo, useState, useEffect } from "react";
-import type { ReactState, ReactSetState } from "./types";
 
 export type TranslationContext = null | {
   reRender?: ReactSetState<number>;
@@ -40,7 +40,7 @@ export function TranslationProvider<
   variables,
   settings,
   ...state
-}: TranslationProps<T, A, D>) {
+}: TranslationProps<T, A, D>): ReactNode | Content<T["node"]> {
   const context = useContext(TranslationContext) || {};
   context.t = t ??= context.t ??= TranslationNode.t as any;
   context.reRender ??= useState(0)[1];

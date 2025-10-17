@@ -1,13 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "composite": true,
     "rootDir": "src",
-    "outDir": "dist",
-    "paths": {
-      "@intl-t/format": ["./src"],
-      "@intl-t/format/*": ["./src/*"]
-    }
+    "outDir": "dist"
   },
+  "references": [{ "path": "../global" }, { "path": "../locales" }],
   "include": ["src"],
   "exclude": ["node_modules", "dist", "test"]
 }

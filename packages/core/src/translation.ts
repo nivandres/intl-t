@@ -1,4 +1,6 @@
+import { TranslationNodeFC, TranslationFC } from "@intl-t/core/chunk";
 import { getLocales } from "@intl-t/core/dynamic";
+import { type GlobalTranslation, hydration, isClient, enabledEval, disabledEval } from "@intl-t/core/global";
 import type {
   Node,
   Values,
@@ -17,13 +19,11 @@ import type {
   Override,
 } from "@intl-t/core/types";
 import { injectVariables } from "@intl-t/format";
-import { type GlobalTranslation, hydration, isClient, isEdge } from "@intl-t/global";
 import type { Locale } from "@intl-t/locales";
-import type { TranslationNodeFC, TranslationFC } from "@intl-t/react";
 
 export type { Locale };
 
-const TranslationBase = (isEdge ? Object : Function) as FunctionConstructor;
+export let TranslationBase = (enabledEval ? Function : Object) as FunctionConstructor;
 
 abstract class TranslationProxy extends TranslationBase {
   public name = "Translation";
@@ -84,7 +84,7 @@ export class TranslationNode<
   g: typeof this.global;
   private parent: TranslationNode;
 
-  use = isEdge ? (this.__call__ as unknown as typeof this) : this;
+  use = enabledEval ? this : (this.call as never);
   get = this.use;
 
   static Node = TranslationNode;
@@ -103,19 +103,19 @@ export class TranslationNode<
 
   static Provider = function (this: any, ...args: any[]) {
     return this[this.settings.locale](...args);
-  } as unknown as TranslationFC;
+  } as TranslationFC;
 
-  protected T = new Proxy(isEdge ? this.call.bind(this) : (this as any), {
+  protected T = new Proxy(enabledEval ? (this as any) : this.call.bind(this), {
     apply(target, _, args) {
-      if (isEdge) target = target();
+      if (disabledEval) target = target();
       return TranslationNode.Provider.apply(target, args as any);
     },
     get(target, p, receiver) {
-      if (isEdge) target = target();
+      if (disabledEval) target = target();
       const t = Reflect.get(target, p, receiver) as any;
       return t?.T || t;
     },
-  }) as unknown as TranslationNodeFC<S, N, V>;
+  }) as TranslationNodeFC;
 
   Tr = this.T;
   Trans = this.T;
@@ -128,13 +128,13 @@ export class TranslationNode<
     return this.current(...args);
   };
 
-  protected hook = new Proxy(isEdge ? this.call.bind(this) : (this as any), {
+  protected hook = new Proxy(enabledEval ? (this as any) : this.call.bind(this), {
     apply(target, _, argArray) {
-      if (isEdge) target = target();
+      if (disabledEval) target = target();
       return TranslationNode.hook.apply(target, argArray);
     },
     get(target, p, receiver) {
-      if (isEdge) target = target();
+      if (disabledEval) target = target();
       const t = Reflect.get(target, p, receiver) as any;
       return t?.hook || t;
     },
@@ -342,7 +342,7 @@ export class TranslationNode<
     this[Symbol.for("preload")] = false;
     const t = this[this.currentLocale as any] || this;
     this[Symbol.for("preload")] = null;
-    if (isEdge)
+    if (disabledEval)
       return new Proxy(t.call, {
         get(target, p, receiver) {
           return Reflect.get(t, p, receiver);
@@ -354,7 +354,7 @@ export class TranslationNode<
     return this.settings.mainLocale as S["mainLocale"];
   }
   get allowedLocales() {
-    return this.settings.allowedLocales as S["allowedLocale"][];
+    return this.settings.allowedLocales as readonly S["allowedLocale"][];
   }
   get locales() {
     return this.allowedLocales;

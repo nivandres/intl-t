@@ -1,4 +1,4 @@
-import { locale as l } from "@intl-t/global";
+import { state } from "@intl-t/global";
 import { resolveLocale } from "@intl-t/tools/resolvers";
 
 export const LOCALE_CLIENT_KEY = "LOCALE";
@@ -17,7 +17,7 @@ export function getClientLocale(key = LOCALE_CLIENT_KEY) {
   const settings = this?.settings;
   const r = resolveLocale.bind(settings);
   // @ts-expect-error location type from browser
-  const locale = localStorage?.getItem(key) || r(location.pathname) || r(l);
+  const locale = localStorage?.getItem(key) || r(location.pathname) || r(state.locale);
   if (settings) settings.locale = locale;
   return locale;
 }

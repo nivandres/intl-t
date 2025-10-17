@@ -1,4 +1,4 @@
 #!/usr/bin/env node
-import main from ".";
+import main from "./index.js";
 
 main(process.argv).catch(console.error);

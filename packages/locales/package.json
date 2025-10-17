@@ -6,14 +6,24 @@
   "license": "MIT",
   "homepage": "https://intl-t.dev",
   "repository": {
-    "url": "https://github.com/nivandres/intl-t",
     "type": "git",
+    "url": "git+https://github.com/nivandres/intl-t.git",
     "directory": "packages/locales"
   },
   "author": {
     "name": "Ivan Vargas",
     "email": "nivnnd@gmail.com",
     "url": "https://nivan.dev"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    }
   },
   "scripts": {
     "bump": "bun pm version",

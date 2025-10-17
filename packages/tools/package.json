@@ -6,8 +6,8 @@
   "license": "MIT",
   "homepage": "https://intl-t.dev",
   "repository": {
-    "url": "https://github.com/nivandres/intl-t",
     "type": "git",
+    "url": "git+https://github.com/nivandres/intl-t.git",
     "directory": "packages/tools"
   },
   "author": {
@@ -23,29 +23,9 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./declarations": {
-      "types": "./dist/declarations.d.ts",
-      "default": "./dist/declarations.js"
-    },
-    "./format": {
-      "types": "./dist/format.d.ts",
-      "default": "./dist/format.js"
-    },
-    "./inject": {
-      "types": "./dist/format.d.ts",
-      "default": "./dist/format.js"
-    },
-    "./resolvers": {
-      "types": "./dist/resolvers.d.ts",
-      "default": "./dist/resolvers.js"
-    },
-    "./negotiator": {
-      "types": "./dist/negotiator.d.ts",
-      "default": "./dist/negotiator.js"
-    },
-    "./match": {
-      "types": "./dist/match.d.ts",
-      "default": "./dist/match.js"
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
     }
   },
   "keywords": [
@@ -53,7 +33,7 @@
     "formatter"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "bump": "bun pm version",
@@ -62,7 +42,7 @@
   "dependencies": {
     "@intl-t/declarations": "workspace:^",
     "@intl-t/format": "workspace:^",
-    "@intl-t/locales": "workspace:^",
-    "@intl-t/types": "workspace:^"
+    "@intl-t/global": "workspace:^",
+    "@intl-t/locales": "workspace:^"
   }
 }

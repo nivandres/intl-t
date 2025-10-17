@@ -6,8 +6,8 @@
   "license": "MIT",
   "homepage": "https://intl-t.dev",
   "repository": {
-    "url": "https://github.com/nivandres/intl-t",
     "type": "git",
+    "url": "git+https://github.com/nivandres/intl-t.git",
     "directory": "packages/react"
   },
   "author": {
@@ -23,33 +23,9 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./translation": {
-      "types": "./dist/translation.d.ts",
-      "default": "./dist/translation.js"
-    },
-    "./context": {
-      "types": "./dist/context.d.ts",
-      "default": "./dist/context.js"
-    },
-    "./client": {
-      "types": "./dist/client.d.ts",
-      "default": "./dist/client.js"
-    },
-    "./inject": {
-      "types": "./dist/inject.d.ts",
-      "default": "./dist/inject.js"
-    },
-    "./patch": {
-      "types": "./dist/patch.d.ts",
-      "default": "./dist/patch.js"
-    },
-    "./hooks": {
-      "types": "./dist/hooks.d.ts",
-      "default": "./dist/hooks.js"
-    },
-    "./types": {
-      "types": "./dist/types.d.ts",
-      "default": "./dist/types.js"
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
     }
   },
   "keywords": [
@@ -69,7 +45,7 @@
     "next.js"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "bump": "bun pm version",
@@ -77,9 +53,8 @@
   },
   "dependencies": {
     "@intl-t/core": "workspace:^",
-    "@intl-t/format": "workspace:^",
     "@intl-t/global": "workspace:^",
-    "@intl-t/types": "workspace:^"
+    "@intl-t/format": "workspace:^"
   },
   "peerDependencies": {
     "react": ">=18 <20"

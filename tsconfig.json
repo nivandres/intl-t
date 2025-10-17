@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "allowArbitraryExtensions": true,
+    "composite": true,
     "declaration": true,
     "jsx": "react-jsx",
     "lib": ["ESNext"],
@@ -10,8 +11,36 @@
     "rootDir": "src",
     "skipLibCheck": true,
     "strict": true,
-    "target": "ESNext"
+    "target": "ESNext",
+    "paths": {
+      "@intl-t/core": ["./packages/core/src"],
+      "@intl-t/core/*": ["./packages/core/src/*"],
+      "@intl-t/declarations": ["./packages/declarations/src"],
+      "@intl-t/declarations/*": ["./packages/declarations/src/*"],
+      "@intl-t/format": ["./packages/format/src"],
+      "@intl-t/format/*": ["./packages/format/src/*"],
+      "@intl-t/global": ["./packages/global/src"],
+      "@intl-t/global/*": ["./packages/global/src/*"],
+      "@intl-t/locales": ["./packages/locales/src"],
+      "@intl-t/locales/*": ["./packages/locales/src/*"],
+      "@intl-t/next": ["./packages/next/src"],
+      "@intl-t/next/*": ["./packages/next/src/*"],
+      "@intl-t/react": ["./packages/react/src"],
+      "@intl-t/react/*": ["./packages/react/src/*"],
+      "@intl-t/tools": ["./packages/tools/src"],
+      "@intl-t/tools/*": ["./packages/tools/src/*"]
+    }
   },
-  "exclude": ["node_modules", "test", "dist", "examples"],
-  "include": ["src"]
+  "references": [
+    { "path": "packages/core" },
+    { "path": "packages/declarations" },
+    { "path": "packages/format" },
+    { "path": "packages/global" },
+    { "path": "packages/locales" },
+    { "path": "packages/next" },
+    { "path": "packages/react" },
+    { "path": "packages/tools" }
+  ],
+  "include": ["src"],
+  "exclude": ["node_modules", "test", "app", "dist", "packages"]
 }

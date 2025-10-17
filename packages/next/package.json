@@ -6,8 +6,8 @@
   "license": "MIT",
   "homepage": "https://intl-t.dev",
   "repository": {
-    "url": "https://github.com/nivandres/intl-t",
     "type": "git",
+    "url": "git+https://github.com/nivandres/intl-t.git",
     "directory": "packages/next"
   },
   "author": {
@@ -23,33 +23,13 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./translation": {
-      "types": "./dist/translation.d.ts",
-      "default": "./dist/translation.js"
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
     },
     "./link": {
       "types": "./dist/link/index.d.ts",
       "default": "./dist/link/index.js"
-    },
-    "./navigation": {
-      "types": "./dist/navigation.d.ts",
-      "default": "./dist/navigation.js"
-    },
-    "./hooks": {
-      "types": "./dist/hooks.d.ts",
-      "default": "./dist/hooks.js"
-    },
-    "./patch": {
-      "types": "./dist/patch.d.ts",
-      "default": "./dist/patch.js"
-    },
-    "./cache": {
-      "types": "./dist/cache.d.ts",
-      "default": "./dist/cache.js"
-    },
-    "./global": {
-      "types": "./dist/global.d.ts",
-      "default": "./dist/global.js"
     }
   },
   "keywords": [
@@ -69,14 +49,15 @@
     "next.js"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
+    "test": "bun test",
     "typecheck": "tsc --noEmit",
     "bump": "bun pm version",
     "release": "bun publish --access public"
   },
   "dependencies": {
     "@intl-t/core": "workspace:^",
-    "@intl-t/locales": "workspace:^",
+    "@intl-t/global": "workspace:^",
     "@intl-t/react": "workspace:^",
     "@intl-t/tools": "workspace:^"
   },
