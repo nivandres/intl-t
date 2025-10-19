@@ -31,8 +31,8 @@ abstract class TranslationProxy extends TranslationBase {
   constructor(protected __call__: Function) {
     super();
     return new Proxy(this as any, {
-      apply(target, thisArg, argArray) {
-        return __call__.apply(thisArg, argArray);
+      apply(target, _thisArg, argArray) {
+        return __call__.apply(target, argArray).t;
       },
       construct(target, [settings]) {
         settings.settings = { ...settings.settings, ...target.settings };
@@ -52,9 +52,6 @@ abstract class TranslationProxy extends TranslationBase {
         }
         if (typeof val === "function" && !val.t) val = val.bind(src);
         return val;
-      },
-      ownKeys(target) {
-        return target.children;
       },
     });
   }
@@ -115,7 +112,7 @@ export class TranslationNode<
       const t = Reflect.get(target, p, receiver) as any;
       return t?.T || t;
     },
-  }) as TranslationNodeFC;
+  }) as TranslationNodeFC<S, N, V>;
 
   Tr = this.T;
   Trans = this.T;
@@ -182,7 +179,8 @@ export class TranslationNode<
 
     settings.allowedLocales.forEach(locale => {
       if (locale === t.locale) {
-        t[locale as any] = parent[locale as any] ??= t;
+        parent[locale as any] ??= t;
+        t[locale as any] = t;
         if (typeof node !== "function" && node) return;
         return (descriptors[locale] = {
           configurable: true,
@@ -323,7 +321,7 @@ export class TranslationNode<
     return this.settings.locale as S["allowedLocale"];
   }
   setLocale<LL extends S["allowedLocale"] = L>(
-    locale: LL | (string & {}) | ((p: L) => LL) = this.settings.locale,
+    locale: LL | (string & {}) | ((p?: L) => LL) = this.settings.locale,
   ): TranslationType<S, FollowWay<S["tree"][LL], R>, V, LL, R> {
     if (typeof locale === "function") locale = locale(this.currentLocale as L);
     this.settings.setLocale(locale) || (this.settings.locale = locale);
@@ -344,7 +342,7 @@ export class TranslationNode<
     this[Symbol.for("preload")] = null;
     if (disabledEval)
       return new Proxy(t.call, {
-        get(target, p, receiver) {
+        get(_target, p, receiver) {
           return Reflect.get(t, p, receiver);
         },
       });

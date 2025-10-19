@@ -23,10 +23,9 @@ export function useLocale<L extends Locale = Locale>(
   // @ts-ignore-error optional binding
   const t = this;
   const context = !defaultLocale && useContext(TranslationContext)?.localeState;
-  if (context) return context;
+  if (context) return context as never;
   const state = useState((!hydration && getClientLocale.call(t, path)) || defaultLocale) as any;
   const setState = state[1];
-  hydration = true;
   if (hydration && !defaultLocale)
     useEffect(() => {
       const locale = getClientLocale.call(t, path);

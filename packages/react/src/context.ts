@@ -52,7 +52,7 @@ export function TranslationProvider<
   useMemo(() => Object.assign(t.settings, settings, state), [settings, t, state]);
   t = (t as any).current(path);
   useMemo(() => {
-    t.setSource(source);
+    source && t.setSource(source);
   }, [t, source]);
   useEffect(() => {
     t.then?.(() => context.reRender?.(p => p + 1));

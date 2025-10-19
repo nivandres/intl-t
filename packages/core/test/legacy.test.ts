@@ -7,6 +7,7 @@ describe("Translation object", () => {
     const t = ct({});
     expect(t).toBeInstanceOf(Object);
     expect(t.t).toBe(t);
+    expect(t()).toBe(t);
     expect(t.translation).toBe(t);
     expect(t.global).toBe(t);
   });
