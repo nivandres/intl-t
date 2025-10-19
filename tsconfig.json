@@ -28,7 +28,9 @@
       "@intl-t/react": ["./packages/react/src"],
       "@intl-t/react/*": ["./packages/react/src/*"],
       "@intl-t/tools": ["./packages/tools/src"],
-      "@intl-t/tools/*": ["./packages/tools/src/*"]
+      "@intl-t/tools/*": ["./packages/tools/src/*"],
+      "intl-t": ["./packages/core/src/index.ts"],
+      "intl-t/*": ["./packages/core/src/*"]
     }
   },
   "references": [

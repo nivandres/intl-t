@@ -1,7 +1,7 @@
 {
   "name": "@intl-t/core",
   "description": "A Fully-Typed Node-Based i18n Translation Library",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "license": "MIT",
   "homepage": "https://intl-t.dev",
@@ -18,6 +18,9 @@
   "files": [
     "dist/*"
   ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
