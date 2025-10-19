@@ -1,7 +1,7 @@
 {
   "name": "@intl-t/tools",
   "description": "i18n utilities",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "license": "MIT",
   "homepage": "https://intl-t.dev",
