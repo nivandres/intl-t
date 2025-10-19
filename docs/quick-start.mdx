@@ -73,9 +73,9 @@ Depending on your framework, you may need to integrate the translation instance 
   <Tab value="React">
 
 ```tsx title="i18n/translation.tsx"
-import { Translation } from "intl-t/react";
+import { createTranslation } from "intl-t/react";
 
-export const { Translation, useTranslation } = new Translation(/* ... */);
+export const { Translation, useTranslation } = createTranslation(/* ... */);
 ```
 
 ```tsx title="App.tsx"
@@ -84,7 +84,7 @@ import { Translation } from "./i18n/translation";
 export default function App() {
   return (
     <Translation>
-      <Content />
+      <App />
     </Translation>
   );
 }

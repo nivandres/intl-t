@@ -212,9 +212,9 @@ import { setRequestLocale /* or setLocale */ } from "intl-t/next";
 
 export default function Page({ params }) {
   const { locale } = await params;
-  setRequestLocale(locale); // required if not using server TranslationProvider
+  setRequestLocale(locale);
   // or
-  // setLocale(locale); Same as setRequestLocale but typed with available locales (Absolutely not needed)
+  // setLocale(locale); Same as setRequestLocale but typed with available locales
   const t = getTranslation(); // It works like useTranslation
   return <div>{t}</div>; // hello world
 }
@@ -288,8 +288,6 @@ export default function Component() {
 }
 ```
 
-[Read more about static rendering with Intl-T](/docs/next#static-rendering)
-
 ### **With React Server Components (Dynamic):**
 
 If you don't provide a Translation Provider or don't use `setRequestLocale` if required, you can use `await getTranslation()` for dynamic rendering in Next.js.
@@ -302,8 +300,6 @@ export default function Component() {
   return <div>{t("greeting", { name: "Ivan" })}</div>;
 }
 ```
-
-[Read more about dynamic rendering with Intl-T](/docs/next#dynamic-rendering)
 
 ### **With Server Actions:**
 
@@ -406,8 +402,6 @@ _The recommended approach is to use `await getTranslation()` when there is no `l
 The previous problem only applies for [dynamic rendering with next](#dynamic-rendering), but if you are using [static rendering](#static-rendering) with [dynamic import](/docs/dynamic-import), keep in mind that sometimes pages load before the layout. Therefore, you may need to `await getTranslation` at the top of your static page to preload your locale translations (It keeps static). After this initial preload, you won't need to await the `getTranslation` in your components.
 
 ## Next.js React patch
-
-Read more about [React Patch](/docs/react#patch) to understand how it works and limitations.
 
 ```ts title="i18n/patch.ts"
 import patch from "intl-t/react";
