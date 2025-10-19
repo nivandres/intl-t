@@ -1,7 +1,7 @@
 {
   "name": "@intl-t/locales",
   "description": "Locale type",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "license": "MIT",
   "homepage": "https://intl-t.dev",

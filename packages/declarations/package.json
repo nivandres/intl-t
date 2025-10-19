@@ -1,7 +1,7 @@
 {
   "name": "@intl-t/declarations",
   "description": "Generate type declaration files from JavaScript Object",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "license": "MIT",
   "homepage": "https://intl-t.dev",

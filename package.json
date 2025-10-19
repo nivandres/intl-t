@@ -1,7 +1,7 @@
 {
   "name": "intl-t",
   "description": "A Fully-Typed Object-Based i18n Translation Library",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "license": "MIT",
   "homepage": "https://intl-t.dev",
@@ -80,14 +80,14 @@
     "*.{js,ts,tsx}": "oxlint"
   },
   "dependencies": {
-    "@intl-t/core": "workspace:*",
-    "@intl-t/declarations": "workspace:*",
-    "@intl-t/format": "workspace:*",
-    "@intl-t/global": "workspace:*",
-    "@intl-t/locales": "workspace:*",
-    "@intl-t/next": "workspace:*",
-    "@intl-t/react": "workspace:*",
-    "@intl-t/tools": "workspace:*"
+    "@intl-t/core": "workspace:^",
+    "@intl-t/declarations": "workspace:^",
+    "@intl-t/format": "workspace:^",
+    "@intl-t/global": "workspace:^",
+    "@intl-t/locales": "workspace:^",
+    "@intl-t/next": "workspace:^",
+    "@intl-t/react": "workspace:^",
+    "@intl-t/tools": "workspace:^"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
