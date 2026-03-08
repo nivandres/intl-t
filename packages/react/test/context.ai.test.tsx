@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { createTranslation as ct, useLocale } from "../src";
 import { TranslationProvider, TranslationContext, useTranslation } from "../src/context";
+import { useLocale } from "../src/hooks";
+import { createTranslation as ct } from "../src/translation";
 import messages from "./messages.json";
 
 function render(node: any) {
