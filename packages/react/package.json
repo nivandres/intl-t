@@ -59,6 +59,10 @@
     "@intl-t/global": "workspace:^",
     "@intl-t/format": "workspace:^"
   },
+  "devDependencies": {
+    "@types/react-dom": "^19",
+    "react-dom": "^19"
+  },
   "peerDependencies": {
     "react": ">=18 <20"
   },
