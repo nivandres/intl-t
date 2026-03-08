@@ -3,11 +3,13 @@ import type { Locale } from "@intl-t/locales";
 export function match<L extends Locale>(
   requestLocales?: Locale[] | Locale | null,
   // @ts-ignore-error optional binding
-  availableLocales: L[] | readonly L[] = this?.allowedLocales || requestLocales || [],
+  availableLocales: L[] | readonly L[] = this?.allowedLocales,
   // @ts-ignore-error optional binding
-  defaultLocale: L | null = this?.mainLocale || this?.defaultLocale || availableLocales[0],
+  defaultLocale: L | null = this?.mainLocale || this?.defaultLocale,
 ): L {
   requestLocales = typeof requestLocales === "string" ? [requestLocales] : requestLocales || [];
+  availableLocales ||= requestLocales as L[];
+  defaultLocale ||= availableLocales[0];
   let matchedLocale: L | undefined;
   for (let i = 0; i < requestLocales.length; i++) {
     const locale = requestLocales[i];

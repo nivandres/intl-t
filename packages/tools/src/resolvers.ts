@@ -2,10 +2,10 @@ import { state } from "@intl-t/global";
 import type { Locale } from "@intl-t/locales";
 import { match } from "@intl-t/tools/match";
 
-type Awaitable<T> = T & Promise<T>;
+type Awaitable<T> = (T & Promise<T>) | T;
 
 // @ts-ignore-error optional binding
-export function resolveLocale<L extends Locale>(path: string = "", locales: L[] = this?.allowedLocales || []) {
+export function resolveLocale<L extends Locale>(path: string = "", locales: L[] = this?.allowedLocales) {
   const locale = path.match(/^\/([a-z]{2}(?:-[A-Za-z]+)*)(?:$|\/)/)?.[1] as L;
   if (!locale || !locales) return locale;
   return locales.includes(locale) ? locale : undefined;
@@ -41,7 +41,7 @@ export function resolveHref<L extends Locale>(
     getLocale = () => match(state.locale, allowedLocales, undefined),
   }: // @ts-ignore-error optional binding
   LocalizedHref<L> = this || {},
-): Awaitable<`/${L | ""}${string}`> {
+): Awaitable<`${`/${L}` | ""}${string}`> {
   if (href[0] !== "/") return href as any;
   if (pathPrefix == "hidden" && locale) pathPrefix = "always";
   if (pathPrefix == "hidden") locale = "";
@@ -54,8 +54,8 @@ export function resolveHref<L extends Locale>(
   return locale instanceof Promise ? (new Promise(async r => r(fn(await locale) as any)) as any) : (fn(locale) as any);
 }
 
-export function resolvePath(pathname: string, locales: string[] = []) {
-  const [, _, p] = pathname.match(/(\/[a-z]{2}(?:-[A-Za-z]+)*)(\/.*|$)/) || [];
-  if (!locales[0] || !p) return p || "/";
-  return locales.some(l => _?.includes(l)) ? p : _ + p;
+// @ts-ignore-error optional binding
+export function resolvePath(pathname: string, locales: string[] = this?.allowedLocales) {
+  let [, l, p] = pathname.match(/(\/[a-z]{2}(?:-[A-Za-z]+)*)(\/.*|$)/) || [];
+  return !locales || locales?.some(locale => l?.includes(locale)) ? p || (l ? "/" : pathname) : pathname;
 }
