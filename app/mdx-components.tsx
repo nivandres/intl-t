@@ -9,7 +9,6 @@ import { ImageZoom } from "./components/image-zoom";
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
-    ...components,
     ...defaultMdxComponents,
     img: props => <ImageZoom {...props} />,
     ...GithubInfoComponents,
@@ -17,5 +16,6 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ...TabsComponents,
     ...StepsComponents,
     ...Twoslash,
+    ...components,
   };
 }

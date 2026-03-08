@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 
 const docOptions: DocsLayoutProps = {
   ...baseOptions,
-  tree: source.pageTree,
+  tree: source.getPageTree(),
   links: [
     {
       type: "custom",

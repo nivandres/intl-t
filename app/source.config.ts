@@ -1,5 +1,6 @@
 import { rehypeCodeDefaultOptions } from "fumadocs-core/mdx-plugins";
 import { defineConfig, defineDocs, frontmatterSchema, metaSchema } from "fumadocs-mdx/config";
+import lastModified from "fumadocs-mdx/plugins/last-modified";
 import { transformerTwoslash } from "fumadocs-twoslash";
 import { createFileSystemTypesCache } from "fumadocs-twoslash/cache-fs";
 import { remarkAutoTypeTable, createGenerator } from "fumadocs-typescript";
@@ -19,7 +20,7 @@ export const docs = defineDocs({
 const generator = createGenerator();
 
 export default defineConfig({
-  lastModifiedTime: "git",
+  plugins: [lastModified()],
   mdxOptions: {
     remarkPlugins: [[remarkAutoTypeTable, { generator }]],
     rehypeCodeOptions: {

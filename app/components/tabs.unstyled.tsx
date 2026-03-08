@@ -1,7 +1,7 @@
 "use client";
 
 import * as Primitive from "@radix-ui/react-tabs";
-import { useEffectEvent } from "fumadocs-core/utils/use-effect-event";
+import { useEffectEvent } from "react";
 import { type ComponentProps, createContext, useContext, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { mergeRefs } from "../lib/merge-refs";
 
