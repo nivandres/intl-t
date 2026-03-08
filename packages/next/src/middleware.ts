@@ -8,7 +8,7 @@ import { LOCALE_HEADERS_KEY, PATH_HEADERS_KEY } from "./headers";
 
 export const LOCALE_COOKIE_KEY = "locale";
 
-export type Middleware = (req: NextRequest, ev: NextFetchEvent, res?: NextResponse) => NextResponse | Promise<NextResponse> | undefined;
+export type Middleware = (req: NextRequest, ev?: NextFetchEvent, res?: NextResponse) => NextResponse | Promise<NextResponse> | void;
 export type MiddlewareFactory = (middleware: Middleware) => Middleware;
 
 export interface MiddlewareConfig<L extends Locale> extends MG, ResolveConfig<L> {
@@ -17,7 +17,7 @@ export interface MiddlewareConfig<L extends Locale> extends MG, ResolveConfig<L>
   detect?: false | string | string[] | ((req: NextRequest) => string[] | string);
   domains?: I18NDomains;
   config?: MG;
-  middleware?: Middleware;
+  middleware?: typeof middleware;
   withMiddleware?: MiddlewareFactory;
   match?: typeof match;
 }
@@ -42,7 +42,7 @@ export function createMiddleware<L extends Locale>(settings: MiddlewareConfig<L>
   return Object.assign(settings.middleware, settings, middlewareConfig);
 }
 
-export function middleware<L extends Locale>(req: NextRequest, ev: NextFetchEvent, res?: NextResponse) {
+export function middleware<L extends Locale>(req: NextRequest, ev?: NextFetchEvent, res?: NextResponse) {
   let {
     allowedLocales = [],
     defaultLocale = allowedLocales[0],
@@ -86,9 +86,9 @@ export function middleware<L extends Locale>(req: NextRequest, ev: NextFetchEven
 export const i18nMiddleware = middleware;
 
 export function withMiddleware(middleware: Middleware) {
-  // @ts-ignore
+  // @ts-ignore optional binding
   const i18nMiddlewareBound = i18nMiddleware.bind(this);
-  return (req: NextRequest, ev: NextFetchEvent, res?: NextResponse) => {
+  return (req: NextRequest, ev?: NextFetchEvent, res?: NextResponse) => {
     res = i18nMiddlewareBound(req, ev, res);
     return middleware(req, ev, res);
   };

@@ -1,7 +1,7 @@
 "use client";
 
 import type { Locale } from "@intl-t/locales";
-import { useLocale } from "@intl-t/react";
+import { useLocale } from "@intl-t/react/hooks";
 import { resolvePath, resolveHref, ResolveConfig } from "@intl-t/tools/resolvers";
 import { useRouter as ur, usePathname as up } from "next/navigation";
 

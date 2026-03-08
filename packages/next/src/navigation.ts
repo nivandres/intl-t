@@ -31,11 +31,7 @@ export const redirect: typeof r = resolvedRedirect;
 export const permanentRedirect: typeof pr = resolvedPermanentRedirect;
 
 export interface IntlConfig<L extends Locale = Locale, T extends FC<any> = NL>
-  extends ResolveConfig<L>,
-    StaticParamsConfig<L>,
-    MiddlewareConfig<L>,
-    RouterConfig<L>,
-    LinkConfig<T> {
+  extends ResolveConfig<L>, StaticParamsConfig<L>, MiddlewareConfig<L>, RouterConfig<L>, LinkConfig<T> {
   settings?: Partial<TranslationSettings<L>>;
 }
 

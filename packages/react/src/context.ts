@@ -15,8 +15,13 @@ export type TranslationContext = null | {
 
 export const TranslationContext = createContext<TranslationContext>(null);
 
-interface TranslationProps<T extends TranslationNode, A extends string[] = string[], D extends string = string>
-  extends TP<T["settings"], T["node"], T["values"], A, D> {
+interface TranslationProps<T extends TranslationNode, A extends string[] = string[], D extends string = string> extends TP<
+  T["settings"],
+  T["node"],
+  T["values"],
+  A,
+  D
+> {
   t?: T;
 }
 
