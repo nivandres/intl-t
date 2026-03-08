@@ -28,7 +28,7 @@ import { Translation, t } from "@/i18n/translation";
 import { match } from "intl-t/tools";
 
 interface Props {
-  params: Promise<{ locale: typeof Translation.locale }>;
+  params: Promise<{ locale: string }>;
 }
 
 export default function RootLayout({ children, params }) {

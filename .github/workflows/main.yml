@@ -2,16 +2,16 @@ name: Check
 on:
   push:
     paths-ignore:
-      - 'app/**'
-      - 'docs/**'
-      - '**/*.md'
-      - '**/*.yml'
+      - "app/**"
+      - "docs/**"
+      - "**/*.md"
+      - "**/*.yml"
   pull_request:
     paths-ignore:
-      - 'app/**'
-      - 'docs/**'
-      - '**/*.md'
-      - '**/*.yml'
+      - "app/**"
+      - "docs/**"
+      - "**/*.md"
+      - "**/*.yml"
 jobs:
   build:
     name: Build, lint, and test

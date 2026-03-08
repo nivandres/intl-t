@@ -212,9 +212,8 @@ import { setRequestLocale /* or setLocale */ } from "intl-t/next";
 
 export default function Page({ params }) {
   const { locale } = await params;
-  setRequestLocale(locale);
-  // or
-  // setLocale(locale); Same as setRequestLocale but typed with available locales
+  setRequestLocale(locale); // or
+  // setLocale(locale); // Same as setRequestLocale but typed with available locales
   const t = getTranslation(); // It works like useTranslation
   return <div>{t}</div>; // hello world
 }
