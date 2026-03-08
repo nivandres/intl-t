@@ -18,7 +18,26 @@
     "paths": {
       "@/.source": ["./.source/index.ts"],
       "fumadocs-mdx:collections/*": ["./.source/*"],
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@intl-t/*": ["../src/*"],
+      "@intl-t/core": ["../packages/core/src"],
+      "@intl-t/core/*": ["../packages/core/src/*"],
+      "@intl-t/declarations": ["../packages/declarations/src"],
+      "@intl-t/declarations/*": ["../packages/declarations/src/*"],
+      "@intl-t/format": ["../packages/format/src"],
+      "@intl-t/format/*": ["../packages/format/src/*"],
+      "@intl-t/global": ["../packages/global/src"],
+      "@intl-t/global/*": ["../packages/global/src/*"],
+      "@intl-t/locales": ["../packages/locales/src"],
+      "@intl-t/locales/*": ["../packages/locales/src/*"],
+      "@intl-t/next": ["../packages/next/src"],
+      "@intl-t/next/*": ["../packages/next/src/*"],
+      "@intl-t/react": ["../packages/react/src"],
+      "@intl-t/react/*": ["../packages/react/src/*"],
+      "@intl-t/tools": ["../packages/tools/src"],
+      "@intl-t/tools/*": ["../packages/tools/src/*"],
+      "intl-t": ["../src/index.ts"],
+      "intl-t/*": ["../src/*"]
     },
     "plugins": [
       {
