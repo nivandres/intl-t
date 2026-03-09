@@ -1,7 +1,7 @@
 {
   "name": "@intl-t/core",
   "description": "A Fully-Typed Node-Based i18n Translation Library",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "type": "module",
   "license": "MIT",
   "homepage": "https://intl-t.dev",
@@ -49,9 +49,9 @@
     "release": "bun publish --access public"
   },
   "dependencies": {
-    "@intl-t/format": "workspace:^",
-    "@intl-t/global": "workspace:^",
-    "@intl-t/locales": "workspace:^"
+    "@intl-t/format": "workspace:*",
+    "@intl-t/global": "workspace:*",
+    "@intl-t/locales": "workspace:*"
   },
   "peerDependencies": {
     "typescript": "^5"

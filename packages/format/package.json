@@ -1,7 +1,7 @@
 {
   "name": "@intl-t/format",
   "description": "Format utilities, variable injection, ICU Support",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "type": "module",
   "license": "MIT",
   "homepage": "https://intl-t.dev",
@@ -48,6 +48,6 @@
     "release": "bun publish --access public"
   },
   "dependencies": {
-    "@intl-t/global": "workspace:^"
+    "@intl-t/global": "workspace:*"
   }
 }
