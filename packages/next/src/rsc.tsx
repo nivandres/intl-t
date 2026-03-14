@@ -2,7 +2,7 @@ import { TranslationNode } from "@intl-t/core";
 import type { GlobalTranslation } from "@intl-t/core/global";
 import type { isArray, SearchWays, ArrayToString } from "@intl-t/core/types";
 import { TranslationProvider as TranslationClientProvider, TranslationProviderProps } from "@intl-t/react";
-import { Suspense } from "react";
+import { Suspense, ReactNode } from "react";
 import { getCache } from "./cache";
 import { getRequestLocale } from "./request";
 import { createTranslation } from "./translation";
@@ -11,7 +11,6 @@ export async function TranslationProvider<
   T extends TranslationNode,
   A extends isArray<SearchWays<T>>,
   D extends ArrayToString<A, T["settings"]["ps"]>,
-  // @ts-ignore-error optional binding
 >({ children, t = this, preventDynamic, hydrate, ...props }: TranslationProviderProps<T, A, D>) {
   const cache = getCache();
   t ||= cache.t ||= TranslationNode.t || (createTranslation(props.settings) as any);
@@ -29,7 +28,7 @@ export async function TranslationProvider<
   t = (await t.current) as any;
   if (!children) return t(props.path || props.id || props.i18nKey).base;
   props.source = props.source || props.messages || ((hydrate ?? t.settings.hydrate) && { ...(t.node as any) }) || void 0;
-  // @ts-ignore
+  // @ts-ignore deep nested type
   return (<TranslationClientProvider {...props}>{children}</TranslationClientProvider>) as never;
 }
 export const T = TranslationProvider;
@@ -37,13 +36,11 @@ export { T as Tr, T as Trans };
 
 export const TranslationDynamicRendering: typeof TranslationProvider = async ({ children, ...props }) => {
   props.locale ||= (await getRequestLocale.call(props.t)) as string;
-  // @ts-ignore TS2589
-  return <TranslationProvider {...props}>{children}</TranslationProvider>;
+  return <TranslationProvider {...props}>{children as ReactNode}</TranslationProvider>;
 };
 
 function hook(...args: any[]) {
   const cache = getCache();
-  // @ts-ignore-error optional binding
   let t = this || (cache.t ||= TranslationNode.t);
   if (!t) throw new Error("Translation not found");
   const locale = cache.locale ? (t.settings.locale = cache.locale) : getRequestLocale.call(t);
@@ -60,9 +57,9 @@ function hook(...args: any[]) {
   return t(...args);
 }
 
-// @ts-ignore
+// @ts-ignore global translation
 export declare const getTranslation: GlobalTranslation;
-// @ts-ignore
+// @ts-ignore global translation
 export declare const getTranslations: GlobalTranslation;
-// @ts-ignore
+// @ts-ignore global translation
 export { hook as getTranslation, hook as getTranslations };

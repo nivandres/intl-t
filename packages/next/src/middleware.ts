@@ -26,7 +26,6 @@ export const middlewareConfig: MG = {
   matcher: ["/((?!api|.*\\..*|_next).*)"],
 };
 
-// @ts-ignore
 export function detect(req: NextRequest, domains: I18NDomains = this?.domains || []) {
   const { hostname } = req.nextUrl;
   const domain = domains.find(d => hostname.includes(d.domain));
@@ -52,7 +51,6 @@ export function middleware<L extends Locale>(req: NextRequest, ev?: NextFetchEve
     detect = req => negotiator(req),
     redirectPath = "r",
     match = () => "",
-    // @ts-ignore
   } = this as MiddlewareConfig<L>;
   res ||= NextResponse.next();
   const { nextUrl, cookies } = req;
@@ -86,7 +84,6 @@ export function middleware<L extends Locale>(req: NextRequest, ev?: NextFetchEve
 export const i18nMiddleware = middleware;
 
 export function withMiddleware(middleware: Middleware) {
-  // @ts-ignore optional binding
   const i18nMiddlewareBound = i18nMiddleware.bind(this);
   return (req: NextRequest, ev?: NextFetchEvent, res?: NextResponse) => {
     res = i18nMiddlewareBound(req, ev, res);

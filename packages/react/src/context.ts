@@ -32,7 +32,6 @@ export function TranslationProvider<
   A extends isArray<SearchWays<T>>,
   D extends ArrayToString<A, T["settings"]["ps"]>,
 >({
-  // @ts-ignore-error optional binding
   t = this,
   onLocaleChange,
   locale,
@@ -70,7 +69,6 @@ export { T as Trans, T as Tr };
 
 export function hook(...args: any[]) {
   const context = useContext(TranslationContext) || {};
-  // @ts-ignore-error optional binding
   let t = this || (context.t ||= TranslationNode.t);
   if (!t) throw new Error("Translation not found");
   context.t ||= t;
@@ -83,9 +81,9 @@ export function hook(...args: any[]) {
   return t(...args);
 }
 
-// @ts-ignore
+// @ts-ignore global translation
 export declare const useTranslation: GlobalTranslation;
-// @ts-ignore
+// @ts-ignore global translation
 export declare const useTranslations: GlobalTranslation;
-// @ts-ignore
+// @ts-ignore global translation
 export { hook as useTranslation, hook as useTranslations };

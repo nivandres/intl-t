@@ -19,11 +19,9 @@ export * from "./router";
 export * from "./state";
 
 export function resolvedRedirect(href?: string, type?: RedirectType) {
-  // @ts-ignore
   return r(resolveHref.bind(this || {})(href), type);
 }
 export function resolvedPermanentRedirect(href?: string, type?: RedirectType) {
-  // @ts-ignore
   return pr(resolveHref.bind(this || {})(href), type);
 }
 
@@ -35,10 +33,7 @@ export interface IntlConfig<L extends Locale = Locale, T extends FC<any> = NL>
   settings?: Partial<TranslationSettings<L>>;
 }
 
-export function createNavigation<L extends Locale, LC extends FC<any>>(
-  // @ts-ignore
-  config: IntlConfig<L, LC> = this || {},
-) {
+export function createNavigation<L extends Locale, LC extends FC<any>>(config: IntlConfig<L, LC> = this || {}) {
   const { allowedLocales } = config;
   if (!allowedLocales && Array.isArray(config.locales)) config.allowedLocales = config.locales;
   config.locales ||= allowedLocales as L[];

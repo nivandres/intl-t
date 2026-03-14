@@ -8,7 +8,6 @@ import { ReactState, ReactSetState } from "@intl-t/react/types";
 import { useState, useEffect, useContext, useMemo } from "react";
 
 export function useLocale<L extends Locale = Locale>(
-  // @ts-ignore-error optional binding
   defaultLocale: L | undefined | null = this?.locale,
   {
     hydration = h,
@@ -16,11 +15,9 @@ export function useLocale<L extends Locale = Locale>(
   }: {
     hydration?: boolean;
     path?: string;
-    // @ts-ignore-error optional binding
   } = this?.settings || {},
 ) {
   path &&= `${LOCALE_CLIENT_KEY}${path}`;
-  // @ts-ignore-error optional binding
   const t = this;
   const context = !defaultLocale && useContext(TranslationContext)?.localeState;
   if (context) return context as never;

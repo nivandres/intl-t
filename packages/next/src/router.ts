@@ -26,7 +26,6 @@ export interface RouterConfig<L extends Locale = Locale> extends ResolveConfig<L
 
 const state: Record<string, () => string> = {};
 
-// @ts-ignore
 function useResolvedRouter({ useRouter = ur, ...config }: RouterConfig = this || {}) {
   const router = useRouter();
   let path = state.path?.();

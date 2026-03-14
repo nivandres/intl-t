@@ -1,5 +1,5 @@
 import type { Locale } from "@intl-t/locales";
-import { ResolveConfig, resolveHref } from "@intl-t/tools/resolvers";
+import { ResolveHrefConfig, resolveHref } from "@intl-t/tools/resolvers";
 import { default as NL, LinkProps as LP } from "next/link";
 import type { FC, ReactNode, ComponentProps } from "react";
 import { LC } from "./link_client";
@@ -17,7 +17,7 @@ export interface LinkProps<L extends Locale = Locale, LC extends FC<any> = NL> e
   href?: string;
   locale?: L;
   currentLocale?: L;
-  config?: ResolveConfig<L> & LinkConfig<LC>;
+  config?: ResolveHrefConfig<L> & LinkConfig<LC>;
   children?: ReactNode;
 }
 
@@ -27,7 +27,6 @@ export async function LS<L extends Locale, L_ extends string, LC extends FC<any>
   href = "",
   locale,
   currentLocale,
-  // @ts-ignore
   config = this || {},
   Link = config.Link || (NL as unknown as LC),
   preventDynamic = config.preventDynamic ?? true,
@@ -39,8 +38,7 @@ export async function LS<L extends Locale, L_ extends string, LC extends FC<any>
       config = { allowedLocales, defaultLocale, pathPrefix, redirectPath } as any;
       return <LC href={href} locale={locale} currentLocale={currentLocale} config={config} {...(props as any)} />;
     } else href = (await getPathname()) || "";
-  // @ts-ignore
-  config.getLocale ||= getRequestLocale.bind(null, preventDynamic);
+  config.getLocale ||= getRequestLocale.bind(null, preventDynamic) as () => L;
   href = await resolveHref.call(config, href, { ...config, locale, currentLocale });
   return <Link href={href} {...(props as any)} />;
 }

@@ -12,6 +12,7 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ESNext",
+    "noImplicitThis": false,
     "paths": {
       "@intl-t/core": ["./packages/core/src"],
       "@intl-t/core/*": ["./packages/core/src/*"],

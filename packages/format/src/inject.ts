@@ -47,7 +47,6 @@ export function instructionsMatch(content: string) {
 export function injectVariables<T extends string, V extends Values>(
   content: T = "" as T,
   variables: Partial<Variables<T>> & V = {} as any,
-  // @ts-ignore
   state: Partial<State> = this || {},
 ) {
   if (!content || !variables) return content as never;
