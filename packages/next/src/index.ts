@@ -6,7 +6,6 @@ export * from "./middleware";
 export * from "./navigation";
 export * from "./params";
 export * from "./request";
-export * from "./root";
 export * from "./router";
 export * from "./rsc";
 export * from "./state";

@@ -10,13 +10,7 @@ export function getRequestLocale<L extends Locale>(preventDynamic?: boolean): Pr
 // @ts-ignore
 export function getRequestLocale(preventDynamic: boolean = this?.settings?.preventDynamic || false) {
   return (
-    // @ts-ignore
-    getCachedRequestLocale.call(this) ||
-    // Missing workStore in unstable_rootParams.
-    // getRootParamsLocale.call(this) ||
-    // @ts-ignore
-    (!preventDynamic && getHeadersRequestLocale.call(this).then(setCachedRequestLocale)) ||
-    undefined
+    getCachedRequestLocale.call(this) || (!preventDynamic && getHeadersRequestLocale.call(this).then(setCachedRequestLocale)) || undefined
   );
 }
 
