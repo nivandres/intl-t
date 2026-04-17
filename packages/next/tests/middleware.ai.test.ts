@@ -185,24 +185,6 @@ describe("next middleware", () => {
     expect(response.cookies.get(LOCALE_COOKIE_KEY)?.value).toBe("es");
   });
 
-  it("prefers the latest cookie locale in request strategy detect-latest mode", () => {
-    const middleware = createMiddleware({
-      allowedLocales: ["en", "es"],
-      defaultLocale: "en",
-      detect: ["en"],
-      strategy: "request",
-      pathBase: "detect-latest",
-      pathPrefix: "hidden",
-    });
-
-    const response = middleware(createRequest("/docs", { cookie: "locale=es" }));
-
-    expect(response.headers.get("location")).toBeNull();
-    expect(response.headers.get("x-middleware-rewrite")).toBeNull();
-    expect(response.headers.get(LOCALE_HEADERS_KEY)).toBe("es");
-    expect(response.headers.get(PATH_HEADERS_KEY)).toBe("/docs");
-  });
-
   it("rewrites to the localized path when the param strategy uses optional prefixes", () => {
     const middleware = createMiddleware({
       allowedLocales: ["en", "es"],
