@@ -21,7 +21,7 @@ on:
       - "**/*.yml"
 jobs:
   check:
-    name: Format, lint, typecheck, build, and test
+    name: Format, lint, typecheck, test, and build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -36,7 +36,7 @@ jobs:
         run: bun run lint
       - name: Typecheck
         run: bun run typecheck
-      - name: Build
-        run: bun run build
       - name: Test
         run: bun test
+      - name: Build
+        run: bun run build
