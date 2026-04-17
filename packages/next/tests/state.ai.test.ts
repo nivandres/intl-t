@@ -1,11 +1,28 @@
 // AI generated test
-import { beforeEach, describe, expect, it } from "bun:test";
+import { GlobalRegistrator } from "@happy-dom/global-registrator";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { getLocale, isRSC, setLocale } from "../src/state";
+
+const domSetupKey = Symbol.for("intl-t.react.test.dom-setup");
+
+if (!(globalThis as Record<PropertyKey, unknown>)[domSetupKey]) {
+  GlobalRegistrator.register();
+  (globalThis as Record<PropertyKey, unknown>)[domSetupKey] = true;
+}
 
 describe("next state client", () => {
   beforeEach(() => {
+    document.body.innerHTML = "";
     localStorage.clear();
+    sessionStorage.clear();
     window.history.replaceState({}, "", "/es/dashboard");
+  });
+
+  afterEach(() => {
+    document.body.innerHTML = "";
+    localStorage.clear();
+    sessionStorage.clear();
+    window.history.replaceState({}, "", "/");
   });
 
   it("reads and writes the locale through the client helpers in the current environment", () => {

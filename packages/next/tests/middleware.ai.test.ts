@@ -184,6 +184,8 @@ describe("next middleware", () => {
       defaultLocale: "en",
       detect: ["en"],
       strategy: "request",
+      pathBase: "detect-latest",
+      pathPrefix: "hidden",
     });
 
     const response = middleware(createRequest("/docs", { cookie: "locale=es" }));

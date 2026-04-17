@@ -51,9 +51,17 @@ function createAsyncCoreLocales() {
   };
 }
 
-const sourceProvider = TranslationNode.Provider;
-const sourceGetLocale = TranslationNode.getLocale;
-const sourceHook = TranslationNode.hook;
+function coreProvider(this: any, ...args: any[]) {
+  return this[this.settings.locale](...args);
+}
+
+function coreGetLocale(this: any) {
+  return this.defaultLocale;
+}
+
+function coreHook(this: any, ...args: any[]) {
+  return this.current(...args);
+}
 
 let previousStatics: Record<string, unknown> = {};
 
@@ -76,9 +84,9 @@ beforeEach(() => {
     t: TranslationNode.t,
   };
 
-  TranslationNode.Provider = sourceProvider as never;
-  TranslationNode.getLocale = sourceGetLocale as never;
-  TranslationNode.hook = sourceHook as never;
+  TranslationNode.Provider = coreProvider as never;
+  TranslationNode.getLocale = coreGetLocale as never;
+  TranslationNode.hook = coreHook as never;
   TranslationNode.setLocale = setCoreLocale as never;
   TranslationNode.locale = undefined as never;
   TranslationNode.source = undefined as never;
