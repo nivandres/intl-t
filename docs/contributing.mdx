@@ -14,6 +14,7 @@ Here are some planned features and improvements for future:
 - **Translations Merging:** Support for dynamically merging and extending translation namespaces for each independent node in the tree, enabling on-demand loading and updates.
 - **CLI Tooling:** Command-line utilities for managing, validating, and extracting translations.
 - **Documentation Web:** A web-based documentation site for Intl-T, providing examples, guides, and API references.
+- **Documentation Enhancement:** Improve docs such as `AGENTS.md`, `CONTRIBUTING.md` to provide clearer and more practical guidance for contributors.
 - **Editor Integrations:** VSCode plugin for enhanced translation management.
 - **Improved ICU Support:** More advanced ICU message format features.
 - **Performance Optimizations:** Further reduce bundle size and improve runtime efficiency.
@@ -21,10 +22,11 @@ Here are some planned features and improvements for future:
 - **Testing:** Add robust testing for Intl-T to ensure its reliability.
 - **More frameworks:** Support for more popular frameworks and libraries, including backend frameworks.
 - **Implement new features:** For example, localization for pathnames.
-- **Modular and agnostic:** To ensure agnosticism, Intl-T will be a monorepo with separate modules for different environments and features (e.g., `@intl-t/next`, `@intl-t/tools`, `@intl-t/server`, etc.)
+- **Modular and agnostic:** To ensure agnosticism, Intl-T will be a monorepo with separate modules for different environments and features (e.g., `@intl-t/next`, `@intl-t/utils`, `@intl-t/server`, etc.)
 - **Intl-T Server:** Easily self-host translations with a simple API that is agnostic and compatible with the intl-t client.
 - **Intl-T l10n Service:** A simple service for providing translation management to your application through intl-t API.
 - **Crowdin Integration:** Integration with Crowdin for efficient translation management and dynamic loading.
+- **TypeScript Augmentation:** Allow augmenting the `intl-t` module so the default `t` object can be imported directly from the package with full type inference.
 
 ### Progress Table
 
@@ -33,24 +35,26 @@ Here are some planned features and improvements for future:
 🔵 Almost there
 🟢 Completed
 
-| Feature                            | Status |
-| ---------------------------------- | ------ |
-| Modular and agnostic               | 🔵     |
-| Translations Merging               | 🔴     |
-| CLI Tooling                        | 🔴     |
-| Documentation web                  | 🔵     |
-| Edge Runtime Support               | 🟡     |
-| Editor Integration                 | 🔴     |
-| Improved ICU Support               | 🔴     |
-| Performance Optimizations          | 🔴     |
-| Testing                            | 🟡     |
-| More frameworks support            | 🔴     |
-| `@intl-t/server`                   | 🔴     |
-| Intl-T Service                     | 🔴     |
-| Crowdin Integration                | 🔴     |
-| Enhance dynamic import strategies  | 🔴     |
-| Enhanced TypeScript type inference | 🔴     |
-| Debugging                          | 🔴     |
-| Plugins                            | 🔴     |
+| Feature                           | Status |
+| --------------------------------- | ------ |
+| Modular and agnostic              | 🔵     |
+| Translations Merging              | 🔴     |
+| CLI Tooling                       | 🔴     |
+| Documentation web                 | 🟢     |
+| Documentation enhancement         | 🟡     |
+| Edge Runtime Support              | 🔵     |
+| IDE Integration                   | 🔴     |
+| Improved ICU Support              | 🔴     |
+| Performance Optimizations         | 🔴     |
+| Testing                           | 🟡     |
+| More frameworks support           | 🔴     |
+| `@intl-t/server`                  | 🔴     |
+| Intl-T Service                    | 🔴     |
+| Crowdin Integration               | 🔴     |
+| Enhance dynamic import strategies | 🔴     |
+| TypeScript Augmentation           | 🔴     |
+| Enhance TypeScript type inference | 🔴     |
+| Debugging                         | 🔴     |
+| Plugins                           | 🔴     |
 
 Have a feature request? [Open an issue](https://github.com/nivandres/intl-t/issues) or join the [Discord](https://discord.gg/5EbCXKpdyw).
