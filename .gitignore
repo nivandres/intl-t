@@ -2,9 +2,10 @@
 .next
 .source
 .vercel
+*.tsbuildinfo
 *lock.json
 bun.lock*
 desktop.ini
 dist
 node_modules
-tsconfig.tsbuildinfo
+.env*.local

@@ -4,99 +4,34 @@
     "composite": true,
     "declaration": true,
     "jsx": "react-jsx",
-    "lib": [
-      "ESNext"
-    ],
+    "lib": ["ESNext", "DOM"],
+    "noEmit": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "outDir": "dist",
-    "rootDir": "src",
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
     "target": "ESNext",
+    "types": ["*"],
     "noImplicitThis": false,
     "paths": {
-      "@intl-t/core": [
-        "./packages/core/src"
-      ],
-      "@intl-t/core/*": [
-        "./packages/core/src/*"
-      ],
-      "@intl-t/declarations": [
-        "./packages/declarations/src"
-      ],
-      "@intl-t/declarations/*": [
-        "./packages/declarations/src/*"
-      ],
-      "@intl-t/format": [
-        "./packages/format/src"
-      ],
-      "@intl-t/format/*": [
-        "./packages/format/src/*"
-      ],
-      "@intl-t/locales": [
-        "./packages/locales/src"
-      ],
-      "@intl-t/locales/*": [
-        "./packages/locales/src/*"
-      ],
-      "@intl-t/next": [
-        "./packages/next/src"
-      ],
-      "@intl-t/next/*": [
-        "./packages/next/src/*"
-      ],
-      "@intl-t/react": [
-        "./packages/react/src"
-      ],
-      "@intl-t/react/*": [
-        "./packages/react/src/*"
-      ],
-      "intl-t": [
-        "./packages/core/src/index.ts"
-      ],
-      "intl-t/*": [
-        "./packages/core/src/*"
-      ],
-      "@intl-t/utils": [
-        "./packages/utils/src"
-      ],
-      "@intl-t/utils/*": [
-        "./packages/utils/src/*"
-      ]
+      "@intl-t/core": ["./packages/core/src"],
+      "@intl-t/core/*": ["./packages/core/src/*"],
+      "@intl-t/declarations": ["./packages/declarations/src"],
+      "@intl-t/declarations/*": ["./packages/declarations/src/*"],
+      "@intl-t/format": ["./packages/format/src"],
+      "@intl-t/format/*": ["./packages/format/src/*"],
+      "@intl-t/locales": ["./packages/locales/src"],
+      "@intl-t/locales/*": ["./packages/locales/src/*"],
+      "@intl-t/next": ["./packages/next/src"],
+      "@intl-t/next/*": ["./packages/next/src/*"],
+      "@intl-t/react": ["./packages/react/src"],
+      "@intl-t/react/*": ["./packages/react/src/*"],
+      "@intl-t/utils": ["./packages/utils/src"],
+      "@intl-t/utils/*": ["./packages/utils/src/*"],
+      "intl-t": ["./packages/core/src/index.ts"],
+      "intl-t/*": ["./packages/core/src/*"]
     }
   },
-  "references": [
-    {
-      "path": "packages/core"
-    },
-    {
-      "path": "packages/declarations"
-    },
-    {
-      "path": "packages/format"
-    },
-    {
-      "path": "packages/locales"
-    },
-    {
-      "path": "packages/next"
-    },
-    {
-      "path": "packages/react"
-    },
-    {
-      "path": "packages/utils"
-    }
-  ],
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules",
-    "test",
-    "app",
-    "dist",
-    "packages"
-  ]
+  "exclude": ["node_modules", "dist", "apps", "examples"]
 }

@@ -2,10 +2,9 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "composite": true,
+    "noEmit": false,
     "rootDir": "src",
     "outDir": "dist"
   },
-  "references": [{ "path": "../global" }, { "path": "../locales" }],
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "test"]
+  "include": ["src"]
 }

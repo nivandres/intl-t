@@ -2,10 +2,10 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "composite": true,
+    "noEmit": false,
     "rootDir": "src",
     "outDir": "dist"
   },
-  "references": [{ "path": "../core" }, { "path": "../global" }, { "path": "../locales" }, { "path": "../format" }, { "path": "../tools" }],
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "test"]
+  "references": [{ "path": "../core" }, { "path": "../locales" }, { "path": "../format" }, { "path": "../utils" }],
+  "include": ["src"]
 }

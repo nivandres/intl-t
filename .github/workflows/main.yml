@@ -1,20 +1,27 @@
 name: Check
 on:
+  workflow_call:
   push:
+    branches:
+      - main
     paths-ignore:
-      - "app/**"
-      - "docs/**"
+      - "**/docs/**/*.mdx"
+      - "**/docs/**/*.md"
+      - "**/*.mdx"
       - "**/*.md"
       - "**/*.yml"
   pull_request:
+    branches:
+      - main
     paths-ignore:
-      - "app/**"
-      - "docs/**"
+      - "**/docs/**/*.mdx"
+      - "**/docs/**/*.md"
+      - "**/*.mdx"
       - "**/*.md"
       - "**/*.yml"
 jobs:
-  build:
-    name: Build, lint, and test
+  check:
+    name: Format, lint, typecheck, build, and test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -23,8 +30,12 @@ jobs:
         uses: oven-sh/setup-bun@v2
       - name: Install deps
         run: bun install
+      - name: Format
+        run: bun run format:check
       - name: Lint
         run: bun run lint
+      - name: Typecheck
+        run: bun run typecheck
       - name: Build
         run: bun run build
       - name: Test
