@@ -1,13 +1,13 @@
-import type { TranslationSettings } from "@intl-t/core/types";
-import type { Locale } from "@intl-t/locales";
+import type { TranslationSettings, Locale } from "@intl-t/core/types";
 import { ResolveConfig, resolveHref, resolveLocale, resolvePath } from "@intl-t/utils/resolvers";
-import { redirect as r, permanentRedirect as pr, RedirectType } from "next/navigation";
+import { redirect as r, permanentRedirect as pr } from "next/navigation";
 import type { FC } from "react";
 import { Link, LinkConfig, NL } from "./link";
 import { createMiddleware, MiddlewareConfig } from "./middleware";
-import { createStaticParams, StaticParamsConfig } from "./params";
+import { createGenerateStaticParams, StaticParamsConfig } from "./params";
+import { getPathname } from "./request";
 import { RouterConfig, useRouter, useLocale, usePathname } from "./router";
-import { getLocale, getPathname, setLocale } from "./state";
+import { getLocale, setLocale } from "./state";
 
 export * from "@intl-t/utils/match";
 export * from "@intl-t/utils/negotiator";
@@ -18,10 +18,10 @@ export * from "./params";
 export * from "./router";
 export * from "./state";
 
-export function resolvedRedirect(href?: string, type?: RedirectType) {
+export function resolvedRedirect(href?: string, type?: Parameters<typeof r>[1]) {
   return r(resolveHref.bind(this || {})(href), type);
 }
-export function resolvedPermanentRedirect(href?: string, type?: RedirectType) {
+export function resolvedPermanentRedirect(href?: string, type?: Parameters<typeof pr>[1]) {
   return pr(resolveHref.bind(this || {})(href), type);
 }
 
@@ -38,10 +38,11 @@ export function createNavigation<L extends Locale, LC extends FC<any>>(config: I
   if (!allowedLocales && Array.isArray(config.locales)) config.allowedLocales = config.locales;
   config.locales ||= allowedLocales as L[];
   config.param ||= "locale";
-  config.pathPrefix ||= config.strategy == "domain" ? "hidden" : "default";
+  config.pathPrefix ||= config.strategy == "request" ? "hidden" : "default";
   config.pathBase ||= config.pathPrefix == "hidden" ? "detect-latest" : "detect-default";
   config.defaultLocale ||= allowedLocales?.[0];
   config.redirectPath ||= "r";
+  const middleware = createMiddleware<L>(config);
   return {
     config,
     useRouter: useRouter.bind(config),
@@ -54,9 +55,11 @@ export function createNavigation<L extends Locale, LC extends FC<any>>(config: I
     resolveHref: resolveHref.bind(config)<L>,
     resolveLocale: resolveLocale.bind(config)<L>,
     match: config.match!,
-    middleware: createMiddleware<L>(config),
+    middleware,
     withMiddleware: config.withMiddleware!,
-    generateStaticParams: createStaticParams<L, string>(config),
+    proxy: middleware,
+    withProxy: config.withMiddleware!,
+    generateStaticParams: createGenerateStaticParams<L, string>(config),
     useLocale: useLocale<L>,
     usePathname,
     getPathname,

@@ -29,10 +29,6 @@
     "./*": {
       "types": "./dist/*.d.ts",
       "default": "./dist/*.js"
-    },
-    "./link": {
-      "types": "./dist/link/index.d.ts",
-      "default": "./dist/link/index.js"
     }
   },
   "keywords": [
@@ -60,6 +56,7 @@
   },
   "dependencies": {
     "@intl-t/core": "workspace:*",
+    "@intl-t/locales": "workspace:*",
     "@intl-t/react": "workspace:*",
     "@intl-t/utils": "workspace:*"
   },

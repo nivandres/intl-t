@@ -20,13 +20,13 @@ declare module "next/dist/shared/lib/app-router-context.shared-runtime" {
 export { useLocale };
 export const usePathname: typeof up = () => resolvePath(up());
 
-export interface RouterConfig<L extends Locale = Locale> extends ResolveConfig<L> {
+export interface RouterConfig<L extends Locale = Locale> extends ResolveConfig<L>, Options {
   useRouter?: typeof ur;
 }
 
 const state: Record<string, () => string> = {};
 
-function useResolvedRouter({ useRouter = ur, ...config }: RouterConfig = this || {}) {
+export function useResolvedRouter({ useRouter = ur, ...config }: RouterConfig = this || {}) {
   const router = useRouter();
   let path = state.path?.();
   let locale = state.locale?.();
@@ -49,4 +49,4 @@ function useResolvedRouter({ useRouter = ur, ...config }: RouterConfig = this ||
   };
 }
 
-export const useRouter: typeof ur = useResolvedRouter;
+export { useResolvedRouter as useRouter };

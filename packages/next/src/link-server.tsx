@@ -2,9 +2,9 @@ import type { Locale } from "@intl-t/locales";
 import { ResolveHrefConfig, resolveHref } from "@intl-t/utils/resolvers";
 import { default as NL, LinkProps as LP } from "next/link";
 import type { FC, ReactNode, ComponentProps } from "react";
-import { LC } from "./link_client";
-import { getRequestLocale } from "./request";
-import { getPathname, isRSC } from "./state";
+import { LC } from "./link-client";
+import { getRequestLocale, getPathname } from "./request";
+import { isRSC } from "./state";
 
 export type NL = typeof NL;
 
