@@ -1,6 +1,6 @@
-# @intl-t/declarations
+# @intl-t/utils
 
-`@intl-t/declarations` is a tiny CLI/library to generate TypeScript declaration files from your translation JavaScript objects, keeping autocompletion and strict types aligned with your source.
+`@intl-t/utils` bundles small utilities used across intl-t, including locale negotiation, URL/path matching, format helpers, and inject/resolver helpers for working with your translation data and runtime.
 
 [**→ Check out the Intl-T Website**](https://intl-t.dev)
 

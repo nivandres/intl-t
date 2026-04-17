@@ -7,7 +7,7 @@
 [![React](https://img.shields.io/badge/-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
 [![Next.js](https://img.shields.io/badge/-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Discord Chat](https://img.shields.io/discord/1063280542759526400?label=Chat&logo=discord&color=blue)](https://discord.gg/5EbCXKpdyw)
-[![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6)
+[![Donate via Github Sponsors](https://img.shields.io/github/sponsors/nivandres?label=Sponsors&color=hotpink&logo=github)](https://github.com/sponsors/nivandres)
 [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)
 
 [![Banner](https://raw.githubusercontent.com/nivandres/intl-t/main/assets/banner.webp)](https://intl-t.dev/)
@@ -126,6 +126,6 @@ export default function Component() {
 
 ## Support
 
-If you find this project useful, [consider supporting its development ☕](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6) or [leave a ⭐ on the Github Repo.](https://github.com/nivandres/intl-t) Also, if you need direct support or help, please don't hesitate to contact me.
+If you find this project useful, [consider supporting its development ☕](https://github.com/sponsors/nivandres) or [leave a ⭐ on the Github Repo.](https://github.com/nivandres/intl-t) Also, if you need direct support or help, please don't hesitate to contact me.
 
-[![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal)](https://www.paypal.com/ncp/payment/PMH5ASCL7J8B6) [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)
+[![Donate via Github Sponsors](https://img.shields.io/github/sponsors/nivandres?label=Sponsors&color=hotpink&logo=github)](https://github.com/sponsors/nivandres) [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)
