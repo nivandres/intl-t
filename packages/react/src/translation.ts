@@ -1,7 +1,6 @@
 import { TranslationNode } from "@intl-t/core";
-import { injectVariables as iv } from "@intl-t/format";
-import { hydration } from "@intl-t/core/global";
-import { getClientLocale } from "@intl-t/react/client";
+import { injectVariables as iv } from "@intl-t/format/inject";
+import { getLocale, setLocale } from "@intl-t/react/client";
 import { TranslationProvider, useTranslation } from "@intl-t/react/context";
 import { injectReactChunks as ir } from "@intl-t/react/inject";
 import "@intl-t/react/patch";
@@ -12,7 +11,8 @@ export const injectVariables = ((str: string, ...args: any[]) => ir(iv(str, ...a
 TranslationNode.injectVariables = injectVariables;
 TranslationNode.Provider = TranslationProvider as TranslationFC;
 TranslationNode.hook = useTranslation;
-!hydration && (TranslationNode.getLocale = getClientLocale);
+TranslationNode.setLocale = setLocale;
+TranslationNode.getLocale = getLocale;
 
 export { createTranslation, Translation, TranslationNode } from "@intl-t/core";
 export default TranslationNode;

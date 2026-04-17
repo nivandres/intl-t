@@ -1,5 +1,5 @@
 import { TranslationNode } from "@intl-t/core";
-import type { GlobalTranslation } from "@intl-t/core/global";
+import type { Translation } from "@intl-t/core/types";
 import type { isArray, SearchWays, ArrayToString } from "@intl-t/core/types";
 import { TranslationProvider as TranslationClientProvider, TranslationProviderProps } from "@intl-t/react";
 import { Suspense, ReactNode } from "react";
@@ -58,8 +58,8 @@ function hook(...args: any[]) {
 }
 
 // @ts-ignore global translation
-export declare const getTranslation: GlobalTranslation;
+export declare const getTranslation: Translation;
 // @ts-ignore global translation
-export declare const getTranslations: GlobalTranslation;
+export declare const getTranslations: Translation;
 // @ts-ignore global translation
 export { hook as getTranslation, hook as getTranslations };

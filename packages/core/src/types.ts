@@ -1,18 +1,15 @@
 import type { Chunk } from "@intl-t/core/chunk";
-import type { State, GlobalPathSeparator } from "@intl-t/core/global";
-import type { TranslationNode, invalidKeys } from "@intl-t/core/translation";
+import type { State } from "@intl-t/core/state";
+import type { TranslationNode, InvalidKey } from "@intl-t/core/translation";
 import type { Locale } from "@intl-t/locales";
 
-export type { TranslationNode, Locale, State, Chunk };
-export * from "@intl-t/core/chunk";
+export type { TranslationNode, Locale, State };
 
 export type Base = string | number;
 export type Key = Base | symbol;
 export type Value = Base | null | undefined | boolean | Base[] | Date | Chunk;
 export type Values = Record<Key, Value>;
 export type Stringable = string | number | boolean | null | undefined;
-
-export type InvalidKey = (typeof invalidKeys)[number];
 
 export type Node =
   | Base
@@ -91,10 +88,8 @@ export type SearchWays<N, A extends any[] = [], C extends keyof N = Children<N>>
       [K in C]: SearchWays<N[K], [...A, K]> | [...A, K];
     }>;
 
-export type KeysFromNode<N, S extends string = GlobalPathSeparator> = ArrayToString<isArray<SearchWays<N>>, S>;
-export type TranslationKeys<T, S extends string = GlobalPathSeparator> = T extends { node: infer N }
-  ? KeysFromNode<N, S>
-  : KeysFromNode<T, S>;
+export type KeysFromNode<N, S extends string> = ArrayToString<isArray<SearchWays<N>>, S>;
+export type TranslationKeys<T, S extends string> = T extends { node: infer N } ? KeysFromNode<N, S> : KeysFromNode<T, S>;
 
 export type FollowWay<N, W extends Key[]> = W extends [infer F, ...infer R extends Key[]]
   ? F extends keyof N
@@ -154,7 +149,7 @@ export type { Translation as TranslationType };
 export interface TranslationSettings<
   AllowedLocale extends Locale = string,
   MainLocale extends AllowedLocale = AllowedLocale,
-  Tree = unknown,
+  Tree = any,
   Variables extends Values = Values,
   PathSeparator extends string = string,
   N = Node,

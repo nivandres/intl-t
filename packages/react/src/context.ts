@@ -1,10 +1,9 @@
 "use client";
 
-import type { GlobalTranslation } from "@intl-t/core/global";
-import type { isArray, SearchWays, ArrayToString, Locale, TranslationProps as TP, Content } from "@intl-t/core/types";
+import type { isArray, SearchWays, ArrayToString, Locale, Content, Translation } from "@intl-t/core/types";
 import { useLocale } from "@intl-t/react/hooks";
 import { TranslationNode } from "@intl-t/react/translation";
-import type { ReactState, ReactSetState, ReactNode } from "@intl-t/react/types";
+import type { ReactState, ReactSetState, ReactNode, TranslationProps as TP } from "@intl-t/react/types";
 import { createElement, createContext, useContext, useMemo, useState, useEffect } from "react";
 
 export type TranslationContext = null | {
@@ -51,16 +50,16 @@ export function TranslationProvider<
   if (locale || onLocaleChange) context.localeState = [locale!, onLocaleChange!];
   else ((context.localeState ??= useLocale.call(t, locale)), (locale = context.localeState?.[0]));
   children &&= createElement(TranslationContext, { value: context }, children as any);
-  if (!t?.settings) return ((TranslationNode.context = { locale, source }), children);
+  if (!t?.settings) return (Object.assign(TranslationNode, { locale, source }), children);
   t.settings.locale = locale!;
-  useMemo(() => Object.assign(t.settings, settings, state), [settings, t, state]);
+  useMemo(() => Object.assign(t.settings, settings, state), [settings, t as any, state]);
   t = (t as any).current(path);
   useMemo(() => {
     source && t.setSource(source);
-  }, [t, source]);
+  }, [t as any, source]);
   useEffect(() => {
     t.then?.(() => context.reRender?.(p => p + 1));
-  }, [t, t.currentLocale]);
+  }, [t as any, t.currentLocale]);
   variables && t.set(variables);
   return children || t.base;
 }
@@ -81,9 +80,9 @@ export function hook(...args: any[]) {
   return t(...args);
 }
 
-// @ts-ignore global translation
-export declare const useTranslation: GlobalTranslation;
-// @ts-ignore global translation
-export declare const useTranslations: GlobalTranslation;
-// @ts-ignore global translation
+// @ts-ignore translation
+export declare const useTranslation: Translation;
+// @ts-ignore translation
+export declare const useTranslations: Translation;
+// @ts-ignore translation
 export { hook as useTranslation, hook as useTranslations };

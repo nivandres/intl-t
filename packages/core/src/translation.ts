@@ -1,6 +1,6 @@
 import { TranslationNodeFC, TranslationFC } from "@intl-t/core/chunk";
 import { getLocales } from "@intl-t/core/dynamic";
-import { type GlobalTranslation, hydration, isClient, enabledEval, disabledEval } from "@intl-t/core/global";
+import { hydration, isClient, enabledEval } from "@intl-t/core/state";
 import type {
   Node,
   Values,
@@ -18,15 +18,16 @@ import type {
   Join,
   Override,
 } from "@intl-t/core/types";
-import { injectVariables } from "@intl-t/format";
+import { injectVariables } from "@intl-t/format/inject";
 import type { Locale } from "@intl-t/locales";
 
 export type { Locale };
 
-export let TranslationBase = (enabledEval ? Function : Object) as FunctionConstructor;
+let isCallable = enabledEval && process.env.INTL_T_CALLABLE !== "false";
 
-abstract class TranslationProxy extends TranslationBase {
+abstract class TranslationProxy extends (isCallable ? Function : Object) {
   public name = "Translation";
+  protected __callable__: boolean = isCallable;
 
   constructor(protected __call__: Function) {
     super();
@@ -76,12 +77,13 @@ export class TranslationNode<
   key: LastKey<R>;
   children: Children<N>[];
   private __node__: any;
+  protected __preload__: boolean | null = null;
 
   global: TranslationType<S, S["tree"][L], S["variables"], L>;
   g: typeof this.global;
-  private parent: TranslationNode;
+  parent: TranslationNode;
 
-  use = enabledEval ? this : (this.call as never);
+  use = this.__callable__ ? this : (this.call as never);
   get = this.use;
 
   static Node = TranslationNode;
@@ -90,25 +92,26 @@ export class TranslationNode<
   static injectVariables = injectVariables;
   static getChildren = getChildren;
   static Proxy = TranslationProxy;
-  static context = null as any;
   static t = null as any;
-  static setLocale = undefined;
+  static locale: Locale;
+  static source: Node;
+  static setLocale: (locale: Locale) => void;
 
   static getLocale = function (this: any) {
     return this.defaultLocale;
   };
 
   static Provider = function (this: any, ...args: any[]) {
-    return this[this.settings.locale](...args);
+    return this.current(...args);
   } as TranslationFC;
 
-  protected T = new Proxy(enabledEval ? (this as any) : this.call.bind(this), {
+  protected T = new Proxy(this.__callable__ ? (this as any) : this.call.bind(this), {
     apply(target, _, args) {
-      if (disabledEval) target = target();
+      if (!this.__callable__) target = target();
       return TranslationNode.Provider.apply(target, args as any);
     },
     get(target, p, receiver) {
-      if (disabledEval) target = target();
+      if (!this.__callable__) target = target();
       const t = Reflect.get(target, p, receiver) as any;
       return t?.T || t;
     },
@@ -125,13 +128,13 @@ export class TranslationNode<
     return this.current(...args);
   };
 
-  protected hook = new Proxy(enabledEval ? (this as any) : this.call.bind(this), {
+  protected hook = new Proxy(this.__callable__ ? (this as any) : this.call.bind(this), {
     apply(target, _, argArray) {
-      if (disabledEval) target = target();
+      if (!this.__callable__) target = target();
       return TranslationNode.hook.apply(target, argArray);
     },
     get(target, p, receiver) {
-      if (disabledEval) target = target();
+      if (!this.__callable__) target = target();
       const t = Reflect.get(target, p, receiver) as any;
       return t?.hook || t;
     },
@@ -188,7 +191,7 @@ export class TranslationNode<
           get() {
             Object.defineProperty(t, locale, { value: t, configurable: true, enumerable: false });
             if (settings.preload && t == settings.t && t.hasOwnProperty("then")) delete settings.t.then;
-            return (t.node === node && t.getNode(t[Symbol.for("preload")] ?? true), t);
+            return (t.node === node && t.getNode(t.__preload__ ?? true), t);
           },
         });
       }
@@ -204,7 +207,7 @@ export class TranslationNode<
                   variables,
                   parent,
                   node: (settings.locales as any)[locale],
-                  preload: t[Symbol.for("preload")] ?? true,
+                  preload: t.__preload__ ?? true,
                 });
           Object.defineProperty(t, locale, { value, configurable: true, enumerable: false });
           return value;
@@ -317,14 +320,12 @@ export class TranslationNode<
   getChildren() {
     return getChildren(this.node);
   }
-  getLocale() {
-    return this.settings.locale as S["allowedLocale"];
-  }
   setLocale<LL extends S["allowedLocale"] = L>(
     locale: LL | (string & {}) | ((p?: L) => LL) = this.settings.locale,
   ): TranslationType<S, FollowWay<S["tree"][LL], R>, V, LL, R> {
     if (typeof locale === "function") locale = locale(this.currentLocale as L);
-    this.settings.setLocale(locale) || (this.settings.locale = locale);
+    this.settings.setLocale(locale);
+    this.settings.locale = locale;
     return this.current as any;
   }
   get values(): Variables<N, V> {
@@ -337,10 +338,10 @@ export class TranslationNode<
     return this.settings.locale as S["allowedLocale"];
   }
   get current(): TranslationType<S, FollowWay<S["tree"][S["allowedLocale"]], R>, V, L, R> {
-    this[Symbol.for("preload")] = false;
+    this.__preload__ = false;
     const t = this[this.currentLocale as any] || this;
-    this[Symbol.for("preload")] = null;
-    if (disabledEval)
+    this.__preload__ = null;
+    if (!this.__callable__)
       return new Proxy(t.call, {
         get(_target, p, receiver) {
           return Reflect.get(t, p, receiver);
@@ -368,9 +369,6 @@ export class TranslationNode<
   }
   toString(): Content<N> & string {
     return String(this.base) as any;
-  }
-  get raw() {
-    return this.toString();
   }
   get promise(): Promise<this> | null {
     return this.then ? new Promise((r, c) => this.then?.(r).catch(c)) : null;
@@ -423,17 +421,16 @@ export function createTranslationSettings<
   settings.mainLocale ??= settings.defaultLocale ??= settings.allowedLocales[0] as M;
   settings.defaultLocale ??= settings.mainLocale;
   settings.allowedLocale ??= settings.mainLocale;
-  settings.currentLocale ??= TranslationNode.context?.locale || settings.defaultLocale;
+  settings.currentLocale ??= (TranslationNode.locale as L) || settings.defaultLocale;
   settings.locale ??= settings.currentLocale;
-  settings.setLocale ??= TranslationNode.setLocale;
+  settings.setLocale ??= TranslationNode.setLocale || setLocale.bind(settings);
   settings.tree ??= settings.locales as any;
   settings.variables ??= {} as unknown as V;
   settings.hydration ??= hydration;
   settings.ps ??= settings.pathSeparator ??= "." as PS;
-  if (TranslationNode.context?.source) (settings.locales as any)[TranslationNode.context.locale] = TranslationNode.context.source;
+  if (TranslationNode.source) (settings.locales as any)[TranslationNode.locale] = TranslationNode.source;
   const gls = settings.getLocale as any;
   settings.getLocale = l => ((settings.locales as any)[l] ??= gls?.(l, (settings.hydrate ??= true)));
-  settings.setLocale ??= TranslationNode.setLocale || (l => (settings.locale = l as L));
   return (settings.settings = settings as S);
 }
 
@@ -450,6 +447,7 @@ export function createTranslation<
 }
 
 export const invalidKeys = ["base", "values", "children", "parent", "node", "path", "settings", "key", "default", "catch", "then"] as const;
+export type InvalidKey = (typeof invalidKeys)[number];
 
 export function getChildren<N>(node: N) {
   return ((node as any)?.children ||
@@ -459,7 +457,13 @@ export function getChildren<N>(node: N) {
 }
 
 export function getT() {
-  return TranslationNode.t as GlobalTranslation;
+  return TranslationNode.t;
 }
-export const getTranslation = ((...args: any[]) => getT().current(...args)) as GlobalTranslation;
+export const getTranslation = (...args: any[]) => getT().current(...args);
 export default TranslationNode;
+
+export function setLocale<L extends Locale>(locale: L): L {
+  if (this?.settings) this.settings.locale = locale;
+  // this?.t?.current?.then?.();
+  return locale;
+}
