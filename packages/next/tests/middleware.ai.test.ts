@@ -7,7 +7,14 @@ import { createMiddleware, detect, middlewareConfig, middleware } from "../src/m
 import { createGenerateStaticParams, generateStaticParams } from "../src/params";
 
 function createRequest(pathname: string, headers?: Record<string, string>) {
-  return new NextRequest(`https://intl-t.dev${pathname}`, { headers });
+  const normalizedHeaders = new Headers();
+
+  for (const [key, value] of Object.entries(headers || {})) {
+    normalizedHeaders.set(key, value);
+    if (key.toLowerCase() === "cookie") normalizedHeaders.set("Cookie", value);
+  }
+
+  return new NextRequest(`https://intl-t.dev${pathname}`, { headers: normalizedHeaders });
 }
 
 describe("next params", () => {
@@ -333,7 +340,7 @@ describe("next middleware", () => {
       return response;
     });
 
-    const responsePromise = composed(createRequest("/docs"));
+    const responsePromise = composed(createRequest("/docs"), void 0 as any, void 0 as any);
 
     return Promise.resolve(responsePromise).then(response => {
       expect(response).toBeDefined();
