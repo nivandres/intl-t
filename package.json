@@ -82,11 +82,10 @@
     "@intl-t/core": "workspace:*",
     "@intl-t/declarations": "workspace:*",
     "@intl-t/format": "workspace:*",
-    "@intl-t/global": "workspace:*",
     "@intl-t/locales": "workspace:*",
     "@intl-t/next": "workspace:*",
     "@intl-t/react": "workspace:*",
-    "@intl-t/tools": "workspace:*"
+    "@intl-t/utils": "workspace:*"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",

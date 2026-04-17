@@ -1,4 +1,4 @@
-import { Locale } from "@intl-t/locales";
+import type { Locale } from "@intl-t/format/types";
 
 export type Intl = typeof Intl;
 export type TimeZone = Intl.DateTimeFormatOptions["timeZone"];
@@ -20,7 +20,6 @@ export interface State<L extends Locale = Locale> {
   isClient: boolean;
   hydration: boolean;
   enabledEval: boolean;
-  disabledEval: boolean;
   behavior: "function" | "object" | "flexible";
   localeOptions: Intl.ResolvedDateTimeFormatOptions;
   formatOptions?: FormatOptions;
@@ -30,7 +29,6 @@ export interface State<L extends Locale = Locale> {
 export const isClient = "window" in globalThis;
 export const hydration = "process" in globalThis;
 export const enabledEval = "eval" in globalThis;
-export const disabledEval = !enabledEval;
 
 let localeOptions: Intl.ResolvedDateTimeFormatOptions;
 let locale: Locale;
@@ -40,7 +38,6 @@ export const state: State = {
   isClient,
   hydration,
   enabledEval,
-  disabledEval,
   behavior: "function",
   get localeOptions() {
     return (localeOptions ??= Intl.DateTimeFormat().resolvedOptions());
@@ -49,7 +46,7 @@ export const state: State = {
     return this.localeOptions.timeZone;
   },
   get locale() {
-    return (locale ??= isClient ? (navigator["language" as keyof typeof navigator] as string)?.split(",")[0] : this.localeOptions.locale);
+    return (locale ??= isClient ? navigator.language.split(",")[0] : this.localeOptions.locale);
   },
   get now() {
     return (now ??= new Date());

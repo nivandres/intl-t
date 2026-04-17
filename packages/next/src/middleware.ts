@@ -1,7 +1,7 @@
 import type { Locale } from "@intl-t/locales";
-import { match } from "@intl-t/tools/match";
-import { negotiator } from "@intl-t/tools/negotiator";
-import { ResolveConfig } from "@intl-t/tools/resolvers";
+import { match } from "@intl-t/utils/match";
+import { negotiator } from "@intl-t/utils/negotiator";
+import { ResolveConfig } from "@intl-t/utils/resolvers";
 import { I18NDomains } from "next/dist/server/config-shared";
 import { MiddlewareConfig as MG, NextFetchEvent, NextRequest, NextResponse } from "next/server";
 import { LOCALE_HEADERS_KEY, PATH_HEADERS_KEY } from "./headers";

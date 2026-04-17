@@ -1,5 +1,5 @@
 import { inject } from "@intl-t/format/inject";
-import { type State, state } from "@intl-t/global";
+import { type State, state } from "@intl-t/format/state";
 
 export function list(value: string[] = [], options?: Intl.ListFormatOptions, { locale = state.locale }: Partial<State> = this) {
   return new Intl.ListFormat(locale, options).format(value);

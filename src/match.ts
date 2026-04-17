@@ -1,1 +1,1 @@
-export * from "@intl-t/tools/match";
+export * from "@intl-t/utils/match";

@@ -60,9 +60,8 @@
   },
   "dependencies": {
     "@intl-t/core": "workspace:*",
-    "@intl-t/global": "workspace:*",
     "@intl-t/react": "workspace:*",
-    "@intl-t/tools": "workspace:*"
+    "@intl-t/utils": "workspace:*"
   },
   "peerDependencies": {
     "next": ">=14",

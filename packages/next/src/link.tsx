@@ -1,5 +1,5 @@
 import type { Locale } from "@intl-t/locales";
-import { ResolveHrefConfig, resolveHref } from "@intl-t/tools/resolvers";
+import { ResolveHrefConfig, resolveHref } from "@intl-t/utils/resolvers";
 import { default as NL, LinkProps as LP } from "next/link";
 import type { FC, ReactNode, ComponentProps } from "react";
 import { LC } from "./link_client";

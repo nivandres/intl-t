@@ -1,6 +1,6 @@
 {
-  "name": "@intl-t/global",
-  "description": "Intl-T Global State",
+  "name": "@intl-t/utils",
+  "description": "i18n utilities",
   "version": "1.0.6",
   "type": "module",
   "license": "MIT",
@@ -8,7 +8,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nivandres/intl-t.git",
-    "directory": "packages/global"
+    "directory": "packages/utils"
   },
   "author": {
     "name": "Ivan Vargas",
@@ -25,12 +25,26 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
     }
   },
+  "keywords": [
+    "intl",
+    "formatter"
+  ],
   "scripts": {
     "build": "tsc -b",
+    "test": "bun test",
     "typecheck": "tsc --noEmit",
     "bump": "bun pm version",
     "release": "bun publish --access public"
+  },
+  "dependencies": {
+    "@intl-t/declarations": "workspace:*",
+    "@intl-t/format": "workspace:*",
+    "@intl-t/locales": "workspace:*"
   }
 }

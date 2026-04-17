@@ -2,7 +2,7 @@
 
 import type { Locale } from "@intl-t/locales";
 import { useLocale } from "@intl-t/react/hooks";
-import { resolvePath, resolveHref, ResolveConfig } from "@intl-t/tools/resolvers";
+import { resolvePath, resolveHref, ResolveConfig } from "@intl-t/utils/resolvers";
 import { useRouter as ur, usePathname as up } from "next/navigation";
 
 export interface Options {

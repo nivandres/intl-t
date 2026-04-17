@@ -1,6 +1,6 @@
-import { state } from "@intl-t/global";
+import { state } from "@intl-t/format/state";
 import type { Locale } from "@intl-t/locales";
-import { match } from "@intl-t/tools/match";
+import { match } from "@intl-t/utils/match";
 
 type Awaitable<T> = (T & Promise<T>) | T;
 

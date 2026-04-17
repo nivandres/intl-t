@@ -25,7 +25,7 @@ And then you can access it from your translations.
 
 ```tsx
 import { Translation, t } from "@/i18n/translation";
-import { match } from "intl-t/tools";
+import { match } from "intl-t/utils";
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -99,7 +99,7 @@ For example, you might have:
     </Folder>
 
     <Folder name="docs">
-    
+
       <Folder name="i18n" defaultOpen>
         <Folder name="messages" />
         <File name="translation.ts" />

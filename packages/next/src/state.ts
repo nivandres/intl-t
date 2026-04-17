@@ -5,7 +5,7 @@ import { getRequestLocale, getRequestPathname } from "./request";
 import { setRequestLocale } from "./request";
 import { useLocale, usePathname } from "./router";
 
-export { isClient } from "@intl-t/global";
+export { isClient } from "@intl-t/core/global";
 export const isRSC = !("useEffect" in React);
 
 export function getLocale<L extends Locale>(preventDynamic: true, defaultLocale?: L): L | undefined;

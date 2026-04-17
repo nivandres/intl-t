@@ -50,7 +50,6 @@
   },
   "dependencies": {
     "@intl-t/format": "workspace:*",
-    "@intl-t/global": "workspace:*",
     "@intl-t/locales": "workspace:*"
   },
   "peerDependencies": {

@@ -1,6 +1,8 @@
 import type { Translation } from "@intl-t/core/types";
+import { enabledEval } from "@intl-t/core/state";
 
-export * from "@intl-t/global";
+export * from "@intl-t/core/state";
+export const disabledEval = !enabledEval;
 
 export default interface Global {
   Translation: Translation;

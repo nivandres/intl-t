@@ -1,6 +1,6 @@
 import { format } from "@intl-t/format/formatters";
 import type { Values, Content, Variables } from "@intl-t/format/types";
-import { state as globalState, type State } from "@intl-t/global";
+import { state as globalState, type State } from "@intl-t/format/state";
 
 export const ev = (expr: string, state: Partial<State> = globalState) => {
   if ((state.enabledEval ??= globalState.enabledEval) === false) return undefined as never;

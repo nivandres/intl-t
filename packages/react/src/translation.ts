@@ -1,6 +1,6 @@
 import { TranslationNode } from "@intl-t/core";
 import { injectVariables as iv } from "@intl-t/format";
-import { hydration } from "@intl-t/global";
+import { hydration } from "@intl-t/core/global";
 import { getClientLocale } from "@intl-t/react/client";
 import { TranslationProvider, useTranslation } from "@intl-t/react/context";
 import { injectReactChunks as ir } from "@intl-t/react/inject";

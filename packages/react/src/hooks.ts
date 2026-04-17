@@ -1,6 +1,6 @@
 "use client";
 
-import { hydration as h } from "@intl-t/global";
+import { hydration as h } from "@intl-t/core/global";
 import { Locale } from "@intl-t/locales";
 import { getClientLocale, setClientLocale, LOCALE_CLIENT_KEY } from "@intl-t/react/client";
 import { TranslationContext } from "@intl-t/react/context";

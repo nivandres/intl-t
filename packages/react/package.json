@@ -56,8 +56,8 @@
   },
   "dependencies": {
     "@intl-t/core": "workspace:*",
-    "@intl-t/global": "workspace:*",
-    "@intl-t/format": "workspace:*"
+    "@intl-t/format": "workspace:*",
+    "@intl-t/utils": "workspace:*"
   },
   "devDependencies": {
     "@types/react-dom": "^19",

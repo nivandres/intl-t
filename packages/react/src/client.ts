@@ -1,5 +1,5 @@
-import { state } from "@intl-t/global";
-import { resolveLocale } from "@intl-t/tools/resolvers";
+import { state } from "@intl-t/core/global";
+import { resolveLocale } from "@intl-t/utils/resolvers";
 
 export const LOCALE_CLIENT_KEY = "LOCALE";
 

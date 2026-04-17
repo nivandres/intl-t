@@ -1,1 +1,1 @@
-export * from "@intl-t/tools/resolvers";
+export * from "@intl-t/utils/resolvers";

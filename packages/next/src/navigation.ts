@@ -1,6 +1,6 @@
 import type { TranslationSettings } from "@intl-t/core/types";
 import type { Locale } from "@intl-t/locales";
-import { ResolveConfig, resolveHref, resolveLocale, resolvePath } from "@intl-t/tools/resolvers";
+import { ResolveConfig, resolveHref, resolveLocale, resolvePath } from "@intl-t/utils/resolvers";
 import { redirect as r, permanentRedirect as pr, RedirectType } from "next/navigation";
 import type { FC } from "react";
 import { Link, LinkConfig, NL } from "./link";
@@ -9,9 +9,9 @@ import { createStaticParams, StaticParamsConfig } from "./params";
 import { RouterConfig, useRouter, useLocale, usePathname } from "./router";
 import { getLocale, getPathname, setLocale } from "./state";
 
-export * from "@intl-t/tools/match";
-export * from "@intl-t/tools/negotiator";
-export * from "@intl-t/tools/resolvers";
+export * from "@intl-t/utils/match";
+export * from "@intl-t/utils/negotiator";
+export * from "@intl-t/utils/resolvers";
 export * from "./link";
 export * from "./middleware";
 export * from "./params";
