@@ -10,17 +10,17 @@ argument-hint: "What are you migrating from, and what behavior or compatibility 
 
 - Public docs: https://intl-t.dev/docs
 - Full text guide for AI and deep lookup: https://intl-t.dev/llms-full.txt
-- Repo migration guide: [docs/migration.mdx](../../docs/migration.mdx)
-- Repo Next.js guide: [docs/next.mdx](../../docs/next.mdx)
-- Repo node logic and syntax: [docs/node.mdx](../../docs/node.mdx)
-- Repo TypeScript guide: [docs/typescript.mdx](../../docs/typescript.mdx)
-- Repo examples guide: [docs/examples.mdx](../../docs/examples.mdx)
-- Repo Next example: [examples/with-next-app](../../examples/with-next-app)
+- Single-page AI fetches: use https://intl-t.dev/docs/<slug>.mdx to fetch the LLM-friendly text version of a specific doc page.
+- Migration guide: https://intl-t.dev/docs/migration
+- Next.js guide: https://intl-t.dev/docs/next
+- Node guide: https://intl-t.dev/docs/node
+- TypeScript guide: https://intl-t.dev/docs/typescript
+- Examples guide: https://intl-t.dev/docs/examples
 
 ## When to Use
 
 - Moving from another i18n library to intl-t
-- Upgrading an older intl-t setup toward the current repo structure
+- Upgrading an older intl-t setup toward the current public APIs
 - Converting flat locale maps into intl-t tree-shaped locale files
 - Preserving routing, server rendering, or client locale behavior while changing translation infrastructure
 - Introducing TypeScript declarations or compatibility aliases during a migration
@@ -33,10 +33,11 @@ argument-hint: "What are you migrating from, and what behavior or compatibility 
    - Server or client loading strategy
    - Routing and locale URL behavior
    - Existing compatibility constraints
-2. Start with the canonical docs, then ground in the repo.
+2. Start with the canonical docs.
    - Use https://intl-t.dev/docs for the public migration and integration model.
    - Use https://intl-t.dev/llms-full.txt when you need full-text lookup across concepts.
-   - Cross-check with [docs/migration.mdx](../../docs/migration.mdx), [docs/next.mdx](../../docs/next.mdx), and the example app.
+   - Use https://intl-t.dev/docs/<slug>.mdx when you want the AI-friendly text version of one specific page.
+   - Cross-check the migration, Next.js, node, and TypeScript guides before proposing compatibility work.
 3. Normalize translations into intl-t’s tree model.
    - Convert flat keys into nested objects when needed.
    - Keep every locale file structurally identical.
@@ -61,28 +62,24 @@ argument-hint: "What are you migrating from, and what behavior or compatibility 
    - Route behavior matches the intended canonical URL policy.
    - Variable interpolation, fallbacks, and pluralization match expected output.
    - Imports use current package names.
-10. Update docs if the migration changes public usage or contributor guidance.
-
-- Update `docs/` when the new public integration shape changes examples or import paths.
-- Update [docs/contributing.mdx](../../docs/contributing.mdx) if the migration changes broader roadmap or contributor guidance.
+10. Update public-facing documentation when the migration changes usage, imports, or examples.
 
 ## Response Rules
 
 - Focus on migration order and risk reduction, not just final code snippets.
 - Preserve behavior intentionally, not accidentally.
 - Keep compatibility advice explicit so the user can migrate incrementally.
-- Use the current repo naming and current public docs, not older package names or older import paths.
-- When the migration question turns into general usage or integration design, continue with the repo’s consolidated usage skill flow.
+- Use current public package names and current public docs, not older names or stale import paths.
+- When the migration question turns into general usage or integration design, continue with the intl-t usage skill flow.
 
 ## Primary Sources
 
 - Public docs: https://intl-t.dev/docs
 - Full text guide: https://intl-t.dev/llms-full.txt
-- [docs/migration.mdx](../../docs/migration.mdx)
-- [docs/next.mdx](../../docs/next.mdx)
-- [docs/node.mdx](../../docs/node.mdx)
-- [docs/typescript.mdx](../../docs/typescript.mdx)
-- [docs/examples.mdx](../../docs/examples.mdx)
-- [examples/with-next-app](../../examples/with-next-app)
-- [AGENTS.md](../../AGENTS.md)
-- [CONTRIBUTING.md](../../CONTRIBUTING.md)
+- Single-page AI fetch pattern: https://intl-t.dev/docs/<slug>.mdx
+- Migration guide: https://intl-t.dev/docs/migration
+- Next.js guide: https://intl-t.dev/docs/next
+- Node guide: https://intl-t.dev/docs/node
+- TypeScript guide: https://intl-t.dev/docs/typescript
+- Examples guide: https://intl-t.dev/docs/examples
+- Packages: `intl-t`, `intl-t/react`, `intl-t/next`, `intl-t/navigation`, `intl-t/utils`
