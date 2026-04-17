@@ -1,16 +1,21 @@
-// import { getRootParamsLocale } from "./root";
 import type { Locale } from "@intl-t/locales";
 import { getCachedRequestLocale, setCachedRequestLocale } from "./cache";
-import { getHeadersRequestLocale, getHeadersRequestPathname } from "./headers";
+import { getCookieLocale } from "./cookies";
+import { getHeadersLocale } from "./headers";
 
-export { setCachedRequestLocale as setRequestLocale } from "./cache";
+export { getHeadersPathname as getRequestPathname } from "./headers";
+export { getHeadersPathname as getPathname } from "./headers";
+
+export function getDynamicRequestLocale() {
+  return getHeadersLocale.call(this).then(locale => locale || getCookieLocale.call(this));
+}
 
 export function getRequestLocale<L extends Locale>(preventDynamic: true): L | undefined;
 export function getRequestLocale<L extends Locale>(preventDynamic?: boolean): Promise<L> | L | undefined;
-export function getRequestLocale(preventDynamic: boolean = this?.settings?.preventDynamic || false) {
-  return (
-    getCachedRequestLocale.call(this) || (!preventDynamic && getHeadersRequestLocale.call(this).then(setCachedRequestLocale)) || undefined
-  );
+export function getRequestLocale(preventDynamic: boolean = this?.settings?.preventDynamic ?? false) {
+  return getCachedRequestLocale.call(this) || (!preventDynamic && getDynamicRequestLocale.call(this));
 }
 
-export const getRequestPathname = getHeadersRequestPathname;
+export function setRequestLocale(locale: Locale) {
+  return setCachedRequestLocale.call(this, locale);
+}

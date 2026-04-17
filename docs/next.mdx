@@ -126,7 +126,7 @@ When creating navigation, you can configure the routing structure using resolver
 interface Config {
   pathPrefix?: "always" | "default" | "optional" | "hidden";
   pathBase?: "always-default" | "detect-default" | "detect-latest";
-  strategy?: "domain" | "param" | "headers";
+  strategy?: "param" | "request";
   redirectPath?: string;
 }
 ```
@@ -136,16 +136,19 @@ interface Config {
   - `"default"`: The default locale is hidden in the path, while other locales are shown.
   - `"optional"`: The locale prefix can be present or absent, depending on the accessed URL.
   - `"hidden"`: The locale is never shown in the path prefix.  
-    _Default is `"default"`._
+    _Default is `"default"` for `strategy: "param"` and `"hidden"` for `strategy: "request"`._
 
 - **`pathBase`**: Determines the behavior when no locale is specified in the path.
   - `"always-default"`: The path base `/` always routes to the default locale.
   - `"detect-default"`: On the first visit, the user's locale is detected and redirected; subsequent visits at path base go to the default locale.
   - `"detect-latest"`: On the first visit, the user's locale is detected and redirected; subsequent visits at path base go to the most recently used locale.  
-    _Default is `"detect-default"`._
+    _Default is `"detect-default"` when the effective `pathPrefix` is visible and `"detect-latest"` when it is `"hidden"`._
 
 - **`strategy`**: Specifies how to match the locale and path.
-  The default is to use the `[locale]` param with Next.js, but you can determine it, including the parameter name.
+  - `"param"`: Uses the locale path segment, typically the Next.js `[locale]` param. This is the static-friendly mode.
+  - `"request"`: Resolves the locale dynamically from request state, such as custom detection, headers, cookies, or domain-derived logic. Middleware stores the resolved locale in both headers and cookies for later reads.
+
+  `"request"` does not require a `[locale]` route segment. Its default canonical URL is unprefixed, but you can still expose locale prefixes by setting `pathPrefix`.
 
 - **`redirectPath`**: Sets a custom path for redirecting users to the appropriate locale.  
   For example, if you are sending an email and don't know the user's locale, you can use a prefix path like `/r` to redirect to the default locale, or set it to any path you prefer.
@@ -253,7 +256,7 @@ If you want to use your own strategy to load locales dynamically, you can and av
 When creating navigation, you can configure its strategy to load locales always dinamically and don't route to the locale path with param. (Also it can be shown or hidden as you want configuring the `pathPrefix` and `pathBase` options)
 
 ```tsx
-createNavigation({ allowedLocales, strategy: "headers" });
+createNavigation({ allowedLocales, strategy: "request" });
 ```
 
 Then is no more needed to wrap your application routes into `[locale]` param.

@@ -6,10 +6,14 @@ export interface StaticParamsConfig<L extends Locale = Locale, S extends string 
 }
 
 export function createStaticParams<L extends Locale, S extends string>(config: StaticParamsConfig<L, S>) {
+  return generateStaticParams.call(config);
+}
+
+export function createGenerateStaticParams<L extends Locale, S extends string>(config: StaticParamsConfig<L, S>) {
   return generateStaticParams.bind(config);
 }
 
 export function generateStaticParams<L extends Locale, S extends string>(this: StaticParamsConfig<L, S>) {
-  const { locales = [], param } = this;
-  return locales.map(locale => ({ [param as string]: locale })) satisfies any[];
+  const { locales = [], param = "locale" } = this;
+  return locales.map(locale => ({ [param]: locale })) satisfies any[];
 }

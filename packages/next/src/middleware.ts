@@ -4,16 +4,15 @@ import { negotiator } from "@intl-t/utils/negotiator";
 import { ResolveConfig } from "@intl-t/utils/resolvers";
 import { I18NDomains } from "next/dist/server/config-shared";
 import { MiddlewareConfig as MG, NextFetchEvent, NextRequest, NextResponse } from "next/server";
+import { LOCALE_COOKIE_KEY } from "./cookies";
 import { LOCALE_HEADERS_KEY, PATH_HEADERS_KEY } from "./headers";
-
-export const LOCALE_COOKIE_KEY = "locale";
 
 export type Middleware = (req: NextRequest, ev?: NextFetchEvent, res?: NextResponse) => NextResponse | Promise<NextResponse> | void;
 export type MiddlewareFactory = (middleware: Middleware) => Middleware;
 
 export interface MiddlewareConfig<L extends Locale> extends MG, ResolveConfig<L> {
   pathBase?: "always-default" | "detect-default" | "detect-latest" | "always-detect";
-  strategy?: "domain" | "param" | "headers";
+  strategy?: "param" | "request";
   detect?: false | string | string[] | ((req: NextRequest) => string[] | string);
   domains?: I18NDomains;
   config?: MG;
@@ -25,6 +24,8 @@ export interface MiddlewareConfig<L extends Locale> extends MG, ResolveConfig<L>
 export const middlewareConfig: MG = {
   matcher: ["/((?!api|.*\\..*|_next).*)"],
 };
+
+export { middlewareConfig as config };
 
 export function detect(req: NextRequest, domains: I18NDomains = this?.domains || []) {
   const { hostname } = req.nextUrl;
@@ -46,7 +47,7 @@ export function middleware<L extends Locale>(req: NextRequest, ev?: NextFetchEve
     allowedLocales = [],
     defaultLocale = allowedLocales[0],
     strategy = "param",
-    pathPrefix = strategy == "domain" ? "hidden" : "default",
+    pathPrefix = strategy == "request" ? "hidden" : "default",
     pathBase = pathPrefix == "hidden" ? "detect-latest" : "detect-default",
     detect = req => negotiator(req),
     redirectPath = "r",
@@ -65,16 +66,20 @@ export function middleware<L extends Locale>(req: NextRequest, ev?: NextFetchEve
     else if (pathBase == "detect-default") locale = defaultLocale;
     else locale ||= defaultLocale;
     url.pathname = [locale, ...path].join("/");
-    if (strategy != "headers") {
+    if (strategy == "param") {
       if (pathPrefix != "always" && (pathPrefix == "default" ? locale == defaultLocale : true))
         res = res ? NextResponse.rewrite(url) : NextResponse.redirect(((url.pathname = path.join("/")), url));
       else if (pathPrefix == "always") res = NextResponse.redirect(url);
+    } else if (pathPrefix == "always" || (pathPrefix == "default" && locale != defaultLocale)) {
+      res = NextResponse.redirect(url);
+    } else {
+      res = NextResponse.next();
     }
     res ||= NextResponse.redirect(url);
   } else if ((pathPrefix == "default" && locale == defaultLocale) || pathPrefix == "hidden") {
     url.pathname = path.join("/");
     res = NextResponse.redirect(url);
-  } else if (strategy == "headers") res = NextResponse.rewrite(((url.pathname = path.join("/")), url));
+  } else if (strategy == "request") res = NextResponse.rewrite(((url.pathname = path.join("/")), url));
   res.headers.set(PATH_HEADERS_KEY, (path.unshift(""), path.join("/")));
   res.headers.set(LOCALE_HEADERS_KEY, locale);
   res.cookies.set(LOCALE_COOKIE_KEY, locale);
