@@ -229,3 +229,9 @@ export type LocaleMapping = [
   ["zh", "CN", "HK", "MO", "SG", "TW", "Hans", "Hant"],
   ["zu"],
 ];
+
+export type LocaleMapper<T> = T extends [infer L extends string, ...infer R extends string[]] ? L | `${L}-${R[number]}` : never;
+
+export type Locale = LocaleMapper<LocaleMapping[number]> | (string & {});
+
+// TODO: declare globally locale types for Intl namespace

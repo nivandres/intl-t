@@ -1,7 +1,7 @@
 {
   "name": "intl-t",
   "description": "A Fully-Typed Object-Based i18n Translation Library",
-  "version": "1.0.6",
+  "version": "1.1.0-rc.14",
   "type": "module",
   "license": "MIT",
   "homepage": "https://intl-t.dev",
@@ -29,14 +29,14 @@
     "test:coverage": "bun test --coverage",
     "clean": "tsc -b --clean tsconfig.build.json",
     "format": "prettier --write .",
+    "format:check": "bun run format --check",
     "lint": "oxlint --fix",
     "typecheck": "tsc",
     "check": "bun run format && bun run lint && bun run typecheck",
     "prepare": "bun husky",
     "bump": "bun run --filter '@intl-t/*' bump",
-    "release": "bun run --filter '@intl-t/*' release",
-    "format:check": "bun run format --check",
-    "prepublishOnly": "bun run build"
+    "prepublishOnly": "bun run build",
+    "release": "bun run --filter '@intl-t/*' release"
   },
   "keywords": [
     "translation",
@@ -89,21 +89,21 @@
     "@intl-t/utils": "workspace:*"
   },
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-    "@types/bun": "^1.3.0",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+    "@types/bun": "^1.3.12",
     "@types/react": "^19",
     "husky": "^9.1.7",
-    "lint-staged": "^16.3.2",
+    "lint-staged": "^16.4.0",
     "next": "^16",
-    "oxlint": "^1.51.0",
+    "oxlint": "^1.59.0",
     "prettier": "^3.8.1",
     "react": "^19",
-    "typescript": "^5"
+    "typescript": "^6"
   },
   "peerDependencies": {
     "next": ">=14",
     "react": ">=18 <20",
-    "typescript": "^5"
+    "typescript": "^6"
   },
   "peerDependenciesMeta": {
     "typescript": {
