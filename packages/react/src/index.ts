@@ -5,3 +5,4 @@ export * from "@intl-t/react/inject";
 export * from "@intl-t/react/patch";
 export * from "@intl-t/react/translation";
 export * from "@intl-t/react/types";
+export * from "@intl-t/react/utils";
