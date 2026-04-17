@@ -1,3 +1,5 @@
+export type Locale = Intl.UnicodeBCP47LocaleIdentifier;
+
 export type Base = string | number;
 export type Key = Base | symbol;
 export type Value = Base | null | undefined | boolean | Base[] | Date | Function;

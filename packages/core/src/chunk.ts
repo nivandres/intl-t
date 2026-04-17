@@ -14,6 +14,8 @@ import type {
 } from "@intl-t/core/types";
 import type { ReactNode, Key as ReactKey, Dispatch, SetStateAction } from "react";
 
+// TODO: Remove this file to ensure intl-t remains truly framework-agnostic with no React deps in the core, keeping everything properly modularized.
+
 // export * from "@intl-t/react/types";
 
 export type { ReactNode, ReactKey };
@@ -31,7 +33,7 @@ export interface ChunkProps {
   [key: string]: any;
 }
 
-export type Chunk = (props: ChunkProps) => ReactNode | void;
+export type Chunk = (props: ChunkProps) => ReactNode;
 
 export interface TranslationProps<
   S extends TranslationSettings = TranslationSettings,

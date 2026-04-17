@@ -1,6 +1,6 @@
 import { describe, it, expect, mock } from "bun:test";
 import { createTranslation as ct, getChildren as gc, getLocales } from "../src";
-import en from "./messages.json";
+import en from "./fixtures/messages.json";
 
 describe("Translation object", () => {
   it("should run correctly nested", () => {

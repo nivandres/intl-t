@@ -1,0 +1,18 @@
+{
+  "hello": "hello world",
+  "bye": "goodbye world",
+  "common": {
+    "yes": "yes",
+    "no": "no",
+    "hello": "Hello {name}",
+    "values": {
+      "name": "John"
+    }
+  },
+  "pages": {
+    "dashboard": {
+      "title": "Dashboard",
+      "welcome": "Welcome {name}"
+    }
+  }
+}

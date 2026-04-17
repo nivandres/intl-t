@@ -1,6 +1,6 @@
 import { describe, it, expect } from "bun:test";
 import { injectReactChunks as ir, createTranslation as ct } from "../src";
-import * as en from "./messages.json";
+import * as en from "./fixtures/messages.json";
 
 describe("react plugin", () => {
   it("should work", () => {
