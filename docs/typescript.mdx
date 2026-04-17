@@ -119,21 +119,3 @@ It is recommended to use TypeScript with intl-t. You may find the following conf
   },
 }
 ```
-
-## Augmentation
-
-If you want to import functions, methods, etc. from the `intl-t/*` package directly instead of your custom i18n folder (`@/i18n/*`), you can declare `intl-t` module with TypeScript. However, this is not recommended, as the intended approach is for intl-t to infer everything from your created translations at `@/i18n/*`, which you then import with bound values and functions. If you import directly from the `intl-t` module, the value will be shared globally, but the types will not. If you want to enforce global type consistency, you can do so as follows:
-
-```ts
-import { t } from "@/i18n/translation";
-
-declare module "intl-t" {
-  export interface Global {
-    Translation: typeof t;
-  }
-}
-```
-
-In this way you can then import from the `intl-t` module with inferred types.
-
-> This is not necessary. `intl-t` is designed to infer translations from your custom files in `@/i18n/*`, which you import with their bound values and functions.

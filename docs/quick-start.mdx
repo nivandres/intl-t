@@ -108,14 +108,14 @@ export const { middleware, generateStaticParams, Link, redirect, useRouter } = c
 Wrap your application files inside `/app/[locale]`.
 
 ```tsx title="app/[locale]/layout.tsx"
-import { setRequestLocale } from "intl-t/next";
 import { Translation } from "@/i18n/translation";
+import { setRequestLocale } from "intl-t/next";
 
-export { generateStaticParams } from "@/i18n/navigation"
+export { generateStaticParams } from "@/i18n/navigation";
 
 interface Props {
   children: React.ReactNode;
-  params: Promise<{ locale: typeof Translation.locale }>
+  params: Promise<{ locale: typeof Translation.locale }>;
 }
 
 export default function RootLayout({ children, params }: Props) {
@@ -126,9 +126,7 @@ export default function RootLayout({ children, params }: Props) {
   return (
     <html lang={locale}>
       <body>
-        <Translation>
-          {children}
-        </Translation>
+        <Translation>{children}</Translation>
       </body>
     </html>
   );
