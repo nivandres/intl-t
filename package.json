@@ -12,18 +12,18 @@
   "workspaces": {
     "packages": [
       ".",
-      "app",
+      "apps/*",
       "assets",
       "packages/*"
     ]
   },
   "scripts": {
     "start": "tsc --noEmit --watch",
-    "start:app": "bun run --filter 'intl-t-app' start",
+    "start:app": "bun run --filter 'intl-t-*' start",
     "dev": "bun run test:watch",
-    "dev:app": "bun run --filter 'intl-t-app' dev",
+    "dev:app": "bun run --filter 'intl-t-*' dev",
     "build": "tsc -b",
-    "build:app": "bun run --filter 'intl-t-app' build",
+    "build:app": "bun run --filter 'intl-t-*' build",
     "test": "bun test",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",

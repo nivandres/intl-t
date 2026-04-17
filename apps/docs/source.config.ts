@@ -14,7 +14,7 @@ export const docs = defineDocs({
   meta: {
     schema: metaSchema,
   },
-  dir: "../docs",
+  dir: "../../docs",
 });
 
 const generator = createGenerator();

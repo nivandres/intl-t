@@ -1,5 +1,6 @@
+import { Github } from "@/components/icons/github";
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
-import { Book, Download, Github, MessageSquare } from "lucide-react";
+import { Book, Download, MessageSquare } from "lucide-react";
 
 /**
  * Shared layout configurations

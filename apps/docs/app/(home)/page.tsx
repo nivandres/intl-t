@@ -1,9 +1,10 @@
 import { GithubInfo } from "@/components/github-info";
+import { Github } from "@/components/icons/github";
 import { ImageZoom } from "@/components/image-zoom";
 import { Button } from "@/components/ui/button";
 import { getMDXComponents } from "@/mdx-components";
 import "fumadocs-ui/components/banner";
-import { Book, Github, Shield, Zap, Globe, Package, Layers, Code } from "lucide-react";
+import { Book, Shield, Zap, Globe, Package, Layers, Code } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import HeroCode from "./code/hero.mdx";
@@ -15,7 +16,7 @@ export default function HomePage() {
       <section className="flex items-center justify-center space-y-24 flex-wrap w-full my-12">
         <div className="max-w-lg my-24 space-y-2">
           <h1 className="text-6xl font-extrabold text-center">Intl-T.</h1>
-          <GithubInfo owner="nivandres" repo="intl-t" className="justify-center !flex-row" />
+          <GithubInfo owner="nivandres" repo="intl-t" className="justify-center flex-row!" />
           <p className="text-xl text-center text-fd-muted-foreground">
             A Fully-Typed Object-Based i18n Translation Library for TypeScript, React, and Next.js
           </p>
@@ -32,7 +33,7 @@ export default function HomePage() {
           <HeroCode components={getMDXComponents()} />
         </div>
       </section>
-      <section className="max-w-screen-xl mx-auto px-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <section className="max-w-7xl mx-auto px-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Feature
           icon={<Shield />}
           title="Fully Type-Safe"
@@ -57,7 +58,7 @@ export default function HomePage() {
         />
       </section>
 
-      <section className="max-w-screen-xl mx-auto my-24 flex flex-wrap justify-center items-center gap-16">
+      <section className="max-w-7xl mx-auto my-24 flex flex-wrap justify-center items-center gap-16">
         <ImageZoom
           className="w-xl max-w-full"
           src="https://raw.githubusercontent.com/nivandres/intl-t/main/assets/banner.webp"
