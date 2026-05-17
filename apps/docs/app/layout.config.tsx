@@ -43,12 +43,12 @@ export const baseOptions: BaseLayoutProps = {
     },
     {
       icon: <Github />,
-      text: "Github",
+      text: "Source",
       url: "https://github.com/nivandres/intl-t",
     },
     {
       icon: <Download />,
-      text: "NPM",
+      text: "Package",
       url: "https://www.npmjs.com/package/intl-t",
     },
   ],
