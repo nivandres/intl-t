@@ -1,19 +1,27 @@
-import { setLocale } from "@intl-t/core";
-import { state } from "@intl-t/format/state";
+import { getLocale, setLocale, getSettings } from "@intl-t/core";
+import { match } from "@intl-t/utils/match";
 import { resolveLocale } from "@intl-t/utils/resolvers";
 
-export const LOCALE_CLIENT_KEY = "LOCALE";
+export const LOCALE_CLIENT_KEY = "locale";
 
-export function getClientLocale(key = LOCALE_CLIENT_KEY) {
-  const settings = this?.settings;
-  const r = resolveLocale.bind(settings);
-  const locale = localStorage?.getItem(key) || r(location?.pathname) || r(state.locale);
-  if (locale) return setLocale.call(this, locale);
+export function getClientLocale<L extends string>(
+  key = LOCALE_CLIENT_KEY,
+  detectLocale = true,
+  allowedLocales = (getSettings.call(this) as any)?.allowedLocales as L[],
+) {
+  try {
+    const locale =
+      globalThis.localStorage?.getItem(key) ||
+      (detectLocale ? resolveLocale(globalThis.location?.pathname, allowedLocales) || match(getLocale(), allowedLocales) : undefined);
+    if (locale) return setLocale.call(this, locale) as L;
+  } catch {}
 }
 
-export function setClientLocale(locale: string, key = LOCALE_CLIENT_KEY) {
-  localStorage?.setItem(key, locale);
-  return setLocale.call(this, locale);
+export function setClientLocale<L extends string>(locale: L, key = LOCALE_CLIENT_KEY) {
+  try {
+    globalThis.localStorage?.setItem(key, locale);
+  } catch {}
+  return setLocale.call(this, locale) as L;
 }
 
 export { getClientLocale as getLocale, setClientLocale as setLocale };
