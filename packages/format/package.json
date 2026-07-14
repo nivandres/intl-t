@@ -18,6 +18,9 @@
   "files": [
     "dist/*"
   ],
+  "sideEffects": [
+    "./dist/formatters.js"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",

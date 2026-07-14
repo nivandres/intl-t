@@ -18,6 +18,11 @@
   "files": [
     "dist/*"
   ],
+  "sideEffects": [
+    "./dist/index.js",
+    "./dist/translation.js",
+    "./dist/patch.js"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
