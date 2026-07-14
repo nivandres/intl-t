@@ -10,12 +10,14 @@ export interface Cache {
 
 export const getCache = cache(() => ({}) as Partial<Cache>);
 
-export function getCachedRequestLocale() {
-  const locale = getCache().locale;
-  if (locale) return setLocale.call(this, locale);
+export function getCachedRequestLocale<L extends Locale>() {
+  const locale = getCache().locale as L | undefined;
+  if (locale) return setLocale.call(this, locale) as L;
 }
 
-export function setCachedRequestLocale(locale: Locale) {
+export function setCachedRequestLocale<L extends Locale>(locale: L) {
   getCache().locale = locale;
-  return setLocale.call(this, locale);
+  return setLocale.call(this, locale) as L;
 }
+
+export { getCachedRequestLocale as getCacheLocale, setCachedRequestLocale as setCacheLocale };
