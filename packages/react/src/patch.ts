@@ -27,23 +27,29 @@ export function ___jsxDEV(...[type, props, key, isStatic, source]: Parameters<ty
 }
 
 export function ___createElement(...[type, props, ...children]: Parameters<typeof __createElement>) {
-  return __createElement(type, checkProps(props), ...children.map(check));
+  return __createElement(type, typeof type === "string" ? checkProps(props) : props, ...children.map(check));
 }
 
-export function patch({ React, jsx, jsxDEV }: { React?: any; jsx?: any; jsxDEV?: any }): void;
-export function patch(React?: any, jsx?: any, jsxDEV?: any): void;
-export function patch(React = _React as any, jsx = _jsx as any, jsxDEV = _jsxDEV as any) {
-  if (React.React) return patch(React.React, React.jsx, React.jsxDEV);
+export let patched = false;
+
+export function patch({ React, jsx, jsxDEV, forcePatch }: { React?: any; jsx?: any; jsxDEV?: any; forcePatch?: boolean }): boolean;
+export function patch(React?: any, jsx?: any, jsxDEV?: any, forcePatch?: boolean): boolean;
+export function patch(React = _React as any, jsx = _jsx as any, jsxDEV = _jsxDEV as any, forcePatch = false) {
+  if (patched && !forcePatch) return false;
+  if (React.React) return patch(React.React, React.jsx, React.jsxDEV, React.forcePatch);
   try {
     React.createElement = ___createElement;
     jsx.jsx = ___jsx;
     jsx.jsxs = ___jsxs;
     jsxDEV.jsxDEV = ___jsxDEV;
-  } catch {}
+    return (patched = true);
+  } catch {
+    return false;
+  }
 }
 
 export { ___createElement as createElement, ___jsx as jsx, ___jsxs as jsxs, ___jsxDEV as jsxDEV };
 
 export default patch;
 
-process.env.INTL_T_REACT_PATCH !== "false" && patch();
+globalThis.process?.env?.INTL_T_REACT_PATCH !== "false" && patch();
