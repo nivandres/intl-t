@@ -16,4 +16,4 @@ TranslationNode.getLocale = getLocale;
 
 export { createTranslation, Translation, TranslationNode } from "@intl-t/core";
 export default TranslationNode;
-export { getLocales } from "@intl-t/core/dynamic";
+export { loadLocales as getLocales } from "@intl-t/core/dynamic";

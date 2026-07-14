@@ -13,4 +13,4 @@ TranslationNode.getLocale = getLocale;
 
 export { createTranslation, Translation, TranslationNode } from "@intl-t/react";
 export default TranslationNode;
-export { getLocales } from "@intl-t/core/dynamic";
+export { loadLocales as getLocales } from "@intl-t/core/dynamic";
