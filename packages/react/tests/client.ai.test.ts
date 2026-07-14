@@ -1,5 +1,6 @@
 // AI generated test
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
+import { LOCALE_CLIENT_KEY } from "@intl-t/react";
 import "@testing-library/jest-dom";
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { getClientLocale, setClientLocale } from "../src/client";
@@ -50,7 +51,7 @@ describe("react client helpers", () => {
   it("resolves the locale from storage and syncs translation settings", () => {
     const t = createReactTranslation();
 
-    localStorage.setItem("LOCALE", "es");
+    localStorage.setItem(LOCALE_CLIENT_KEY, "es");
 
     expect(getClientLocale.call(t)).toBe("es");
     expect(t.settings.locale).toBe("es");

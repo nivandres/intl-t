@@ -86,10 +86,15 @@ describe("next request state", () => {
     expect(await requestModule.getRequestLocale.call(binding, false)).toBe("es");
   });
 
-  it("stores request locale in cache", () => {
+  it("stores request locale in cache", async () => {
     const binding = createBinding();
 
-    expect(requestModule.setRequestLocale.call(binding, "es")).toBe("es");
+    expect(await requestModule.setRequestLocale.call(binding, "es")).toBe("es");
+    expect(cookieStore.get(cookiesModule.LOCALE_COOKIE_KEY)).toBe("es"); // the awaited chain must attach the cookie
+  });
+
+  it("returns undefined (not false) when dynamic resolution is prevented and the cache is empty", () => {
+    expect(requestModule.getRequestLocale(true)).toBeUndefined(); // `?? defaultLocale` fallbacks depend on this
   });
 
   it("resolves the request locale from headers and cookies", async () => {

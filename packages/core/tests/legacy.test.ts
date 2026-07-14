@@ -1,5 +1,5 @@
 import { describe, it, expect, mock } from "bun:test";
-import { createTranslation as ct, getChildren as gc, getLocales } from "../src";
+import { createTranslation as ct, getChildren as gc, loadLocales } from "../src";
 import en from "./fixtures/messages.json";
 
 describe("Translation object", () => {
@@ -283,7 +283,7 @@ describe("dynamic import", () => {
     expect((await t.ja).hello.base).toBe("こんにちは");
   });
   it("should work with mapped getLocales function", async () => {
-    const locales = await getLocales({
+    const locales = await loadLocales({
       en: { hello: "Hello" },
       es: () => ({ hello: "Hola" }),
       fr: async () => ({ hello: "Bonjour" }),
@@ -331,7 +331,7 @@ describe("dynamic import", () => {
     expect(t.hello.base).toBe("Hello");
   });
   it("should work with fn getLocales", async () => {
-    const locales = await getLocales(
+    const locales = await loadLocales(
       async locale => {
         if (locale === "en") return { hello: "Hello" };
         if (locale === "es") return { hello: "Hola" };

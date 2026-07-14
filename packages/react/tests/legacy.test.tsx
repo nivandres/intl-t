@@ -23,7 +23,7 @@ describe("variable injection", () => {
       ir("<a /> <a />", {
         a: ({ children }) => children,
       }),
-    ).toEqual(["", " ", ""]);
+    ).toEqual([null, " ", null]);
     expect(ir("hola <b/> que <a/> tal <b/> amigo <b/> como <a/>", { a: "a", b: "b" })).toEqual([
       "hola ",
       "b",

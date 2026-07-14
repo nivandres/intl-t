@@ -380,17 +380,21 @@ describe("IntlMessageFormat", function () {
       const msg = new IntlMessageFormat("{STATE}"),
         state = "Missouri";
 
-      // it("should fail when the argument in the pattern is not provided", function () {
-      //   expect(msg.format).toThrow(new MissingValueError("STATE", "{STATE}"));
-      // });
+      // Adapted from formatjs' MissingValueError: intl-t keeps placeholders by default;
+      // strictness is opt-in through the onMissingVariable function policy.
+      const strict = {
+        onMissingVariable: (k: string, t: string) => {
+          throw new Error(`missing ${k} in ${t}`);
+        },
+      } as any;
 
-      // it("should fail when the argument in the pattern has a typo", function () {
-      //   function formatWithValueNameTypo() {
-      //     return msg.format({ "ST ATE": state });
-      //   }
+      it("should fail when the argument in the pattern is not provided (strict policy)", function () {
+        expect(() => iv("{STATE}", {} as any, strict)).toThrow("missing STATE");
+      });
 
-      //   expect(formatWithValueNameTypo).toThrow(new MissingValueError("STATE", "{STATE}"));
-      // });
+      it("should fail when the argument in the pattern has a typo (strict policy)", function () {
+        expect(() => iv("{STATE}", { "ST ATE": state } as any, strict)).toThrow("missing STATE");
+      });
 
       it("should succeed when the argument is correct", function () {
         expect(msg.format({ STATE: state })).toBe(state);

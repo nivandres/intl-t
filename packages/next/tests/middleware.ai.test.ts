@@ -71,7 +71,7 @@ describe("next middleware", () => {
       value: "es.intl-t.dev",
     });
 
-    expect((middleware.detect as typeof detect | undefined)?.(request)).toEqual(["es", "es-MX"]);
+    expect((middleware.detectLocale as typeof detect | undefined)?.(request)).toEqual(["es", "es-MX"]);
   });
 
   it("creates a configured middleware function with helpers attached", () => {
@@ -87,7 +87,7 @@ describe("next middleware", () => {
     const middleware = createMiddleware({
       allowedLocales: ["en", "es"],
       defaultLocale: "en",
-      detect: ["es"],
+      detectLocale: ["es"],
       pathPrefix: "always",
     });
 
@@ -117,7 +117,7 @@ describe("next middleware", () => {
     const middleware = createMiddleware({
       allowedLocales: ["en", "es"],
       defaultLocale: "en",
-      detect: ["es"],
+      detectLocale: ["es"],
       redirectPath: "r",
     });
 
@@ -148,7 +148,7 @@ describe("next middleware", () => {
       defaultLocale: "en",
       pathPrefix: "always",
       pathBase: "always-default",
-      detect: ["es"],
+      detectLocale: ["es"],
     });
 
     const response = middleware(createRequest("/docs", { cookie: "locale=es" }));
@@ -172,7 +172,7 @@ describe("next middleware", () => {
     const middleware = createMiddleware({
       allowedLocales: ["en", "es"],
       defaultLocale: "en",
-      detect: ["es"],
+      detectLocale: ["es"],
       strategy: "request",
     });
 
@@ -189,7 +189,7 @@ describe("next middleware", () => {
     const middleware = createMiddleware({
       allowedLocales: ["en", "es"],
       defaultLocale: "en",
-      detect: ["es"],
+      detectLocale: ["es"],
       pathPrefix: "optional",
     });
 
@@ -205,7 +205,7 @@ describe("next middleware", () => {
     const middleware = createMiddleware({
       allowedLocales: ["en", "es"],
       defaultLocale: "en",
-      detect: ["en"],
+      detectLocale: ["en"],
       strategy: "request",
       pathPrefix: "default",
     });
@@ -222,7 +222,7 @@ describe("next middleware", () => {
     const middleware = createMiddleware({
       allowedLocales: ["en", "es"],
       defaultLocale: "en",
-      detect: ["es"],
+      detectLocale: ["es"],
       strategy: "request",
       pathPrefix: "always",
     });
@@ -238,7 +238,7 @@ describe("next middleware", () => {
     const middleware = createMiddleware({
       allowedLocales: ["en", "es"],
       defaultLocale: "en",
-      detect: ["en"],
+      detectLocale: ["en"],
       strategy: "request",
       pathPrefix: "default",
     });
@@ -291,7 +291,7 @@ describe("next middleware", () => {
     const middleware = createMiddleware({
       allowedLocales: ["en", "es"],
       defaultLocale: "en",
-      detect: ["es"],
+      detectLocale: ["es"],
       strategy: "request",
       pathPrefix: "default",
     });
@@ -314,7 +314,7 @@ describe("next middleware", () => {
     const middleware = createMiddleware({
       allowedLocales: ["en", "es"],
       defaultLocale: "en",
-      detect: ["es"],
+      detectLocale: ["es"],
       pathPrefix: "always",
     });
     const composed = middleware.withMiddleware!((_req, _ev, response) => {
@@ -348,5 +348,163 @@ describe("next middleware", () => {
     expect(response.headers.get("location")).toBe("https://intl-t.dev/docs");
     expect(response.headers.get(PATH_HEADERS_KEY)).toBe("/docs");
     expect(response.headers.get(LOCALE_HEADERS_KEY) ?? "").toBe("");
+  });
+});
+
+// Matrix regression tests — freezes the routing semantics (strategy × pathPrefix × cookie ×
+// detection) : unprefixed + non-default detection redirects
+// (no more [locale]="about" fall-through), root "/" resolves in a single hop without a trailing
+// slash, and every response carries the x-locale/x-path headers and locale cookie contract.
+function matrixRequest(pathname: string, { cookie, lang }: { cookie?: string; lang?: string } = {}) {
+  const headers = new Headers();
+  if (lang) headers.set("Accept-Language", lang);
+  if (cookie) headers.set("Cookie", `${LOCALE_COOKIE_KEY}=${cookie}`);
+  return new NextRequest(`https://intl-t.dev${pathname}`, { headers });
+}
+
+const rewriteOf = (res: Response) => res.headers.get("x-middleware-rewrite");
+const locationOf = (res: Response) => res.headers.get("location");
+
+const matrixBase = { allowedLocales: ["en", "es"], defaultLocale: "en" };
+
+describe("middleware matrix — strategy param + pathPrefix default", () => {
+  const mw = () => createMiddleware<string>({ ...matrixBase });
+
+  it("rewrites unprefixed paths when detection matches the default", () => {
+    const res = mw()(matrixRequest("/about", { lang: "en" }));
+    expect(rewriteOf(res)).toBe("https://intl-t.dev/en/about");
+    expect(locationOf(res)).toBeNull();
+  });
+
+  it("redirects a first visit with non-default detection to the prefixed URL", () => {
+    const res = mw()(matrixRequest("/about", { lang: "es,en;q=0.8" }));
+    expect(locationOf(res)).toBe("https://intl-t.dev/es/about");
+  });
+
+  it("serves the default on unprefixed paths for returning visitors (cookie ignored under detect-default)", () => {
+    const res = mw()(matrixRequest("/about", { cookie: "es" }));
+    expect(rewriteOf(res)).toBe("https://intl-t.dev/en/about");
+    expect(locationOf(res)).toBeNull();
+  });
+
+  it("redirects the prefixed default locale back to the clean URL", () => {
+    const res = mw()(matrixRequest("/en/about"));
+    expect(locationOf(res)).toBe("https://intl-t.dev/about");
+  });
+
+  it("passes through prefixed non-default locales with i18n headers", () => {
+    const res = mw()(matrixRequest("/es/about"));
+    expect(locationOf(res)).toBeNull();
+    expect(rewriteOf(res)).toBeNull();
+    expect(res.headers.get(LOCALE_HEADERS_KEY)).toBe("es");
+    expect(res.headers.get(PATH_HEADERS_KEY)).toBe("/about");
+    expect(res.cookies.get(LOCALE_COOKIE_KEY)?.value).toBe("es");
+  });
+
+  it("redirects the root path in a single hop without a trailing slash", () => {
+    const res = mw()(matrixRequest("/", { lang: "es" }));
+    expect(locationOf(res)).toBe("https://intl-t.dev/es");
+  });
+
+  it("rewrites the root path for default detection without a trailing slash", () => {
+    const res = mw()(matrixRequest("/", { lang: "en" }));
+    expect(rewriteOf(res)).toBe("https://intl-t.dev/en");
+  });
+
+  it("falls back to the default locale for unsupported detected languages", () => {
+    const res = mw()(matrixRequest("/about", { lang: "fr" }));
+    expect(rewriteOf(res)).toBe("https://intl-t.dev/en/about");
+  });
+
+  it("falls back to detection when the locale cookie holds a value outside allowedLocales", () => {
+    // Stale/poisoned cookie (e.g. a locale removed from allowedLocales) must be ignored,
+    // otherwise it redirects to /zz/about and accumulates segments forever.
+    const res = mw()(matrixRequest("/about", { cookie: "zz", lang: "es,en;q=0.8" }));
+    expect(locationOf(res)).toBe("https://intl-t.dev/es/about");
+    expect(res.cookies.get(LOCALE_COOKIE_KEY)?.value).toBe("es"); // self-heals the stale cookie
+  });
+});
+
+describe("middleware matrix — strategy param + other prefixes", () => {
+  it("always: redirects unprefixed paths to the detected locale", () => {
+    const mw = createMiddleware<string>({ ...matrixBase, pathPrefix: "always" });
+    const res = mw(matrixRequest("/docs", { lang: "es" }));
+    expect(locationOf(res)).toBe("https://intl-t.dev/es/docs");
+  });
+
+  it("always: passes through correctly prefixed paths", () => {
+    const mw = createMiddleware<string>({ ...matrixBase, pathPrefix: "always" });
+    const res = mw(matrixRequest("/es/docs"));
+    expect(locationOf(res)).toBeNull();
+    expect(rewriteOf(res)).toBeNull();
+  });
+
+  it("optional: rewrites unprefixed paths keeping the clean URL", () => {
+    const mw = createMiddleware<string>({ ...matrixBase, pathPrefix: "optional" });
+    const res = mw(matrixRequest("/docs", { lang: "es" }));
+    expect(rewriteOf(res)).toBe("https://intl-t.dev/es/docs");
+    expect(locationOf(res)).toBeNull();
+  });
+
+  it("optional: passes through prefixed paths untouched", () => {
+    const mw = createMiddleware<string>({ ...matrixBase, pathPrefix: "optional" });
+    const res = mw(matrixRequest("/es/docs"));
+    expect(locationOf(res)).toBeNull();
+    expect(rewriteOf(res)).toBeNull();
+  });
+
+  it("hidden: rewrites unprefixed paths so the param route still receives the locale", () => {
+    const mw = createMiddleware<string>({ ...matrixBase, pathPrefix: "hidden" });
+    const res = mw(matrixRequest("/docs", { cookie: "es" }));
+    expect(rewriteOf(res)).toBe("https://intl-t.dev/es/docs");
+  });
+
+  it("redirect path entrypoint forces detection and always redirects", () => {
+    const mw = createMiddleware<string>({ ...matrixBase });
+    const res = mw(matrixRequest("/r/docs", { cookie: "es" }));
+    expect(locationOf(res)).toBe("https://intl-t.dev/es/docs");
+  });
+});
+
+describe("middleware matrix — strategy request", () => {
+  it("passes through unprefixed paths exposing locale via headers, skipping the redundant Set-Cookie", () => {
+    const mw = createMiddleware<string>({ ...matrixBase, strategy: "request" });
+    const res = mw(matrixRequest("/dashboard", { cookie: "es" }));
+    expect(locationOf(res)).toBeNull();
+    expect(rewriteOf(res)).toBeNull();
+    expect(res.headers.get(LOCALE_HEADERS_KEY)).toBe("es"); // metadata: always present
+    expect(res.headers.get(PATH_HEADERS_KEY)).toBe("/dashboard");
+    expect(res.cookies.get(LOCALE_COOKIE_KEY)).toBeUndefined(); // unchanged cookie → cacheable response
+  });
+
+  it("hidden: redirects prefixed URLs to their clean form persisting the locale switch", () => {
+    const mw = createMiddleware<string>({ ...matrixBase, strategy: "request" });
+    const res = mw(matrixRequest("/es/dashboard"));
+    expect(locationOf(res)).toBe("https://intl-t.dev/dashboard");
+    expect(res.cookies.get(LOCALE_COOKIE_KEY)?.value).toBe("es");
+  });
+
+  it("always: rewrites prefixed URLs to the unprefixed route keeping the URL", () => {
+    const mw = createMiddleware<string>({ ...matrixBase, strategy: "request", pathPrefix: "always" });
+    const res = mw(matrixRequest("/es/dashboard"));
+    expect(rewriteOf(res)).toBe("https://intl-t.dev/dashboard");
+    expect(res.headers.get(LOCALE_HEADERS_KEY)).toBe("es");
+  });
+
+  // Mirrors the production curl verification on the pages-router example (Next 16.2.9).
+  it("always: ignores a stale cookie and redirects to the detected locale (self-healing)", () => {
+    const mw = createMiddleware<string>({ ...matrixBase, strategy: "request", pathPrefix: "always" });
+    const res = mw(matrixRequest("/about", { cookie: "zz", lang: "es" }));
+    expect(locationOf(res)).toBe("https://intl-t.dev/es/about");
+    expect(res.cookies.get(LOCALE_COOKIE_KEY)?.value).toBe("es");
+  });
+
+  it("hidden: passes through the root path exposing x-path '/'", () => {
+    const mw = createMiddleware<string>({ ...matrixBase, strategy: "request" });
+    const res = mw(matrixRequest("/", { cookie: "es" }));
+    expect(locationOf(res)).toBeNull();
+    expect(rewriteOf(res)).toBeNull();
+    expect(res.headers.get(PATH_HEADERS_KEY)).toBe("/");
+    expect(res.headers.get(LOCALE_HEADERS_KEY)).toBe("es");
   });
 });
