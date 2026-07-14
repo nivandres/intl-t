@@ -54,7 +54,7 @@
     "@intl-t/locales": "workspace:*"
   },
   "peerDependencies": {
-    "typescript": "^6"
+    "typescript": ">=5 <=7"
   },
   "peerDependenciesMeta": {
     "typescript": {

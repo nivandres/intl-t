@@ -103,7 +103,7 @@
   "peerDependencies": {
     "next": ">=14",
     "react": ">=18 <20",
-    "typescript": "^6"
+    "typescript": ">=5 <=7"
   },
   "peerDependenciesMeta": {
     "typescript": {
