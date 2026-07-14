@@ -1,9 +1,9 @@
 import { format } from "@intl-t/format/formatters";
-import { state as globalState, type State } from "@intl-t/format/state";
+import { globalState, type FormatOptions } from "@intl-t/format/state";
 import type { Values, Content, Variables } from "@intl-t/format/types";
 
-export const ev = (expr: string, state: Partial<State> = globalState) => {
-  if (process.env.INTL_T_DISABLED_EVAL || !(state.enabledEval ??= globalState.enabledEval)) return void 0 as never;
+export const ev = (expr: string, enabledEval: boolean = globalState.enabledEval) => {
+  if (!enabledEval || globalThis.process?.env?.INTL_T_DISABLED_EVAL) return void 0 as never;
   try {
     return globalThis.eval(expr);
   } catch {
@@ -44,31 +44,47 @@ export function instructionsMatch(content: string) {
   return instructions;
 }
 
+export interface InjectOptions extends Record<string, any> {
+  fallback?: string;
+  onMissingVariable?: "keep" | "empty" | ((name: string, target: string) => any);
+}
 export function injectVariables<T extends string, V extends Values>(
   content: T = "" as T,
   variables: Partial<Variables<T>> & V = {} as any,
-  state: Partial<State> = this || {},
+  formatOptions: FormatOptions = this || {},
 ) {
-  if (!content || !variables) return content as never;
-  const { formatFallback = "", formatOptions } = state;
+  if (!content || !variables || !(content.includes("{") || content.includes("`"))) return content as never;
+  const { fallback = "", onMissingVariable = "keep", locale = globalState.locale, enabledEval } = formatOptions as InjectOptions;
   let match: RegExpMatchArray | null | undefined;
   const matches = new Set();
-  while ((match = nested(content)?.value.match(variableRegex))) {
-    let [target, key = formatFallback as string, action = "", instruction = action] = match;
-    if (matches.has(target)) break;
+  let cursor = 0;
+  while ((match = nested(content.slice(cursor))?.value.match(variableRegex))) {
+    let [target, key = fallback as string, action = "", instruction = action] = match;
+    if (matches.has(target)) {
+      cursor += content.slice(cursor).indexOf(target) + target.length;
+      continue;
+    }
     matches.add(target);
-    if (formatFallback) key = key.replace(/#+/g, formatFallback);
+    if (fallback) key = key.replace(/#+/g, fallback);
     let v;
     if (!key.match(/^\w+$/)) {
-      const k = key.match(/\w+/)?.[0] ?? formatFallback;
-      key.matchAll(/{(\w+)}|(\w+)/g).forEach(([i, _, v = _]) => v in variables && (key = key.replace(i, JSON.stringify(variables[v]))));
-      v = ev(key, state);
+      const k = key.match(/\w+/)?.[0] ?? fallback;
+      [...key.matchAll(/{(\w+)}|(\w+)/g)].forEach(
+        ([i, _, v = _]) => v in variables && (key = key.replace(i, JSON.stringify(variables[v]))),
+      );
+      v = ev(key, enabledEval);
       key = k;
     } else v = variables[key];
     let value;
-    if (v === undefined) break;
-    else if (v && typeof v === "string" && !isNaN(v as any)) v = Number(v);
-    const options = { ...formatOptions } as Record<string, any>;
+    if (v === undefined) {
+      if (typeof onMissingVariable === "function") v = onMissingVariable(key, target);
+      else {
+        if (onMissingVariable !== "keep") content = content.replaceAll(target, "") as T;
+        else cursor += content.slice(cursor).indexOf(target) + target.length;
+        continue;
+      }
+    }
+    const options = { ...formatOptions } as any;
     const instructions = instructionsMatch(instruction).map(({ groups = {} }) => {
       const { k: name, v: val, t, t_ } = groups;
       action += "\n" + (t || "") + "\n" + (t_ || "");
@@ -81,10 +97,10 @@ export function injectVariables<T extends string, V extends Values>(
         value = `<${key} ${instruction}/>`;
         break;
       case Array.isArray(v):
-        value = format.list(v as string[], options, state);
+        value = format.list(v as string[], options, locale);
         break;
       case /^(time)?(relativ[eoa]|remain(ing)?)s?(time?)?$/im.test(action):
-        value = format.relative(v, options, state);
+        value = format.relative(v, options, locale);
         break;
       case v instanceof Date ||
         (/^(time|now|hou?ra?|tiempo|today|date|fecha)s?$/im.test(action) &&
@@ -97,25 +113,25 @@ export function injectVariables<T extends string, V extends Values>(
         else if (!options.timeStyle && !/^(date|fecha|today)s?$/im.test(action) && /^(time|now|tiempo|hou?ra?)s?$/im.test(action))
           options.timeStyle = options.style || "short";
         else options.dateStyle ??= options.style;
-        value = format.date(v, options, state);
+        value = format.date(v, options, locale);
         break;
       default:
         for (let { name, val } of instructions) {
           try {
             if (
-              v == name.match(/^=?(?<k>'|")(.*)(?<!`)\k<k>$/)?.[1] ||
+              v == name.match(/^=?(?<k>'|")(.*)(?<!`)\k<k>$/)?.[2] ||
               (/[^\w\s]/.test(name)
                 ? ((name = name.replace(/(?<![=<>&|!])([=&|])(?![=&|])/g, "$1$1")),
                   /\/.+\/\w*$/.test(name) && (name += ".test(String(#))"),
                   (name = name.replace(/(?<=[|&])(?=[=<>])/g, "#")),
                   /^[^\w#"'/({`[\]]/.test(name) ? (name = `#${name}`) : null,
                   (name = name.replaceAll("#", JSON.stringify(v))),
-                  name.matchAll(/{(\w+)}/g).forEach(([i, v]) => (name = name.replace(i, JSON.stringify(variables[v])))),
-                  ev(name, state))
+                  [...name.matchAll(/{(\w+)}/g)].forEach(([i, v]) => (name = name.replace(i, JSON.stringify(variables[v])))),
+                  ev(name, options))
                 : name == v) ||
               /^(ot(her|r[ao])|alway)s?$/im.test(name) ||
               (v ? /^(yea?[hs]?|y[ue]p|true?|s[íi].?|[sytv])$/im.test(name) : /^(no.?|false?|[nf])$/im.test(name)) ||
-              (typeof v === "number"
+              (typeof v === "number" || !isNaN(v)
                 ? (v == 0 && /^([zc]ero|draw|tie|tabl[ea])s?$/i.test(name)) ||
                   (action.includes("ordinal") &&
                     String(v).match(
@@ -152,15 +168,15 @@ export function injectVariables<T extends string, V extends Values>(
             (/^(p[eo]rcent.*|rati?[eo]|taxe?)s?$/im.test(action) && (options.style = "percent")) ||
             (/^(n.m(ero|ber)|digit|decimal|c.(pher|fra)|quantit[iy]e?|cantidad)s?$/im.test(action) && (options.style = "decimal"))
           )
-            v = format.number(v, options, state);
+            v = format.number(v, options, locale);
         }
-        value?.includes("{") && (value = injectVariables(value as T, variables, { ...state, formatOptions: options, formatFallback: key }));
+        value?.includes("{") && (value = injectVariables(value as T, variables, options));
         break;
     }
-    value = value?.replace(/(?<!`)#/, String(v)) ?? v;
-    content = content.replaceAll(target, String(value)) as T;
+    value = value?.replace(/(?<!`)#/g, String(v)) ?? v;
+    content = content.replaceAll(target, () => String(value)) as T;
   }
-  return content.replace(/`(.)/, "$1") as Content<T>;
+  return content.replace(/`(.)/g, "$1") as Content<T>;
 }
 
 export { injectVariables as inject };

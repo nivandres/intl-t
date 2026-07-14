@@ -1,51 +1,67 @@
-import { inject } from "@intl-t/format/inject";
-import { type State, state } from "@intl-t/format/state";
+import { inject, type InjectOptions } from "@intl-t/format/inject";
+import { state } from "@intl-t/format/state";
 
-export function list(value: string[] = [], options?: Intl.ListFormatOptions, { locale = state.locale }: Partial<State> = this) {
+export type FormatterOptions =
+  | Intl.CollatorOptions
+  | Intl.DateTimeFormatOptions
+  | Intl.DisplayNamesOptions
+  | Intl.ListFormatOptions
+  | Intl.NumberFormatOptions
+  | Intl.PluralRulesOptions
+  | (Intl.RelativeTimeFormatOptions & RelativeTimeFormatOptions)
+  | Intl.SegmenterOptions
+  | InjectOptions;
+
+export function list(value: string[] = [], options?: Intl.ListFormatOptions, locale = state.locale) {
   return new Intl.ListFormat(locale, options).format(value);
 }
 
-export function number(value: number = 0, options?: Intl.NumberFormatOptions, { locale = state.locale }: Partial<State> = this) {
+export function number(value: number = 0, options?: Intl.NumberFormatOptions, locale = state.locale) {
   return new Intl.NumberFormat(locale, options).format(value);
 }
 
-export function currency(value: number = 0, options: Intl.NumberFormatOptions = {}, { locale = state.locale }: Partial<State> = this) {
+export function currency(value: number = 0, options: Intl.NumberFormatOptions = {}, locale = state.locale) {
   options.style = "currency";
   options.currency ??= "USD";
   return new Intl.NumberFormat(locale, options).format(value);
 }
 
-export function date(value: Date = new Date(), options?: Intl.DateTimeFormatOptions, { locale = state.locale }: Partial<State> = this) {
+export const price = currency;
+
+export function date(value: Date = new Date(), options?: Intl.DateTimeFormatOptions, locale = state.locale) {
   return new Intl.DateTimeFormat(locale, options).format(value);
 }
 
-export const re = {
-  se: [1000, "conds"],
-  mi: [60000, "nutes"],
-  ho: [3600000, "urs"],
-  da: [86400000, "ys"],
-  we: [604800000, "eks"],
-  mo: [2592000000, "nths"],
-  qu: [7884000000, "arters"],
-  ye: [31536000000, "ars"],
+export const time = date;
+
+export const unitMap = {
+  seconds: 1000,
+  minutes: 60000,
+  hours: 3600000,
+  days: 86400000,
+  weeks: 604800000,
+  months: 2592000000,
+  quarters: 7884000000,
+  years: 31536000000,
 } as const;
 
-export function relative(
-  value: Date | number = 0,
-  options: Intl.RelativeTimeFormatOptions & Record<string, any> = {},
-  { locale = state.locale, now = state.now }: Partial<State> = this,
-) {
-  let { unit } = options;
+export interface RelativeTimeFormatOptions extends Intl.RelativeTimeFormatOptions {
+  unit?: keyof typeof unitMap;
+  now?: Date;
+}
+export function relative(value: Date | number = 0, options: RelativeTimeFormatOptions = {}, locale = state.locale) {
+  let { unit, now = state.now } = options;
   if (value instanceof Date) {
     value = value.getTime() - now.getTime();
-    unit
-      ? (value = Math.floor(value / re[`${unit[0]}${unit[1]}` as "se"][0]))
-      : Object.entries(re).find(([k1, [v, k2]]) =>
-          (value as number) >= v ? ((value = Math.floor((value as number) / v)), (options.unit = k1 + k2)) : false,
-        );
-  }
-  unit ??= "day";
-  return new Intl.RelativeTimeFormat(locale, options).format(value, unit);
+    if (unit) value = Math.trunc(value / unitMap[unit]);
+    else
+      Object.entries(unitMap)
+        .reverse()
+        .find(
+          ([k, v]) => Math.abs(value as number) >= v && ((value = Math.trunc((value as number) / v)), (unit = k as keyof typeof unitMap)),
+        ) || (unit = "seconds");
+  } else unit ??= "days";
+  return new Intl.RelativeTimeFormat(locale, options).format(value, unit!);
 }
 
-export const format = Object.assign(state, { list, number, currency, date, relative, time: date, price: currency, inject });
+export const format = { list, number, currency, date, relative, time, price, inject };

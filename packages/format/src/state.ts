@@ -1,17 +1,10 @@
+import type { FormatterOptions } from "@intl-t/format/formatters";
 import type { Locale } from "@intl-t/format/types";
 
 export type Intl = typeof Intl;
 export type TimeZone = Intl.DateTimeFormatOptions["timeZone"];
 export type LocaleOptions = Intl.LocaleOptions;
-export type FormatOptions =
-  | Intl.CollatorOptions
-  | Intl.DateTimeFormatOptions
-  | Intl.DisplayNamesOptions
-  | Intl.ListFormatOptions
-  | Intl.NumberFormatOptions
-  | Intl.PluralRulesOptions
-  | Intl.RelativeTimeFormatOptions
-  | Intl.SegmenterOptions;
+export type FormatOptions = FormatterOptions & Partial<State> & Record<string, unknown>;
 
 export interface State<L extends Locale = Locale> {
   timeZone: TimeZone;
@@ -23,7 +16,6 @@ export interface State<L extends Locale = Locale> {
   behavior: "function" | "object" | "flexible";
   localeOptions: Intl.ResolvedDateTimeFormatOptions;
   formatOptions?: FormatOptions;
-  formatFallback?: string;
 }
 
 export const isClient = "window" in globalThis;
@@ -32,7 +24,6 @@ export const enabledEval = "eval" in globalThis;
 
 let localeOptions: Intl.ResolvedDateTimeFormatOptions;
 let locale: Locale;
-let now: Date;
 
 export const state: State = {
   isClient,
@@ -49,8 +40,13 @@ export const state: State = {
     return (locale ??= isClient ? navigator.language.split(",")[0] : this.localeOptions.locale);
   },
   get now() {
-    return (now ??= new Date());
+    return new Date();
   },
 };
 
+export function getStateLocale<L extends Locale>() {
+  return state.locale as L;
+}
+
+export { getStateLocale as getLocale, state as globalState };
 export default state;
