@@ -1,22 +1,22 @@
 import type { TranslationSettings, Locale } from "@intl-t/core/types";
+import { Link, LinkConfig, NL } from "@intl-t/next/link";
+import { createMiddleware, MiddlewareConfig } from "@intl-t/next/middleware";
+import { createGenerateStaticParams, StaticParamsConfig } from "@intl-t/next/params";
+import { getPathname } from "@intl-t/next/request";
+import { RouterConfig, useRouter, useLocale, usePathname } from "@intl-t/next/router";
+import { getLocale, setLocale } from "@intl-t/next/state";
 import { ResolveConfig, resolveHref, resolveLocale, resolvePath } from "@intl-t/utils/resolvers";
 import { redirect as r, permanentRedirect as pr } from "next/navigation";
 import type { FC } from "react";
-import { Link, LinkConfig, NL } from "./link";
-import { createMiddleware, MiddlewareConfig } from "./middleware";
-import { createGenerateStaticParams, StaticParamsConfig } from "./params";
-import { getPathname } from "./request";
-import { RouterConfig, useRouter, useLocale, usePathname } from "./router";
-import { getLocale, setLocale } from "./state";
 
 export * from "@intl-t/utils/match";
 export * from "@intl-t/utils/negotiator";
 export * from "@intl-t/utils/resolvers";
-export * from "./link";
-export * from "./middleware";
-export * from "./params";
-export * from "./router";
-export * from "./state";
+export * from "@intl-t/next/link";
+export * from "@intl-t/next/middleware";
+export * from "@intl-t/next/params";
+export * from "@intl-t/next/router";
+export * from "@intl-t/next/state";
 
 export function resolvedRedirect(href?: string, type?: Parameters<typeof r>[1]) {
   return r(resolveHref.bind(this || {})(href), type);
@@ -34,8 +34,8 @@ export interface IntlConfig<L extends Locale = Locale, T extends FC<any> = NL>
 }
 
 export function createNavigation<L extends Locale, LC extends FC<any>>(config: IntlConfig<L, LC> = this || {}) {
-  const { allowedLocales } = config;
-  if (!allowedLocales && Array.isArray(config.locales)) config.allowedLocales = config.locales;
+  let { allowedLocales } = config;
+  if (!allowedLocales && Array.isArray(config.locales)) allowedLocales = config.allowedLocales = config.locales;
   config.locales ||= allowedLocales as L[];
   config.param ||= "locale";
   config.pathPrefix ||= config.strategy == "request" ? "hidden" : "default";
@@ -45,8 +45,8 @@ export function createNavigation<L extends Locale, LC extends FC<any>>(config: I
   const middleware = createMiddleware<L>(config);
   return {
     config,
-    useRouter: useRouter.bind(config),
-    Link: Link.bind(config)<L, L, NL>,
+    useRouter: ((...args: any) => useRouter.apply(config, args)) as typeof useRouter<L>,
+    Link: ((...args: any) => Link.apply(config, args)) as typeof Link,
     redirect: redirect.bind(config),
     permanentRedirect: permanentRedirect.bind(config),
     getLocale: getLocale.bind(config)<L>,
@@ -60,12 +60,12 @@ export function createNavigation<L extends Locale, LC extends FC<any>>(config: I
     proxy: middleware,
     withProxy: config.withMiddleware!,
     generateStaticParams: createGenerateStaticParams<L, string>(config),
-    useLocale: useLocale<L>,
-    usePathname,
+    useLocale: ((...args: any) => useLocale.apply(config, args) as any) as typeof useLocale<L>,
+    usePathname: ((...args: any) => usePathname.apply(config, args)) as typeof usePathname,
     getPathname,
     settings: Object.assign(config, config.settings),
     allowedLocales,
-    locales: allowedLocales!,
-    locale: allowedLocales![0],
+    locales: allowedLocales,
+    locale: allowedLocales?.[0],
   };
 }
