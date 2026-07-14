@@ -1,11 +1,11 @@
 "use client";
 
 import type { Locale } from "@intl-t/locales";
+import type { LinkProps } from "@intl-t/next/link-server";
+import { useLocale, usePathname } from "@intl-t/next/router";
 import { resolveHref } from "@intl-t/utils/resolvers";
 import NL from "next/link";
 import type { ComponentProps } from "react";
-import type { LinkProps } from "./link-server";
-import { useLocale, usePathname } from "./router";
 
 type NL = typeof NL;
 

@@ -1,8 +1,8 @@
+import { TranslationProvider, getTranslation } from "@intl-t/next/rsc";
+import { getLocale, setLocale } from "@intl-t/next/state";
+import { isRSC } from "@intl-t/next/state";
 import { TranslationNode, type TranslationFC } from "@intl-t/react";
 import "./patch";
-import { TranslationProvider, getTranslation } from "./rsc";
-import { getLocale, setLocale } from "./state";
-import { isRSC } from "./state";
 
 if (isRSC) {
   TranslationNode.Provider = TranslationProvider as TranslationFC;

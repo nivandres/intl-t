@@ -1,10 +1,10 @@
 import type { Locale } from "@intl-t/locales";
+import { LC } from "@intl-t/next/link-client";
+import { getRequestLocale, getPathname } from "@intl-t/next/request";
+import { isRSC } from "@intl-t/next/state";
 import { ResolveHrefConfig, resolveHref } from "@intl-t/utils/resolvers";
 import { default as NL, LinkProps as LP } from "next/link";
 import type { FC, ReactNode, ComponentProps } from "react";
-import { LC } from "./link-client";
-import { getRequestLocale, getPathname } from "./request";
-import { isRSC } from "./state";
 
 export type NL = typeof NL;
 

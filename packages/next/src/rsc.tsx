@@ -1,10 +1,10 @@
 import { TranslationNode } from "@intl-t/core";
 import type { isArray, SearchWays, ArrayToString, Translation } from "@intl-t/core/types";
+import { getCache } from "@intl-t/next/cache";
+import { getRequestLocale } from "@intl-t/next/request";
+import { createTranslation } from "@intl-t/next/translation";
 import { TranslationProvider as TranslationClientProvider, TranslationProviderProps } from "@intl-t/react";
 import { Suspense, ReactNode } from "react";
-import { getCache } from "./cache";
-import { getRequestLocale } from "./request";
-import { createTranslation } from "./translation";
 
 export async function TranslationProvider<
   T extends TranslationNode,
