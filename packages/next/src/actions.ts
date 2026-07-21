@@ -34,7 +34,7 @@ export async function getRequestLocaleFromClient<L extends Locale>(preventDynami
 }
 
 export async function setRequestLocaleFromClient<L extends Locale>(locale: L, refresh = true) {
-  return setRequestLocale<L>(locale, refresh);
+  return setRequestLocale<L>(locale, false, refresh);
 }
 
 export { getCachedRequestLocaleFromClient as getCacheLocaleFromClient, setCachedRequestLocaleFromClient as setCacheLocaleFromClient };

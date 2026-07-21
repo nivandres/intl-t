@@ -23,7 +23,8 @@ export function getRequestLocale<L extends Locale>(
   return (getCachedRequestLocale.call(this) || (preventDynamic ? undefined : getDynamicRequestLocale.call(this))) as L;
 }
 
-export function setRequestLocale<L extends Locale>(locale: L, refresh = false) {
+export function setRequestLocale<L extends Locale>(locale: L, preventDynamic = true, refresh = false) {
+  if (preventDynamic) return setCachedRequestLocale.call(this, locale);
   return setCookieLocale
     .call(this, locale)
     .then(() => refresh && nextRefresh())

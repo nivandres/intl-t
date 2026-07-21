@@ -1,16 +1,17 @@
 import { TranslationNode } from "@intl-t/core";
-import type { isArray, SearchWays, ArrayToString, Translation } from "@intl-t/core/types";
 import { getCache } from "@intl-t/next/cache";
 import { getRequestLocale } from "@intl-t/next/request";
 import { createTranslation } from "@intl-t/next/translation";
 import { TranslationProvider as TranslationClientProvider, TranslationProviderProps } from "@intl-t/react";
 import { Suspense, ReactNode } from "react";
 
-export async function TranslationProvider<
-  T extends TranslationNode,
-  A extends isArray<SearchWays<T>>,
-  D extends ArrayToString<A, T["settings"]["ps"]>,
->({ children, t = this, preventDynamic, hydrate, ...props }: TranslationProviderProps<T, A, D>) {
+export async function TranslationProvider<T extends TranslationNode, A extends string[], D extends string>({
+  children,
+  t = this?.settings ? this : void 0,
+  preventDynamic,
+  hydrate,
+  ...props
+}: TranslationProviderProps<T, A, D>) {
   const cache = getCache();
   t ||= cache.t ||= TranslationNode.t || (createTranslation(props.settings) as any);
   props.locale ||= cache.locale;
@@ -26,8 +27,12 @@ export async function TranslationProvider<
   t.settings.locale = cache.locale = props.locale!;
   t = (await t.current) as any;
   if (!children) return t.call(props.path || props.id || props.i18nKey).base;
-  props.source = props.source || props.messages || ((hydrate ?? t.settings.hydrate) && { ...(t.node as any) }) || void 0;
-  // @ts-ignore deep nested type
+  (props as any).tid ??= (t.settings as any).id;
+  props.source =
+    props.source ||
+    props.messages ||
+    ((hydrate ?? t.settings.hydrate) && { ...((props.path ? (t.call(props.path) as any) : t).node as any) }) ||
+    void 0;
   return (<TranslationClientProvider {...props}>{children}</TranslationClientProvider>) as never;
 }
 export const T = TranslationProvider;
@@ -56,9 +61,5 @@ export function hook(...args: any[]) {
   return t(...args);
 }
 
-// @ts-ignore translation
-export declare const getTranslation: Translation;
-// @ts-ignore translation
-export declare const getTranslations: Translation;
-// @ts-ignore translation
-export { hook as getTranslation, hook as getTranslations };
+export const getTranslation = hook;
+export const getTranslations = hook;
