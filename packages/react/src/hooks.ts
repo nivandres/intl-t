@@ -5,7 +5,7 @@ import { hydration as h } from "@intl-t/format/state";
 import { Locale } from "@intl-t/locales";
 import { getClientLocale, setClientLocale, LOCALE_CLIENT_KEY } from "@intl-t/react/client";
 import { TranslationContext } from "@intl-t/react/context";
-import { ReactState, ReactSetState } from "@intl-t/react/types";
+import type { ReactState, ReactSetState } from "@intl-t/react/types";
 import { useState, useEffect, useContext } from "react";
 
 export type LocaleState<L extends Locale = Locale> = L & ReactState<L> & { locale: L; setLocale: ReactSetState<L>; key: string };

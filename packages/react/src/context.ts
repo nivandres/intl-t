@@ -1,6 +1,6 @@
 "use client";
 
-import type { isArray, SearchWays, ArrayToString, Locale, Content, Translation } from "@intl-t/core/types";
+import type { Locale, Content } from "@intl-t/core/types";
 import { LocaleState, useLocale } from "@intl-t/react/hooks";
 import { TranslationNode } from "@intl-t/react/translation";
 import type { ReactSetState, ReactNode, TranslationProps as TP } from "@intl-t/react/types";
@@ -21,17 +21,13 @@ interface TranslationProps<T extends TranslationNode, A extends string[] = strin
   A,
   D
 > {
-  t?: T;
+  t?: TranslationNode;
 }
 
 export { TranslationProps as TranslationProviderProps };
 
-export function TranslationProvider<
-  T extends TranslationNode,
-  A extends isArray<SearchWays<T>>,
-  D extends ArrayToString<A, T["settings"]["ps"]>,
->({
-  t = this,
+export function TranslationProvider<T extends TranslationNode, A extends string[], D extends string>({
+  t = this?.settings ? this : void 0,
   onLocaleChange,
   locale,
   children,
@@ -46,14 +42,15 @@ export function TranslationProvider<
 }: TranslationProps<T, A, D>): ReactNode | Content<T["node"]> {
   const parent = useContext(TranslationContext);
   const context: TranslationContext<Locale> & {} = { ...parent };
+  t ??= (state as any).tid ? (TranslationNode as any).instances?.[(state as any).tid] : (void 0 as never);
   context.t = t ??= context.t ??= TranslationNode.t as any;
   context.reRender ??= useState(0)[1];
   const localeState = useLocale({ t, locale, onLocaleChange, state: locale ? undefined : context.localeState } as any);
-  context.localeState ??= localeState;
+  context.localeState = locale != null ? localeState : (context.localeState ?? localeState);
   locale = localeState[0];
-  children &&= createElement(TranslationContext, { value: context }, children as any);
+  children &&= createElement(TranslationContext.Provider, { value: context }, children as any);
   if (!t?.settings) (Object.assign(TranslationNode, { locale, source }), children);
-  else t.settings.locale = locale!;
+  else ((t.settings.locale = locale!), source && !path && ((t.settings.locales as any)[locale] = source));
   useMemo(() => t?.settings && Object.assign(t.settings, settings, state), [settings, t as any, state]);
   t = ((t?.current as any)?.(path) as T) || t;
   useMemo(() => {
@@ -82,9 +79,5 @@ export function hook(...args: any[]) {
   return t(...args);
 }
 
-// @ts-ignore translation
-export declare const useTranslation: Translation;
-// @ts-ignore translation
-export declare const useTranslations: Translation;
-// @ts-ignore translation
-export { hook as useTranslation, hook as useTranslations };
+export const useTranslation = hook;
+export const useTranslations = hook;

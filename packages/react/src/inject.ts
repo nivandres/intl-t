@@ -1,13 +1,13 @@
 import type { Values, Base } from "@intl-t/core/types";
 import type { ReactChunk, ReactChunkProps } from "@intl-t/react/types";
-import { createElement, type ReactNode } from "react";
+import { cloneElement, createElement, Fragment, isValidElement, type ReactNode } from "react";
 
 const regex = /<(\w+)((?:"[^"]*"|'[^']*'|[^<>"'])*?)\s*(?:\/\s*>|>(?:(.*)<\s*\/\s*\1\s*>)?)/gm;
 const attributesRegex = /(\w+)(?:=(\w+|".*?"|'.*?'|{(.+?)}))?/g;
 
-export const Chunk: ReactChunk = ({ children, tagName, value, key, tagAttributes: _a, tagContent: _c, ...props }) => {
+export const Chunk: ReactChunk = ({ children, tagName, value, key, tagProps }) => {
   if (value) return String(value);
-  return createElement(tagName, { key, ...props }, children);
+  return createElement(tagName, { key, ...tagProps }, children);
 };
 
 export function injectReactChunks(content: string = "", variables: Values = {}) {
@@ -17,27 +17,32 @@ export function injectReactChunks(content: string = "", variables: Values = {}) 
   const elements = [] as ReactNode[];
   matches.forEach(match => {
     const [tag, tagName, tagAttributes, tagContent] = match;
-    const props = {
-      tagName,
-      tagContent,
-      tagAttributes,
-      key: elements.length,
-      children: tagContent == null ? undefined : injectReactChunks(tagContent, variables),
-    } as ReactChunkProps;
+    const tagProps = {} as Record<string, unknown>;
     if (tagAttributes?.trim())
       [...tagAttributes.matchAll(attributesRegex)].forEach(match => {
         let [, key, value, json = value] = match;
         try {
-          props[key] = JSON.parse(json);
+          tagProps[key] = JSON.parse(json);
         } catch {
-          props[key] = value;
+          tagProps[key] = value;
         }
       });
+    const props = {
+      tagName,
+      tagContent,
+      tagAttributes,
+      tagProps,
+      key: elements.length,
+      children: tagContent == null ? undefined : injectReactChunks(tagContent, variables),
+      ...tagProps,
+    } as ReactChunkProps;
     let element: ReactNode;
+    const chunk = variables[tagName] as ReactChunk;
     try {
-      element = ((variables[tagName] as ReactChunk) || Chunk)(props) ?? null;
+      if (isValidElement(chunk)) element = cloneElement(chunk, props.tagProps, props.children);
+      else element = (chunk || Chunk)(props) ?? null;
     } catch {
-      props.value = variables[tagName] as Base;
+      props.value = chunk as unknown as Base;
       element = Chunk(props) ?? null;
     }
     const [start, ...end] = content.split(tag);
@@ -46,7 +51,7 @@ export function injectReactChunks(content: string = "", variables: Values = {}) 
     content = end.length > 1 ? end.join(tag) : end[0];
   });
   if (content) elements.push(content);
-  return elements.length > 1 ? elements : elements[0];
+  return elements.length > 1 ? createElement(Fragment, null, ...elements) : elements[0];
 }
 
 export { injectReactChunks as injectReactChunk };

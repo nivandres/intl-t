@@ -30,19 +30,18 @@ export function ___createElement(...[type, props, ...children]: Parameters<typeo
   return __createElement(type, typeof type === "string" ? checkProps(props) : props, ...children.map(check));
 }
 
-export let patched = false;
+const PATCHED = Symbol.for("intl-t.patched");
 
 export function patch({ React, jsx, jsxDEV, forcePatch }: { React?: any; jsx?: any; jsxDEV?: any; forcePatch?: boolean }): boolean;
 export function patch(React?: any, jsx?: any, jsxDEV?: any, forcePatch?: boolean): boolean;
 export function patch(React = _React as any, jsx = _jsx as any, jsxDEV = _jsxDEV as any, forcePatch = false) {
-  if (patched && !forcePatch) return false;
-  if (React.React) return patch(React.React, React.jsx, React.jsxDEV, React.forcePatch);
   try {
-    React.createElement = ___createElement;
+    if (React?.React) return patch(React.React, React.jsx, React.jsxDEV, React.forcePatch);
+    if (React?.createElement?.[PATCHED] && !forcePatch) return false;
     jsx.jsx = ___jsx;
     jsx.jsxs = ___jsxs;
     jsxDEV.jsxDEV = ___jsxDEV;
-    return (patched = true);
+    return ((React.createElement = ___createElement as any)[PATCHED] = true);
   } catch {
     return false;
   }
@@ -51,5 +50,3 @@ export function patch(React = _React as any, jsx = _jsx as any, jsxDEV = _jsxDEV
 export { ___createElement as createElement, ___jsx as jsx, ___jsxs as jsxs, ___jsxDEV as jsxDEV };
 
 export default patch;
-
-globalThis.process?.env?.INTL_T_REACT_PATCH !== "false" && patch();

@@ -23,6 +23,7 @@ export interface ReactChunkProps {
   children: ReactNode;
   tagName: string;
   tagAttributes: string;
+  tagProps: Record<string, unknown>;
   tagContent: string;
   value?: Base | null;
   key: ReactKey;
@@ -39,7 +40,6 @@ export interface TranslationProps<
   D extends string = ArrayToString<A, S["ps"]>,
 > extends Partial<State<S["allowedLocale"]>> {
   children?: Content<N> | ReactNode;
-  key?: D;
   id?: D | A;
   i18nKey?: D | A;
   path?: D | A;
