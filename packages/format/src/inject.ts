@@ -1,15 +1,9 @@
+import { ev } from "@intl-t/format/eval";
 import { format } from "@intl-t/format/formatters";
 import { globalState, type FormatOptions } from "@intl-t/format/state";
 import type { Values, Content, Variables } from "@intl-t/format/types";
 
-export const ev = (expr: string, enabledEval: boolean = globalState.enabledEval) => {
-  if (!enabledEval || globalThis.process?.env?.INTL_T_DISABLED_EVAL) return void 0 as never;
-  try {
-    return globalThis.eval(expr);
-  } catch {
-    return void 0 as never;
-  }
-};
+export { ev };
 
 export function nested(content: string) {
   const matches = content.matchAll(/(?<!`)({|})/g);
@@ -47,6 +41,7 @@ export function instructionsMatch(content: string) {
 export interface InjectOptions extends Record<string, any> {
   fallback?: string;
   onMissingVariable?: "keep" | "empty" | ((name: string, target: string) => any);
+  evaluator?: typeof ev;
 }
 export function injectVariables<T extends string, V extends Values>(
   content: T = "" as T,
@@ -54,7 +49,13 @@ export function injectVariables<T extends string, V extends Values>(
   formatOptions: FormatOptions = this || {},
 ) {
   if (!content || !variables || !(content.includes("{") || content.includes("`"))) return content as never;
-  const { fallback = "", onMissingVariable = "keep", locale = globalState.locale, enabledEval } = formatOptions as InjectOptions;
+  const {
+    fallback = "",
+    onMissingVariable = "keep",
+    locale = globalState.locale,
+    enabledEval,
+    evaluator = ev,
+  } = formatOptions as InjectOptions;
   let match: RegExpMatchArray | null | undefined;
   const matches = new Set();
   let cursor = 0;
@@ -72,7 +73,7 @@ export function injectVariables<T extends string, V extends Values>(
       [...key.matchAll(/{(\w+)}|(\w+)/g)].forEach(
         ([i, _, v = _]) => v in variables && (key = key.replace(i, JSON.stringify(variables[v]))),
       );
-      v = ev(key, enabledEval);
+      v = evaluator?.(key, enabledEval);
       key = k;
     } else v = variables[key];
     let value;
@@ -127,7 +128,7 @@ export function injectVariables<T extends string, V extends Values>(
                   /^[^\w#"'/({`[\]]/.test(name) ? (name = `#${name}`) : null,
                   (name = name.replaceAll("#", JSON.stringify(v))),
                   [...name.matchAll(/{(\w+)}/g)].forEach(([i, v]) => (name = name.replace(i, JSON.stringify(variables[v])))),
-                  ev(name, options))
+                  evaluator?.(name))
                 : name == v) ||
               /^(ot(her|r[ao])|alway)s?$/im.test(name) ||
               (v ? /^(yea?[hs]?|y[ue]p|true?|s[íi].?|[sytv])$/im.test(name) : /^(no.?|false?|[nf])$/im.test(name)) ||
