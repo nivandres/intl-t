@@ -58,7 +58,13 @@ type VFS1<S extends string> = S extends `${string}{{${infer V}}}${infer C}`
       : {};
 export type VariablesFromString<S extends string> = VFS1<S>;
 export type Override<T, U> = T & U extends never ? Omit<T, keyof U> & U : T & U;
-export type VariablesFromNode<N> = "values" extends keyof N ? N["values"] : N extends string ? VariablesFromString<N> : {};
+export type VariablesFromNode<N> = N extends readonly unknown[]
+  ? {}
+  : "values" extends keyof N
+    ? N["values"]
+    : N extends string
+      ? VariablesFromString<N>
+      : {};
 export type Variables<N, V = Values> = Override<V, VariablesFromNode<N>>;
 export type LastKey<R extends Key[]> = R extends [...Key[], infer K] ? K : Key;
 export type Join<K extends Key[], S extends string> = K extends [infer F extends Stringable, ...infer R]
@@ -172,6 +178,7 @@ export interface TranslationSettings<
   preventDynamic: boolean;
   preload: boolean;
   hydrate: boolean;
+  id?: string;
   t?: any;
   setLocale: (locale: Locale) => Locale | void;
   getLocale: (locale: Locale) => Promisable<Node>;
