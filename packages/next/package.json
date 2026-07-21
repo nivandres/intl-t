@@ -18,11 +18,10 @@
   "files": [
     "dist/*"
   ],
-  "sideEffects": [
-    "./dist/index.js",
-    "./dist/translation.js",
-    "./dist/patch.js"
-  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18.17.0"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",

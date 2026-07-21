@@ -19,6 +19,9 @@
     "dist/*"
   ],
   "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",

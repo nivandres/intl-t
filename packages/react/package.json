@@ -18,11 +18,10 @@
   "files": [
     "dist/*"
   ],
-  "sideEffects": [
-    "./dist/index.js",
-    "./dist/translation.js",
-    "./dist/patch.js"
-  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -61,7 +60,8 @@
   },
   "dependencies": {
     "@intl-t/core": "workspace:*",
-    "@intl-t/format": "workspace:*"
+    "@intl-t/format": "workspace:*",
+    "@intl-t/utils": "workspace:*"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.8.9",
