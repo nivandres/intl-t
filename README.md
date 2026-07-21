@@ -37,7 +37,7 @@ International T`
 - 🚀 Supports **server-side rendering** and **static rendering** with [Next.js](https://nextjs.org/) and [React](https://reactjs.org/)
 - 🔄 **Dynamic importing of locales** for optimized bundle size and on-demand language loading
 - ⚙️ Modular and agnostic to **any framework** or **library**
-- 📦 **[4kb](https://bundlephobia.com/package/intl-t) Lightweight bundle** with no external dependencies and **Tree-Shakable**
+- 📦 **[6kb](https://bundlephobia.com/package/intl-t) Lightweight bundle** with no external dependencies and **Tree-Shakable**
 
 ## Demo
 
@@ -49,11 +49,11 @@ export default function Component() {
     <>
       <h1>{t("title")}</h1>
       {/* Get translations as an object or function */}
-      <h2>{t.title}</h2>
+      <h2>{t.subtitle}</h2>
 
       {/* Use variables in your translations */}
       <span>{t("welcome", { user: "Ivan" })}</span>
-      <span>{t.summary(data)}</span>
+      <span>{t.summary(dataVariables)}</span>
       {/* Flexible syntax */}
 
       <p>{t("main", { now: Date.now() })}</p>
@@ -117,7 +117,6 @@ export default function Component() {
     // default values
     "user": "World",
     "name": "{user}",
-    "now": "{(Date.now())}",
   },
 }
 ```
