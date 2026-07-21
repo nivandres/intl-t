@@ -6,7 +6,6 @@
 [![TypeScript](https://img.shields.io/badge/-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
 [![Next.js](https://img.shields.io/badge/-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
-[![Discord Chat](https://img.shields.io/discord/1063280542759526400?label=Chat&logo=discord&color=blue)](https://discord.gg/5EbCXKpdyw)
 [![Donate via Github Sponsors](https://img.shields.io/github/sponsors/nivandres?label=Sponsors&color=hotpink&logo=github)](https://github.com/sponsors/nivandres)
 [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)
 
@@ -27,17 +26,24 @@ International T`
 
 ## Features
 
-- 🎯 **Fully-Typed** for TypeScript with autocomplete for translation variables
-- 🌲 **Node-based translations** for easy organization and management
-- ✨ **Type-safe** translation keys, values and all sub-nodes
-- 🚚 Supports **JSON files** and dynamic **remote** imports
-- 🪄 **Flexible syntax** integrating all the best parts of other i18n libraries
+- 🌲 **Node-based translations** — the tree is the API: `t.page.section.title`
+- 🎯 **Fully-typed** and **type-safe** translation keys, values and all sub-nodes
+- 🚚 Supports **JSON files** and dynamic **remote** imports on demand
+- 🪄 **Flexible and familiar drop-in syntax** integrating all the best parts of other i18n libraries
 - 🧩 **ICU message format** support and extended for complex and nested pluralization and formatting
-- ⚛️ **React components injections** out of the box with translation variables
-- 🚀 Supports **server-side rendering** and **static rendering** with [Next.js](https://nextjs.org/) and [React](https://reactjs.org/)
-- 🔄 **Dynamic importing of locales** for optimized bundle size and on-demand language loading
+- ⚛️ **React components injections** out of the box with typed chunks and variables
+- 🚀 Supports **SSR**, **RSC** and **Static Rendering** with [Next.js](https://nextjs.org/), serverless friendly
+- 🔄 **On-demand locale loading** for lazy per-language chunks of just a few KB
 - ⚙️ Modular and agnostic to **any framework** or **library**
-- 📦 **[6kb](https://bundlephobia.com/package/intl-t) Lightweight bundle** with no external dependencies and **Tree-Shakable**
+- 📦 **[6kb](https://bundlephobia.com/package/intl-t) Lightweight bundle** with no dependencies, no side effects, and Tree-Shakable
+
+## Installation
+
+```bash
+npm install intl-t # or: bun add intl-t · pnpm add intl-t · yarn add intl-t
+```
+
+Zero external dependencies · TypeScript ≥ 5 · Node 18+, Bun, Deno, Edge & browsers
 
 ## Demo
 
@@ -47,39 +53,24 @@ export default function Component() {
 
   return (
     <>
-      <h1>{t("title")}</h1>
-      {/* Get translations as an object or function */}
-      <h2>{t.subtitle}</h2>
-
-      {/* Use variables in your translations */}
+      <h1>{t.title}</h1>
       <span>{t("welcome", { user: "Ivan" })}</span>
-      <span>{t.summary(dataVariables)}</span>
-      {/* Flexible syntax */}
-
-      <p>{t("main", { now: Date.now() })}</p>
+      <span>{t.summary({ count: 4 })}</span>
       <ul>
-        {/* Array of translations */}
         {t.features.map(t => (
-          <li key={t.id} title={t("title")}>
-            {t}
-          </li>
+          <li key={t.id}>{t}</li>
         ))}
       </ul>
-      <ul>
-        <li>{t.features[0]}</li>
-        <li>{t("features.1", { name: "Ivan V" })}</li>
-        <li>{t("features")[2]({ name: "Ivan V" })}</li>
-        <li>{t({ name: "Ivan V" }).features("3")}</li>
-      </ul>
-      {/* Node-based translations */}
-      <p>{t.page1.section1.article1.title}</p>
-      <p>{t("page1/section1").article1("title")}</p>
-      {/* Full typesafe with completion for variables */}
-      <p>{t({ day: "Monday" }).account(UserVariables).options.change}</p>
+      <p>{t.page1.section[0].article1.title}</p>
+      <p>{t("page1.section.0").article1("title")}</p>
+      <p>{t.account(UserVariables).options.change}</p>
     </>
   );
 }
 ```
+
+<details>
+<summary>View demo JSON source</summary>
 
 ```jsonc
 // en.json
@@ -87,7 +78,6 @@ export default function Component() {
   "title": "Homepage",
   "welcome": "Welcome, {user}!", // support ICU message format
   "summary": "{count, plural, =0 {no items} one {# item} other {# items}}",
-  "main": "It is {now, date, sm}",
   "features": [
     "Hi {name}. This is Feature 1",
     "Hi {name}. This is Feature 2",
@@ -98,11 +88,13 @@ export default function Component() {
     },
   ],
   "page1": {
-    "section1": {
-      "article1": {
-        "title": "Article 1",
+    "section": [
+      {
+        "article1": {
+          "title": "Article 1",
+        },
       },
-    },
+    ],
   },
   "account": {
     "options": {
@@ -120,6 +112,8 @@ export default function Component() {
   },
 }
 ```
+
+</details>
 
 ### [**→ Read the full Intl-T documentation**](https://intl-t.dev/docs)
 
