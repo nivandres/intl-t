@@ -5,10 +5,13 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { getLocale, isRSC, setLocale } from "../src/state";
 
 const domSetupKey = Symbol.for("intl-t.react.test.dom-setup");
+// next/server relies on the runtime fetch primitives, which happy-dom would replace
+const nativeFetchPrimitives = { fetch, Headers, Request, Response, URL, URLSearchParams };
 
 if (!(globalThis as Record<PropertyKey, unknown>)[domSetupKey]) {
   GlobalRegistrator.register();
   (globalThis as Record<PropertyKey, unknown>)[domSetupKey] = true;
+  Object.assign(globalThis, nativeFetchPrimitives);
 }
 
 describe("next state client", () => {

@@ -345,6 +345,7 @@ describe("dynamic import", () => {
   it("should work with integrated getlocale and preload", async () => {
     const t = await ct({
       allowedLocales: ["en", "es"],
+      preload: true,
       async locales() {
         return en;
       },

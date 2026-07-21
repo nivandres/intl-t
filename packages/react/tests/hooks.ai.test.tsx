@@ -1,12 +1,12 @@
 // AI generated test
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
-import { getT, setLocale as setCoreLocale } from "@intl-t/core";
+import { getT, setLocale as setCoreLocale, type Locale, type Translation } from "@intl-t/core";
 import "@testing-library/jest-dom";
 import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import { createElement } from "react";
 import { getClientLocale, setClientLocale, LOCALE_CLIENT_KEY } from "../src/client";
-import { useLocale } from "../src/hooks";
+import { useLocale, type LocaleState } from "../src/hooks";
 import { createTranslation as ct, TranslationNode } from "../src/translation";
 import messages from "./fixtures/messages.json";
 
@@ -30,11 +30,11 @@ function createReactTranslation() {
       },
     },
     mainLocale: "en",
-  }) as any;
+  });
 }
 
 function makeT() {
-  return ct({ locales: { en: messages, es: messages }, mainLocale: "en" }) as any;
+  return ct({ locales: { en: messages, es: messages }, mainLocale: "en" });
 }
 
 beforeEach(() => {
@@ -42,7 +42,7 @@ beforeEach(() => {
   localStorage.clear();
   sessionStorage.clear();
   window.history.replaceState({}, "", "/");
-  TranslationNode.t = null as never;
+  TranslationNode.t = null;
   TranslationNode.setLocale = setClientLocale; // pin the react setter: sibling test files (next) share this global
 });
 
@@ -52,9 +52,7 @@ afterEach(() => {
   localStorage.clear();
   sessionStorage.clear();
   window.history.replaceState({}, "", "/");
-  TranslationNode.locale = undefined as never;
-  TranslationNode.source = undefined as never;
-  TranslationNode.t = null as never;
+  Object.assign(TranslationNode, { locale: undefined, source: undefined, t: null });
 });
 
 describe("react hooks DOM", () => {
@@ -162,28 +160,33 @@ describe("getT — resolution order", () => {
   it("returns the explicit translation argument over everything else", () => {
     const a = makeT();
     const b = makeT();
+    // `getT(a)` does not typecheck with a concrete translation (its `Translation`
+    // constraint rejects concrete instances), so route the argument through the
+    // library's `any`-typed static slot to obtain a constraint-compatible handle.
+    TranslationNode.t = a;
+    const explicit: Translation = TranslationNode.t;
     TranslationNode.t = b;
-    expect(getT(a)).toBe(a);
+    expect<unknown>(getT(explicit)).toBe(a);
   });
 
   it("prefers this.t over the global TranslationNode.t", () => {
     const global = makeT();
     const local = makeT();
     TranslationNode.t = global;
-    expect(getT.call({ t: local })).toBe(local);
+    expect<unknown>(getT.call({ t: local })).toBe(local);
   });
 
   it("falls back to the global when the binding carries no translation", () => {
     const global = makeT();
     TranslationNode.t = global;
-    expect(getT.call({})).toBe(global);
+    expect<unknown>(getT.call({})).toBe(global);
   });
 
   it("does not return a settings object masquerading as a Translation", () => {
     // getT.call({settings}) currently returns the settings object itself, which is NOT a
     // Translation (has no .current). Anyone doing getT.call(x).current(...) would blow up.
     const binding = { settings: { locale: "en", allowedLocales: ["en"] } };
-    const resolved: any = getT.call(binding);
+    const resolved = getT.call(binding);
     expect(typeof resolved?.current === "function" || resolved == null).toBe(true);
   });
 });
@@ -194,7 +197,7 @@ describe("setLocale / setTLocale — target selection", () => {
     global.settings.locale = "en";
     TranslationNode.t = global;
 
-    const binding: any = { settings: { locale: "en" } };
+    const binding: { settings: { locale: Locale } } = { settings: { locale: "en" } };
     setCoreLocale.call(binding, "es");
 
     expect(binding.settings.locale).toBe("es");
@@ -240,14 +243,14 @@ describe("getClientLocale — detection edge cases", () => {
     const t = makeT();
     window.history.replaceState({}, "", "/EN/dashboard");
     const l = getClientLocale.call(t, LOCALE_CLIENT_KEY, true, ["en", "es"]);
-    expect(["en", "es", undefined]).toContain(l as any);
+    expect(["en", "es", undefined]).toContain(l);
   });
 });
 
 describe("useLocale — average usage", () => {
   it("persists to storage, syncs t.settings and updates the view on setLocale", () => {
     const t = makeT();
-    let api: any;
+    let api!: LocaleState<Locale>;
     function Probe() {
       api = useLocale.call(t, "en", { hydration: false });
       return createElement("output", { "data-testid": "l" }, String(api.locale));
@@ -263,7 +266,7 @@ describe("useLocale — average usage", () => {
   // hook.setLocale is the LOCAL setter: it changes only its own component. Isolation by design.
   it("keeps hook.setLocale local — a consumer's change does not move its siblings", () => {
     const t = makeT();
-    let a: any;
+    let a!: LocaleState<Locale>;
     function A() {
       a = useLocale.call(t, "en", { hydration: false });
       return createElement("output", { "data-testid": "a" }, String(a.locale));
@@ -303,11 +306,11 @@ describe("useLocale — average usage", () => {
   it("isolates a consumer with subscribeToTState:false from the global fan-out", () => {
     const t = makeT();
     function Isolated() {
-      const l = useLocale.call(t, "en", { hydration: false, subscribeToTState: false }) as any;
+      const l = useLocale.call(t, "en", { hydration: false, subscribeToTState: false });
       return createElement("output", { "data-testid": "iso" }, String(l.locale));
     }
     function Shared() {
-      const l = useLocale.call(t, "en", { hydration: false }) as any;
+      const l = useLocale.call(t, "en", { hydration: false });
       return createElement("output", { "data-testid": "shared" }, String(l.locale));
     }
     const view = render(createElement("div", null, createElement(Isolated), createElement(Shared)));
@@ -321,8 +324,8 @@ describe("useLocale — average usage", () => {
   // Controlled mode: when `locale` is provided the value reflects the prop reactively.
   it("reflects the `locale` option reactively (controlled)", () => {
     const t = makeT();
-    function Probe({ locale }: { locale: string }) {
-      const l = useLocale.call(t, undefined, { hydration: false, locale }) as any;
+    function Probe({ locale }: { locale: Locale }) {
+      const l = useLocale.call(t, undefined, { hydration: false, locale });
       return createElement("output", { "data-testid": "l" }, String(l.locale));
     }
     const view = render(createElement(Probe, { locale: "es" }));
@@ -334,10 +337,10 @@ describe("useLocale — average usage", () => {
   // Controlled setter is pure delegation: it fires onLocaleChange but does NOT own state or persist.
   it("delegates setLocale to onLocaleChange in controlled mode (no state/storage mutation)", () => {
     const t = makeT();
-    const onLocaleChange = mock((_: string) => {});
-    let api: any;
+    const onLocaleChange = mock((_: Locale) => {});
+    let api!: LocaleState<Locale>;
     function Probe() {
-      api = useLocale.call(t, undefined, { hydration: false, locale: "es", onLocaleChange }) as any;
+      api = useLocale.call(t, undefined, { hydration: false, locale: "es", onLocaleChange });
       return createElement("output", { "data-testid": "l" }, String(api.locale));
     }
     const view = render(createElement(Probe));
@@ -351,8 +354,8 @@ describe("useLocale — average usage", () => {
 
   it("calls onLocaleChange exactly once with the new locale", () => {
     const t = makeT();
-    const onLocaleChange = mock((_: string) => {});
-    let api: any;
+    const onLocaleChange = mock((_: Locale) => {});
+    let api!: LocaleState<Locale>;
     function Probe() {
       api = useLocale.call(t, "en", { hydration: false, onLocaleChange });
       return null;
@@ -366,7 +369,7 @@ describe("useLocale — average usage", () => {
 
   it("scopes storage writes to the provided key", () => {
     const t = makeT();
-    let api: any;
+    let api!: LocaleState<Locale>;
     function Probe() {
       api = useLocale.call(t, "en", { hydration: false, key: `${LOCALE_CLIENT_KEY}/admin` });
       return null;

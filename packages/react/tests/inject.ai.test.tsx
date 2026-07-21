@@ -27,9 +27,7 @@ afterEach(() => {
   localStorage.clear();
   sessionStorage.clear();
   window.history.replaceState({}, "", "/");
-  TranslationNode.locale = undefined as never;
-  TranslationNode.source = undefined as never;
-  TranslationNode.t = null as never;
+  Object.assign(TranslationNode, { locale: undefined, source: undefined, t: null });
 });
 
 describe("react chunk injection", () => {
@@ -49,7 +47,7 @@ describe("react chunk injection", () => {
       label: ({ children, key }) => <Fragment key={key}>{children}</Fragment>,
     });
 
-    const view = render(<div data-testid="content">{content as any}</div>);
+    const view = render(<div data-testid="content">{content}</div>);
 
     expect(view.getByTestId("card").classList.contains("hero")).toBe(true);
     expect(view.getByTestId("card").getAttribute("data-count")).toBe("2");
@@ -62,7 +60,7 @@ describe("react chunk injection", () => {
       icon: "*",
     });
 
-    const view = render(<div data-testid="content">{content as any}</div>);
+    const view = render(<div data-testid="content">{content}</div>);
 
     expect(view.container.querySelector('[data-testid="content"]')?.textContent).toBe("Click here or *");
     expect(document.querySelector("span")?.textContent).toBe("here");
@@ -73,21 +71,26 @@ describe("react chunk injection", () => {
         tagAttributes: "",
         tagContent: "",
         tagName: "span",
+        tagProps: {},
         value: "plain",
-      } as any),
+      }),
     ).toBe("plain");
   });
 
   it("creates a React element through Chunk when no plain value is provided", () => {
-    const view = render(
-      Chunk({
-        children: "strong text",
-        key: 1,
-        tagAttributes: "",
-        tagContent: "strong text",
-        tagName: "strong",
-      } as any) as any,
-    );
+    const element = Chunk({
+      children: "strong text",
+      key: 1,
+      tagAttributes: "",
+      tagContent: "strong text",
+      tagProps: {},
+      tagName: "strong",
+    });
+
+    // Chunk is typed to possibly return nothing, so narrow before rendering.
+    if (!element) throw new Error("Chunk should build an element from tag content");
+
+    const view = render(element);
 
     expect(view.container.querySelector("strong")?.textContent).toBe("strong text");
   });
@@ -101,7 +104,7 @@ describe("react chunk injection", () => {
       ),
     });
 
-    const view = render(<div data-testid="content">{content as any}</div>);
+    const view = render(<div data-testid="content">{content}</div>);
 
     expect(view.getByTestId("pill-primary").textContent).toBe("One");
     expect(view.container.querySelector('[data-testid="content"]')?.textContent).toBe("Before One After");
@@ -109,7 +112,7 @@ describe("react chunk injection", () => {
 
   it("exposes injectReactChunk as an alias of injectReactChunks", () => {
     const content = injectReactChunk("<mark>highlight</mark>");
-    const view = render(<div data-testid="content">{content as any}</div>);
+    const view = render(<div data-testid="content">{content}</div>);
 
     expect(view.container.querySelector("mark")?.textContent).toBe("highlight");
   });

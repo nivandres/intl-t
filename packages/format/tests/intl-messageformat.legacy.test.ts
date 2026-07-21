@@ -386,14 +386,14 @@ describe("IntlMessageFormat", function () {
         onMissingVariable: (k: string, t: string) => {
           throw new Error(`missing ${k} in ${t}`);
         },
-      } as any;
+      };
 
       it("should fail when the argument in the pattern is not provided (strict policy)", function () {
-        expect(() => iv("{STATE}", {} as any, strict)).toThrow("missing STATE");
+        expect(() => iv("{STATE}", {}, strict)).toThrow("missing STATE");
       });
 
       it("should fail when the argument in the pattern has a typo (strict policy)", function () {
-        expect(() => iv("{STATE}", { "ST ATE": state } as any, strict)).toThrow("missing STATE");
+        expect(() => iv("{STATE}", { "ST ATE": state }, strict)).toThrow("missing STATE");
       });
 
       it("should succeed when the argument is correct", function () {

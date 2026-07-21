@@ -1,7 +1,7 @@
 // AI generated test
 import { describe, expect, it } from "bun:test";
 import { currency, date, list, number, relative } from "../src/formatters";
-import { state } from "../src/state";
+import { getLocale, state } from "../src/state";
 
 describe("format helpers", () => {
   it("formats lists, numbers, currency and dates with the provided locale", () => {
@@ -34,5 +34,9 @@ describe("format state", () => {
     expect(state.localeOptions.locale).toBeString();
     expect(state.timeZone).toBe(state.localeOptions.timeZone);
     expect(state.locale).toBeString();
+  });
+
+  it("resolves the shared state locale through the getLocale helper", () => {
+    expect(getLocale()).toBe(state.locale);
   });
 });

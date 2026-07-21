@@ -63,7 +63,7 @@ describe("next middleware", () => {
           locales: ["es-MX"],
         },
       ],
-    } as any);
+    });
     const request = createRequest("/docs");
 
     Object.defineProperty(request.nextUrl, "hostname", {
@@ -322,7 +322,7 @@ describe("next middleware", () => {
       return response;
     });
 
-    const responsePromise = composed(createRequest("/docs"), void 0 as any, void 0 as any);
+    const responsePromise = composed(createRequest("/docs"));
 
     return Promise.resolve(responsePromise).then(response => {
       expect(response).toBeDefined();

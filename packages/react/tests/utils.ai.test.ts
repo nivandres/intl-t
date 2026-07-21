@@ -25,12 +25,12 @@ describe("check — child coercion safety", () => {
   });
 
   it("unwraps translation nodes to their base", () => {
-    const t = createTranslation({ locales: { en: { hello: "hi there" } } }) as any;
+    const t = createTranslation({ locales: { en: { hello: "hi there" } } });
     expect(String(check(t.hello))).toBe("hi there");
   });
 
   it("unwraps a node whose base is an empty string (falsy) to the string, not the node", () => {
-    const t = createTranslation({ locales: { en: { empty: "" } } }) as any;
+    const t = createTranslation({ locales: { en: { empty: "" } } });
     expect(check(t.empty)).toBe("");
   });
 });

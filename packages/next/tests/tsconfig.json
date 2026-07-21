@@ -1,0 +1,9 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "noEmit": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": ["./**/*.ts", "./**/*.tsx", "./**/*.json"]
+}

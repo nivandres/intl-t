@@ -27,7 +27,7 @@ function createReactTranslation() {
       },
     },
     mainLocale: "en",
-  }) as any;
+  });
 }
 
 beforeEach(() => {
@@ -42,9 +42,7 @@ afterEach(() => {
   localStorage.clear();
   sessionStorage.clear();
   window.history.replaceState({}, "", "/");
-  TranslationNode.locale = undefined as never;
-  TranslationNode.source = undefined as never;
-  TranslationNode.t = null as never;
+  Object.assign(TranslationNode, { locale: undefined, source: undefined, t: null });
 });
 
 describe("react client helpers", () => {

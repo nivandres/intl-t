@@ -1,4 +1,5 @@
 import { describe, it, expect } from "bun:test";
+import { Fragment } from "react";
 import { injectReactChunks as ir, createTranslation as ct } from "../src";
 import * as en from "./fixtures/messages.json";
 
@@ -15,16 +16,20 @@ describe("react plugin", () => {
   });
 });
 
+const parts = (x: unknown): unknown => ((x as any)?.type === Fragment ? (x as any).props.children : x);
+
 describe("variable injection", () => {
   it("should work with simple variables", () => {
     expect(ir("<a>test</a>", { a: "a" })).toEqual("a");
     expect(ir("<a>test</a>", { a: ({ children }) => `${children}a` })).toEqual("testa");
     expect(
-      ir("<a /> <a />", {
-        a: ({ children }) => children,
-      }),
+      parts(
+        ir("<a /> <a />", {
+          a: ({ children }) => children,
+        }),
+      ),
     ).toEqual([null, " ", null]);
-    expect(ir("hola <b/> que <a/> tal <b/> amigo <b/> como <a/>", { a: "a", b: "b" })).toEqual([
+    expect(parts(ir("hola <b/> que <a/> tal <b/> amigo <b/> como <a/>", { a: "a", b: "b" }))).toEqual([
       "hola ",
       "b",
       " que ",
@@ -39,16 +44,18 @@ describe("variable injection", () => {
   });
   it("should work with complex variables", () => {
     expect(
-      ir('hello <div className="mx-2 pl-2" ><a>a</a></div>', {
-        div: ({ children }) => children,
-        a: ({ children }) => children,
-      }),
+      parts(
+        ir('hello <div className="mx-2 pl-2" ><a>a</a></div>', {
+          div: ({ children }) => children,
+          a: ({ children }) => children,
+        }),
+      ),
     ).toEqual(["hello ", "a"]);
-    expect(ir("<div>hello</div>")).toEqual((<div key={0}>hello</div>) as any);
-    expect(ir("<juan>hello</juan>", { juan: ({ children }) => <div>{children}</div> })).toEqual((<div>hello</div>) as any);
-    const a = ir("icons <globe /> icon", { globe: () => "🌎" });
+    expect(ir("<div>hello</div>")).toEqual(<div key={0}>hello</div>);
+    expect(ir("<juan>hello</juan>", { juan: ({ children }) => <div>{children}</div> })).toEqual(<div>hello</div>);
+    const a = parts(ir("icons <globe /> icon", { globe: () => "🌎" }));
     expect(a).toEqual(["icons ", "🌎", " icon"]);
-    expect(ir("more items <globe>content</globe> o <globe />", { globe: () => "🌍" })).toEqual(["more items ", "🌍", " o ", "🌍"]);
+    expect(parts(ir("more items <globe>content</globe> o <globe />", { globe: () => "🌍" }))).toEqual(["more items ", "🌍", " o ", "🌍"]);
   });
   // it("should work integrated", () => {
   //   const t = ct({ locales: { en: { hello: `hello <div className="mx-2 pl-2" ><a>a</a></div>` } } });
@@ -57,10 +64,10 @@ describe("variable injection", () => {
   //     <div key={0} className="mx-2 pl-2">
   //       hola
   //     </div>,
-  //   ] as any);
+  //   ]);
   //   expect(t.hello.use({ div: ({ children }) => children, a: ({ children }) => children })).toEqual([
   //     "hello ",
   //     "a",
-  //   ] as any);
+  //   ]);
   // });
 });

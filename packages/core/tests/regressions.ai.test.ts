@@ -2,15 +2,20 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { createTranslation, TranslationNode } from "../src/index";
 
+// Captured at module load so the statics can be restored to their pre-file values
+// without forcing types: they are undefined at runtime until something assigns them.
+const initialStaticLocale = TranslationNode.locale;
+const initialStaticSource = TranslationNode.source;
+
 afterEach(() => {
-  TranslationNode.t = null as never;
-  TranslationNode.locale = undefined as never;
-  TranslationNode.source = undefined as never;
+  TranslationNode.t = null;
+  TranslationNode.locale = initialStaticLocale;
+  TranslationNode.source = initialStaticSource;
 });
 
 describe("variables never mutate shared state", () => {
   it("does not contaminate sibling keys when calling with path + variables", () => {
-    const t = createTranslation({ locales: { en: { a: "A says {name}", b: "B says {name}" } } }) as any;
+    const t = createTranslation({ locales: { en: { a: "A says {name}", b: "B says {name}" } } });
     expect(String(t("a", { name: "Alice" }))).toBe("A says Alice");
     expect(String(t.b)).toBe("B says {name}"); // sibling untouched: no root-level Object.assign
     expect(t.variables?.name).toBeUndefined(); // root carries no leaked call variables
@@ -18,19 +23,19 @@ describe("variables never mutate shared state", () => {
 
   it("does not mutate the user's source JSON module", () => {
     const en = { n1: { n2: "hello {name}", values: { name: "default" } } };
-    const t = createTranslation({ locales: { en } }) as any;
+    const t = createTranslation({ locales: { en } });
     t.n1({ name: "REQUEST_A_SECRET" });
     expect(en.n1.values).toEqual({ name: "default" }); // source object stays pristine
   });
 
   it("keeps parent→child variable inheritance working after the copy-on-write set()", () => {
-    const t = createTranslation({ locales: { en: { section: { greet: "hi {name}" } } } }) as any;
+    const t = createTranslation({ locales: { en: { section: { greet: "hi {name}" } } } });
     t.section.set({ name: "Ivan" });
     expect(String(t.section.greet)).toBe("hi Ivan"); // child still inherits via the values getter chain
   });
 
   it("keeps documented sticky variables on the resolved node", () => {
-    const t = createTranslation({ locales: { en: { greet: "hey {name}" } } }) as any;
+    const t = createTranslation({ locales: { en: { greet: "hey {name}" } } });
     t.greet({ name: "Mia" });
     expect(String(t.greet)).toBe("hey Mia"); // node-level stickiness is the documented contract
   });
@@ -43,8 +48,8 @@ describe("async loading lifecycle", () => {
       allowedLocales: ["en", "es"],
       mainLocale: "en",
       preload: true,
-    }) as any;
-    await expect(Promise.resolve().then(() => t)).rejects.toThrow("boom");
+    });
+    await expect(Promise.resolve().then<unknown>(() => t)).rejects.toThrow("boom");
   });
 
   it("touching t.current before the first await no longer destroys the preload thenable", async () => {
@@ -54,11 +59,24 @@ describe("async loading lifecycle", () => {
       allowedLocales: ["en"],
       mainLocale: "en",
       preload: true,
-    }) as any;
+    });
     void t.current; // pre-await read must not delete `then` without loading
     const resolved = await t;
     expect(loaded).toBeGreaterThan(0);
     expect(String(resolved.hello)).toBe("hello");
+  });
+
+  it("rejects awaiting a locale node whose loader fails without preload", async () => {
+    const t = createTranslation({
+      // the rejecting loader declares the tree shape it would have resolved, otherwise the
+      // inferred es tree collapses to never and the locale node loses its typing
+      locales: { en: async () => ({ hello: "hi" }), es: async (): Promise<{ hello: string }> => Promise.reject(new Error("es-down")) },
+      allowedLocales: ["en", "es"],
+      mainLocale: "en",
+    });
+    // the node thenable itself surfaces the loader failure instead of hanging
+    await expect((async () => t.es)()).rejects.toThrow("es-down");
+    expect(t.es.node).toBeNull(); // the failed payload resets instead of caching a rejection
   });
 
   it("self-heals a transient loader failure instead of caching the rejection", async () => {
@@ -74,9 +92,9 @@ describe("async loading lifecycle", () => {
       allowedLocales: ["en"],
       mainLocale: "en",
       preload: true,
-    }) as any;
-    // getNode's failure resets node to null and the getLocale wrapper uncaches the rejected
-    // promise, so the preload path retries within the same await and resolves.
+    });
+    await expect(Promise.resolve(t)).rejects.toThrow("transient");
+    expect(attempts).toBe(1);
     const resolved = await t;
     expect(attempts).toBe(2);
     expect(String(resolved.hello)).toBe("recovered");
@@ -91,7 +109,7 @@ describe("preload thenable edge cases", () => {
       allowedLocales: ["en"],
       mainLocale: "en",
       preload: true,
-    }) as any;
+    });
     await t;
     const before = loads;
     await t; // `then` was deleted on success → instant, no reload
@@ -108,7 +126,7 @@ describe("preload thenable edge cases", () => {
       allowedLocales: ["en", "es"],
       mainLocale: "en",
       preload: true,
-    }) as any;
+    });
     // NOTE: on the ROOT, t.current === t, so `await t.current` goes through the preload
     // thenable and loads ALL locales. The granular "just this locale" contract lives on the
     // locale sibling nodes: await t.es → only the es loader runs (plus en from construction).
@@ -129,7 +147,7 @@ describe("preload thenable edge cases", () => {
       allowedLocales: ["en", "es"],
       mainLocale: "en",
       preload: true,
-    }) as any;
+    });
     t.setLocale("es");
     const es = await t.current;
     expect(loads.es).toBeGreaterThan(0);
@@ -137,14 +155,14 @@ describe("preload thenable edge cases", () => {
   });
 
   it("does not expose a thenable when preload is off", () => {
-    const t = createTranslation({ locales: { en: { hello: "hi" } }, preload: false }) as any;
-    expect((t as any).hasOwnProperty("then")).toBe(false); // sync trees must not look promise-like
+    const t = createTranslation({ locales: { en: { hello: "hi" } }, preload: false });
+    expect(t.hasOwnProperty("then")).toBe(false); // sync trees must not look promise-like
   });
 });
 
 describe("falsy leaf content", () => {
   it('renders "" and 0 leaves instead of loading the whole locale tree into them', () => {
-    const t = createTranslation({ locales: { en: { empty: "", zero: 0, other: "text" } } }) as any;
+    const t = createTranslation({ locales: { en: { empty: "", zero: 0, other: "text" } } });
     expect(String(t.empty)).toBe("");
     expect(String(t.zero)).toBe("0");
   });
@@ -152,19 +170,21 @@ describe("falsy leaf content", () => {
 
 describe("call() path resolution edges", () => {
   it("resolves array index 0 through the array-path form (filter must keep 0)", () => {
-    const t = createTranslation({ locales: { en: { items: ["first", "second"] } } }) as any;
-    expect(String(t(["items", 0]))).toBe("first");
-    expect(String(t(["items", 1]))).toBe("second");
+    const t = createTranslation({ locales: { en: { items: ["first", "second"] } } });
+    // numeric segments are runtime-supported but not part of the typed path surface,
+    // so the public call method (typed with any[] rest parameters) drives them.
+    expect(String(t.call(["items", 0]))).toBe("first");
+    expect(String(t.call(["items", 1]))).toBe("second");
   });
 
   it("accepts a single numeric key without crashing", () => {
-    const t = createTranslation({ locales: { en: { items: ["first", "second"] } } }) as any;
-    expect(String(t.items(1))).toBe("second");
+    const t = createTranslation({ locales: { en: { items: ["first", "second"] } } });
+    expect(String(t.items.call(1))).toBe("second");
   });
 
   it("drops null/undefined path segments safely", () => {
-    const t = createTranslation({ locales: { en: { hello: "hi" } } }) as any;
-    expect(String(t(undefined as any) ?? t)).toBeDefined(); // no crash, resolves to the node itself
+    const t = createTranslation({ locales: { en: { hello: "hi" } } });
+    expect(String(t(undefined) ?? t)).toBeDefined(); // no crash, resolves to the node itself
   });
 });
 
@@ -182,7 +202,7 @@ describe("async loading race stress", () => {
       allowedLocales: ["en", "es"],
       mainLocale: "en",
       preload: true,
-    }) as any;
+    });
     const all = await Promise.all(Array.from({ length: 20 }, () => Promise.resolve(t)));
     all.forEach(r => expect(String(r.hello)).toBe("hello"));
     expect(loads).toEqual({ en: 1, es: 1 }); // getLocale caches the in-flight promise per locale
@@ -194,7 +214,7 @@ describe("async loading race stress", () => {
       allowedLocales: ["en", "es"],
       mainLocale: "en",
       preload: true,
-    }) as any;
+    });
     const p = Promise.all(Array.from({ length: 10 }, () => Promise.resolve(t)));
     t.setLocale("es"); // mid-load
     await p;
@@ -202,14 +222,16 @@ describe("async loading race stress", () => {
     expect(String(cur.hello)).toBe("hola");
   });
 
-  it("does not hang or loop when the loader resolves undefined", async () => {
+  it("does not hang or loop when the loader resolves an empty payload", async () => {
     let calls = 0;
+    // JSON.parse keeps the empty payload untyped naturally: loaders resolving nothing are a
+    // runtime resilience path that the typed locales surface does not model.
     const t = createTranslation({
-      locales: { en: async () => (calls++, undefined as any) },
+      locales: { en: async () => (calls++, JSON.parse("null")) },
       allowedLocales: ["en"],
       mainLocale: "en",
       preload: true,
-    }) as any;
+    });
     await t; // must settle within the test timeout instead of re-invoking forever
     expect(calls).toBeLessThan(10);
   });
@@ -224,8 +246,8 @@ describe("async loading race stress", () => {
       allowedLocales: ["en", "es", "fr", "de", "it"],
       mainLocale: "en",
       preload: true,
-    }) as any;
-    await expect(Promise.resolve().then(() => t)).rejects.toThrow("de-down");
+    });
+    await expect(Promise.resolve().then<unknown>(() => t)).rejects.toThrow("de-down");
     expect(String((await t.es).hello)).toBe("hello-es");
     expect(String((await t.fr).hello)).toBe("hello-fr");
   });
@@ -237,12 +259,15 @@ describe("async loading race stress", () => {
       allowedLocales: ["en", "es", "fr"],
       mainLocale: "en",
       preload: true,
-    }) as any;
-    const [en, es, fr] = await Promise.all([
-      Promise.all(Array.from({ length: 7 }, () => Promise.resolve(t.en))).then(a => a[0]),
-      Promise.all(Array.from({ length: 7 }, () => Promise.resolve(t.es))).then(a => a[0]),
-      Promise.all(Array.from({ length: 7 }, () => Promise.resolve(t.fr))).then(a => a[0]),
+    });
+    const groups = await Promise.all([
+      Promise.all(Array.from({ length: 7 }, () => Promise.resolve(t.en))),
+      Promise.all(Array.from({ length: 7 }, () => Promise.resolve(t.es))),
+      Promise.all(Array.from({ length: 7 }, () => Promise.resolve(t.fr))),
     ]);
+    const [en] = groups[0];
+    const [es] = groups[1];
+    const [fr] = groups[2];
     expect([String(en.hi), String(es.hi), String(fr.hi)]).toEqual(["hi-en", "hi-es", "hi-fr"]);
     expect(loads).toEqual({ en: 1, es: 1, fr: 1 });
   });
@@ -253,7 +278,7 @@ describe("async loading race stress", () => {
       allowedLocales: ["en"],
       mainLocale: "en",
       preload: true,
-    }) as any;
+    });
     await t;
     expect(String(t.a.b.c({ v: "1" }))).toBe("deep 1");
   });
@@ -261,15 +286,15 @@ describe("async loading race stress", () => {
 
 describe("variables stress", () => {
   it("keeps the source JSON pristine after 1000 distinct-variable calls on one node", () => {
-    const en = { msg: "hi {name} #{i}", other: "plain {name}", values: { name: "seed" } } as any;
+    const en = { msg: "hi {name} #{i}", other: "plain {name}", values: { name: "seed" } };
     const snapshot = JSON.stringify(en);
-    const t = createTranslation({ locales: { en } }) as any;
+    const t = createTranslation({ locales: { en } });
     for (let i = 0; i < 1000; i++) expect(String(t.msg({ name: "u" + i, i }))).toBe(`hi u${i} #${i}`);
     expect(JSON.stringify(en)).toBe(snapshot);
   });
 
   it("renders each node's own variables across 500 interleaved rounds on 2 siblings", () => {
-    const t = createTranslation({ locales: { en: { a: "A={x}", b: "B={x}" } } }) as any;
+    const t = createTranslation({ locales: { en: { a: "A={x}", b: "B={x}" } } });
     for (let i = 0; i < 500; i++) {
       expect(String(t.a({ x: "a" + i }))).toBe("A=a" + i);
       expect(String(t.b({ x: "b" + i }))).toBe("B=b" + i);
@@ -279,14 +304,14 @@ describe("variables stress", () => {
   });
 
   it("does not leak call variables into siblings after 1000 root path-calls", () => {
-    const t = createTranslation({ locales: { en: { x: "X {p}", y: "Y {p}" } } }) as any;
+    const t = createTranslation({ locales: { en: { x: "X {p}", y: "Y {p}" } } });
     for (let i = 0; i < 1000; i++) void String(t("x", { p: i }));
     expect(String(t.y)).toBe("Y {p}");
     expect(t.variables?.p).toBeUndefined();
   });
 
   it("isolates variables between locale siblings of the same key", () => {
-    const t = createTranslation({ locales: { en: { m: "en {x}" }, es: { m: "es {x}" } }, mainLocale: "en" }) as any;
+    const t = createTranslation({ locales: { en: { m: "en {x}" }, es: { m: "es {x}" } }, mainLocale: "en" });
     t.m({ x: "EN" });
     expect(String(t.m.es({ x: "ES" }))).toBe("es ES");
     expect(String(t.m)).toBe("en EN"); // en node keeps its own sticky variable
@@ -295,14 +320,14 @@ describe("variables stress", () => {
 
 describe("edge content", () => {
   it("resolves emoji keys via property access and call()", () => {
-    const t = createTranslation({ locales: { en: { "🚀": "rocket {name}", nest: { "🐈": "cat" } } } }) as any;
+    const t = createTranslation({ locales: { en: { "🚀": "rocket {name}", nest: { "🐈": "cat" } } } });
     expect(String(t["🚀"]({ name: "go" }))).toBe("rocket go");
     expect(String(t.nest["🐈"])).toBe("cat");
     expect(String(t("🚀", { name: "x" }))).toBe("rocket x");
   });
 
   it("reaches a literal dotted key by property/array-path while call('a.b') splits on ps", () => {
-    const t = createTranslation({ locales: { en: { "a.b": "dotted-literal", a: { b: "nested" } } } }) as any;
+    const t = createTranslation({ locales: { en: { "a.b": "dotted-literal", a: { b: "nested" } } } });
     expect(String(t["a.b"])).toBe("dotted-literal");
     expect(String(t(["a.b"]))).toBe("dotted-literal"); // array form never splits
     expect(String(t("a.b"))).toBe("nested"); // string form splits on the path separator
@@ -310,7 +335,7 @@ describe("edge content", () => {
 
   it("renders a 100KB leaf and reports its real length", () => {
     const big = "x".repeat(100_000) + "{name}";
-    const t = createTranslation({ locales: { en: { big } } }) as any;
+    const t = createTranslation({ locales: { en: { big } } });
     const r = String(t.big({ name: "!" }));
     expect(r.length).toBe(100_001);
     expect(r.endsWith("!")).toBe(true);
@@ -327,26 +352,29 @@ describe("edge content", () => {
           m: [[["x0", "x1"], ["y0"]], [["z0"]]],
         },
       },
-    }) as any;
+    });
     expect(String(t.grid[0][1])).toBe("b");
-    expect(String(t(["grid", 1, 0]))).toBe("c");
+    expect(String(t.call(["grid", 1, 0]))).toBe("c");
     expect(String(t.m[0][0][1])).toBe("x1");
-    expect(String(t(["m", 1, 0, 0]))).toBe("z0");
+    expect(String(t.call(["m", 1, 0, 0]))).toBe("z0");
   });
 
   it("iterates array nodes into their rendered children", () => {
-    const t = createTranslation({ locales: { en: { list: ["one {n}", "two"] } } }) as any;
-    expect([...t.list].map((x: any) => String(x))).toEqual(["one {n}", "two"]);
+    const t = createTranslation({ locales: { en: { list: ["one {n}", "two"] } } });
+    expect([...t.list].map(x => String(x))).toEqual(["one {n}", "two"]);
   });
 
   it("treats reserved keys ('values') as variables, not children", () => {
-    const t = createTranslation({ locales: { en: { sec: { values: { x: "V" }, msg: "m {x}" } } } }) as any;
+    const t = createTranslation({ locales: { en: { sec: { values: { x: "V" }, msg: "m {x}" } } } });
     expect(String(t.sec.msg)).toBe("m V");
     expect(t.sec.children).toEqual(["msg"]);
   });
 
   it("freezes today's false/null leaf rendering(null swallows into 'undefined')", () => {
-    const t = createTranslation({ locales: { en: { no: false, nil: null, ok: "ok" } } }) as any;
+    // boolean and null leaves are tolerated at runtime but not part of the typed Node
+    // surface, so the tree arrives as parsed JSON.
+    const en = JSON.parse('{ "no": false, "nil": null, "ok": "ok" }');
+    const t = createTranslation({ locales: { en } });
     expect(String(t.no)).toBe("false");
     // KNOWN: a null leaf currently re-triggers getLocale and renders "undefined" instead of
     // falling back to its path — a known limitation, frozen deliberately. Do not "fix" silently.
@@ -360,7 +388,7 @@ describe("cross-locale integrity", () => {
     const t = createTranslation({
       locales: { en: { greet: "hello {name}", nest: { deep: "deep-en" } }, es: { greet: "hola {name}", nest: { deep: "deep-es" } } },
       mainLocale: "en",
-    }) as any;
+    });
     expect(String(t.greet({ name: "A" }))).toBe("hello A");
     const es = t.setLocale("es");
     expect(String(es.greet({ name: "B" }))).toBe("hola B");
@@ -372,19 +400,24 @@ describe("cross-locale integrity", () => {
   });
 
   it("stays consistent through 50 setLocale alternations with per-iteration variables", () => {
-    const t = createTranslation({ locales: { en: { g: "hello {n}" }, es: { g: "hola {n}" } }, mainLocale: "en" }) as any;
+    // the key is named msg on purpose: a tree key named g would collide with the node's own
+    // g/global alias at the type level even though the runtime resolves the child.
+    const t = createTranslation({ locales: { en: { msg: "hello {n}" }, es: { msg: "hola {n}" } }, mainLocale: "en" });
+    // each branch switches with a literal locale: a union locale argument would produce a
+    // union of generic call signatures that TypeScript cannot invoke.
     for (let i = 0; i < 50; i++) {
-      const loc = i % 2 === 0 ? "es" : "en";
-      const cur = t.setLocale(loc);
-      expect(String(cur.g({ n: i }))).toBe((loc === "es" ? "hola " : "hello ") + i);
+      if (i % 2 === 0) expect(String(t.setLocale("es").msg({ n: i }))).toBe("hola " + i);
+      else expect(String(t.setLocale("en").msg({ n: i }))).toBe("hello " + i);
     }
   });
 
   it("freezes today's missing-key rendering in a secondary locale", () => {
+    // the typed locales surface correctly requires every locale to share the tree shape, so
+    // the deliberately incomplete es tree arrives as parsed JSON to break that contract.
     const t = createTranslation({
-      locales: { en: { onlyEn: "english-only", both: "both-en" }, es: { both: "both-es" } as any },
+      locales: { en: { onlyEn: "english-only", both: "both-en" }, es: JSON.parse('{ "both": "both-es" }') },
       mainLocale: "en",
-    }) as any;
+    });
     const es = t.setLocale("es");
     expect(String(es.both)).toBe("both-es");
     // KNOWN limitation (roadmap): a key missing in the active locale renders "undefined" today
@@ -393,7 +426,7 @@ describe("cross-locale integrity", () => {
   });
 
   it("hops locales at the node level via the locale sibling accessor", () => {
-    const t = createTranslation({ locales: { en: { sec: { msg: "en-msg" } }, es: { sec: { msg: "es-msg" } } }, mainLocale: "en" }) as any;
+    const t = createTranslation({ locales: { en: { sec: { msg: "en-msg" } }, es: { sec: { msg: "es-msg" } } }, mainLocale: "en" });
     expect(String(t.sec.msg.es)).toBe("es-msg");
     expect(String(t.sec.msg)).toBe("en-msg");
   });
@@ -401,16 +434,16 @@ describe("cross-locale integrity", () => {
 
 describe("settings/global coupling", () => {
   it("assigns settings.t on every instance, not only the first", () => {
-    const t1 = createTranslation({ locales: { en: { a: "1" } } }) as any;
-    const t2 = createTranslation({ locales: { en: { a: "2" } } }) as any;
+    const t1 = createTranslation({ locales: { en: { a: "1" } } });
+    const t2 = createTranslation({ locales: { en: { a: "2" } } });
     expect(t1.settings.t).toBeDefined();
     expect(t2.settings.t).toBeDefined();
     expect(t2.settings.t).not.toBe(t1.settings.t);
   });
 
   it("setLocale on one instance does not mutate another instance's locale", () => {
-    const t1 = createTranslation({ locales: { en: { a: "1" }, es: { a: "uno" } }, mainLocale: "en" }) as any;
-    const t2 = createTranslation({ locales: { en: { a: "2" }, es: { a: "dos" } }, mainLocale: "en" }) as any;
+    const t1 = createTranslation({ locales: { en: { a: "1" }, es: { a: "uno" } }, mainLocale: "en" });
+    const t2 = createTranslation({ locales: { en: { a: "2" }, es: { a: "dos" } }, mainLocale: "en" });
     t2.setLocale("es");
     expect(t2.settings.locale).toBe("es");
     expect(t1.settings.locale).toBe("en"); // no cross-instance bleed through the shared global setter

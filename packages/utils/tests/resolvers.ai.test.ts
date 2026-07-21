@@ -36,7 +36,7 @@ describe("resolvers", () => {
     });
 
     it("returns the extracted locale when no allowed locales are provided", () => {
-      expect(resolveLocale.call({}, "/en/about", undefined as never)).toBe("en");
+      expect(resolveLocale.call({}, "/en/about")).toBe("en");
     });
   });
 

@@ -1,5 +1,7 @@
 // AI generated test
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { afterAll, beforeEach, describe, expect, it, mock } from "bun:test";
+
+const headersSnapshot = { ...(await import("next/headers")) };
 
 const headerStore = new Map<string, string>();
 const cookieStore = new Map<string, string>();
@@ -29,6 +31,10 @@ const cookiesModule = await import("../src/cookies");
 const headersModule = await import("../src/headers");
 const requestModule = await import("../src/request");
 
+afterAll(() => {
+  mock.module("next/headers", () => headersSnapshot);
+});
+
 function createBinding() {
   return {
     settings: {
@@ -41,7 +47,7 @@ describe("next request state", () => {
   beforeEach(() => {
     headerStore.clear();
     cookieStore.clear();
-    cacheModule.getCache().locale = undefined as never;
+    cacheModule.getCache().locale = undefined;
   });
 
   it("sets the cached request locale", () => {
@@ -82,15 +88,16 @@ describe("next request state", () => {
     expect(await requestModule.getRequestLocale.call(binding, false)).toBe("fr");
 
     headerStore.set(headersModule.LOCALE_HEADERS_KEY, "es");
-    cacheModule.getCache().locale = undefined as never;
+    cacheModule.getCache().locale = undefined;
     expect(await requestModule.getRequestLocale.call(binding, false)).toBe("es");
   });
 
-  it("stores request locale in cache", async () => {
+  it("applies the request locale without touching the cookie by default", async () => {
     const binding = createBinding();
 
     expect(await requestModule.setRequestLocale.call(binding, "es")).toBe("es");
-    expect(cookieStore.get(cookiesModule.LOCALE_COOKIE_KEY)).toBe("es"); // the awaited chain must attach the cookie
+    expect(binding.settings.locale).toBe("es"); // reached the bound settings through the cache setter
+    expect(cookieStore.get(cookiesModule.LOCALE_COOKIE_KEY)).toBeUndefined(); // static rendering stays safe
   });
 
   it("returns undefined (not false) when dynamic resolution is prevented and the cache is empty", () => {
@@ -102,7 +109,7 @@ describe("next request state", () => {
 
     expect(await requestModule.getRequestLocale(false)).toBe("es");
 
-    cacheModule.getCache().locale = undefined as never;
+    cacheModule.getCache().locale = undefined;
     headerStore.clear();
     cookieStore.set(cookiesModule.LOCALE_COOKIE_KEY, "fr");
     expect(await requestModule.getRequestLocale(false)).toBe("fr");
