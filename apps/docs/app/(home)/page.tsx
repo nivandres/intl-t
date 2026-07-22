@@ -59,13 +59,7 @@ export default function HomePage() {
       </section>
 
       <section className="max-w-7xl mx-auto my-24 flex flex-wrap justify-center items-center gap-16">
-        <ImageZoom
-          className="w-xl max-w-full"
-          src="https://raw.githubusercontent.com/nivandres/intl-t/main/assets/banner.webp"
-          alt="banner"
-          width={1366}
-          height={768}
-        />
+        <ImageZoom className="w-xl max-w-full" src="/banner.webp" alt="banner" width={1366} height={768} />
         <div className="flex flex-col items-center gap-2">
           <h2 className="text-3xl font-bold text-center">Installing</h2>
           <p className="text-fd-muted-foreground text-center">Use your preferred package manager.</p>

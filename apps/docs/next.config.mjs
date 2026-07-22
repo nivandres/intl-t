@@ -6,14 +6,6 @@ const withMDX = createMDX();
 const config = {
   reactStrictMode: true,
   serverExternalPackages: ["typescript", "twoslash"],
-  images: {
-    remotePatterns: [
-      { hostname: "raw.githubusercontent.com" },
-      {
-        hostname: "img.shields.io",
-      },
-    ],
-  },
   async rewrites() {
     return [
       {

@@ -38,8 +38,8 @@ export const baseOptions: BaseLayoutProps = {
     },
     {
       icon: <MessageSquare />,
-      text: "Contact",
-      url: "https://discord.gg/5EbCXKpdyw",
+      text: "Discussions",
+      url: "https://github.com/nivandres/intl-t/discussions",
     },
     {
       icon: <Github />,

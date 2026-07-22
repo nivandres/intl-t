@@ -10,6 +10,7 @@ const inter = Noto_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://intl-t.dev"),
   title: "Intl-T",
   description:
     "Intl-T is a fully typed object-based i18n translation library for TypeScript, React, and Next.js. Fully Type-Safe, Fast & Lightweight, Framework Agnostic, Rich API, Formatting helpers, Next.js Navigation.",
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
   creator: "@nivandres",
   openGraph: {
     images: {
-      url: "https://raw.githubusercontent.com/nivandres/intl-t/main/assets/banner.webp",
+      url: "/banner.webp",
       alt: "Intl-T Banner Image",
     },
   },
