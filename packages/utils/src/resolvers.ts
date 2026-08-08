@@ -43,7 +43,7 @@ export function resolveHref<L extends Locale>(
   if (pathPrefix == "hidden" && locale) pathPrefix = "always";
   if (pathPrefix == "hidden") locale = "";
   else locale ||= currentLocale || getLocale() || (redirectPath as L);
-  const fn = (locale: LL<L>) => {
+  const fn = (locale: LL<L> = redirectPath as L) => {
     if (pathPrefix == "default" && locale == defaultLocale) locale = "";
     locale &&= `/${locale}`;
     return locale + href;
