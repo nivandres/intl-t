@@ -1,4 +1,5 @@
 .DS_Store
+.env*
 .next
 .source
 .vercel
@@ -8,4 +9,4 @@ bun.lock*
 desktop.ini
 dist
 node_modules
-.env*.local
+next-env.d.ts

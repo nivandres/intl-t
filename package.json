@@ -33,7 +33,6 @@
     "lint": "oxlint --fix",
     "typecheck": "tsc",
     "check": "bun run format && bun run lint && bun run typecheck",
-    "prepare": "bun husky",
     "bump": "bun run --filter '@intl-t/*' bump",
     "prepublishOnly": "bun run build",
     "release": "bun run --filter '@intl-t/*' release"
