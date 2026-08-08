@@ -30,6 +30,11 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./root": {
+      "types": "./dist/root-params.d.ts",
+      "react-server": "./dist/root-params.js",
+      "default": "./dist/root.js"
+    },
     "./*": {
       "types": "./dist/*.d.ts",
       "default": "./dist/*.js"

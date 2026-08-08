@@ -3,10 +3,12 @@ import { getCachedRequestLocale, setCachedRequestLocale } from "@intl-t/next/cac
 import { getCookieLocale, setCookieLocale } from "@intl-t/next/cookies";
 import { getHeadersLocale } from "@intl-t/next/headers";
 import { refresh as nextRefresh } from "next/cache";
+import { getRootLocale } from "./root.js";
 
 export * from "@intl-t/next/headers";
 export * from "@intl-t/next/cookies";
 export * from "@intl-t/next/cache";
+export * from "./root.js";
 
 export { getHeadersPathname as getRequestPathname } from "@intl-t/next/headers";
 export { getHeadersPathname as getPathname } from "@intl-t/next/headers";
@@ -15,12 +17,16 @@ export function getDynamicRequestLocale<L extends Locale>() {
   return getHeadersLocale.call(this).then(locale => locale || getCookieLocale.call(this)) as Promise<L | undefined>;
 }
 
-export function getRequestLocale<L extends Locale>(preventDynamic: true): L | undefined;
-export function getRequestLocale<L extends Locale>(preventDynamic?: boolean): Promise<L | undefined> | L | undefined;
-export function getRequestLocale<L extends Locale>(
-  preventDynamic: boolean = this?.settings?.preventDynamic ?? false,
-): Promise<L | undefined> | L | undefined {
-  return (getCachedRequestLocale.call(this) || (preventDynamic ? undefined : getDynamicRequestLocale.call(this))) as L;
+export const getSyncRequestLocale = getCachedRequestLocale;
+
+export function getAsyncRequestLocale<L extends Locale>(preventDynamic?: boolean): Promise<L | undefined> {
+  return getRootLocale.call(this).then(locale => locale || (preventDynamic ? void 0 : getDynamicRequestLocale.call(this))) as Promise<
+    L | undefined
+  >;
+}
+
+export function getRequestLocale<L extends Locale>(preventDynamic: boolean = this?.settings?.preventDynamic ?? false) {
+  return (getCachedRequestLocale.call(this) || getAsyncRequestLocale.call(this, preventDynamic)) as Promise<L | undefined> | L | undefined;
 }
 
 export function setRequestLocale<L extends Locale>(locale: L, preventDynamic = true, refresh = false) {

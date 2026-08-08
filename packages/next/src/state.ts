@@ -6,8 +6,6 @@ import React from "react";
 export { isClient } from "@intl-t/core/state";
 export const isRSC = !("useEffect" in React);
 
-export function getLocale<L extends Locale>(preventDynamic: true): L | undefined;
-export function getLocale<L extends Locale>(preventDynamic?: boolean): Promise<L | undefined> | L | undefined;
 export function getLocale<L extends Locale>(preventDynamic = false): Promise<L | undefined> | L | undefined {
   return (isRSC ? getRequestLocale.call(this, preventDynamic as boolean) : getLocaleFromClient.call(this, preventDynamic)) as L;
 }

@@ -83,7 +83,9 @@ describe("static rendering contract", () => {
   it("getRequestLocale with preventDynamic never invokes cookies() or headers()", async () => {
     const binding = createBinding();
 
-    expect(getRequestLocale.call(binding, true)).toBeUndefined();
+    // the static sources (cache, root params) still run — what preventDynamic blocks is everything
+    // that would opt the render into dynamic rendering
+    expect(await getRequestLocale.call(binding, true)).toBeUndefined();
 
     await flush();
     expect(calls.cookies).toBe(0);

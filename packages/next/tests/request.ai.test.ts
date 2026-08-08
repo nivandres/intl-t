@@ -100,8 +100,11 @@ describe("next request state", () => {
     expect(cookieStore.get(cookiesModule.LOCALE_COOKIE_KEY)).toBeUndefined(); // static rendering stays safe
   });
 
-  it("returns undefined (not false) when dynamic resolution is prevented and the cache is empty", () => {
-    expect(requestModule.getRequestLocale(true)).toBeUndefined(); // `?? defaultLocale` fallbacks depend on this
+  it("resolves to undefined (not false) when dynamic resolution is prevented and the cache is empty", async () => {
+    // preventDynamic gates the sources that would break static rendering, not the asynchrony:
+    // the static chain still runs, and callers that cannot await read the cache directly instead.
+    expect(requestModule.getSyncRequestLocale()).toBeUndefined();
+    expect(await requestModule.getRequestLocale(true)).toBeUndefined(); // `?? defaultLocale` fallbacks depend on this
   });
 
   it("resolves the request locale from headers and cookies", async () => {
