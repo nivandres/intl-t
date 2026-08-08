@@ -240,6 +240,33 @@ describe("translation behavior", () => {
     expect(current.allowedLocales).toEqual(["en", "es"]);
   });
 
+  it("serves an object-typed live view through toObject", async () => {
+    const t = createCoreExample();
+    const view = t.toObject();
+
+    expect(typeof view).toBe("object"); // the whole point: no Function face for React
+    expect(typeof t).toBe("function"); // the callable original is untouched
+    expect(t.toObject()).toBe(view); // lazy and cached: one proxy per node
+    expect(String(view.common.bye)).toBe("goodbye world"); // values flow through the node
+    expect(typeof view.common).toBe("object"); // the shield is recursive
+    expect(typeof view.common.nested.label).toBe("object");
+    const used = view.common.hello.use({ name: "Ada" });
+    expect(String(used)).toBe("hello Ada"); // invocation goes through .use — the edge-mode contract
+    expect(typeof used).toBe("object"); // and its result keeps the object face
+    expect(String(t("common.nested")("label"))).toBe("label en"); // call() chaining stays intact
+
+    const it = (view as any)[Symbol.iterator]();
+    expect(String(it.next().value)).toBe("Root EN"); // the iterator React consumes yields the base
+
+    const lazy: any = createTranslation({
+      locales: { en: async () => ({ hi: "hey" }) },
+      allowedLocales: ["en"],
+    });
+    expect(typeof lazy.toObject()).toBe("object"); // loader-mode construction stays safe
+    await lazy;
+    expect(String(lazy.toObject().hi)).toBe("hey");
+  });
+
   it("resolves async translations through then and promise helpers", async () => {
     const fromThen = createTranslation({ locales: createAsyncCoreLocales(), mainLocale: "en" });
     await fromThen.then?.(resolved => {

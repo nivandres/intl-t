@@ -396,6 +396,21 @@ export class TranslationNode<
   toString(): Content<N> & string {
     return String(this.base) as any;
   }
+  protected __obj__?: this;
+  toObject(): this {
+    return (this.__obj__ ??= new Proxy({} as object, {
+      get: (_target, p) => {
+        if (p === "use" || p === "get")
+          return (...args: any[]) => {
+            const value = this.call(...args);
+            return value instanceof TranslationNode ? value.toObject() : value;
+          };
+        const value = Reflect.get(this, p) as any;
+        return value instanceof TranslationNode ? value.toObject() : value;
+      },
+      has: (_target, p) => p in this,
+    }) as this);
+  }
   get promise(): Promise<this> | null {
     return this.then ? new Promise((r, c) => this.then?.(r).catch(c)) : null;
   }
