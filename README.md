@@ -26,11 +26,11 @@ International T`
 
 ## Features
 
-- 🌲 **Node-based translations** — the tree is the API: `t.page.section.title`
+- 🌲 **Node-based translations**, the tree is the API: `t.page.section.title`
 - 🎯 **Fully-typed** and **type-safe** translation keys, values and all sub-nodes
 - 🚚 Supports **JSON files** and dynamic **remote** imports on demand
 - 🪄 **Flexible and familiar drop-in syntax** integrating all the best parts of other i18n libraries
-- 🧩 **ICU message format** support and extended for complex and nested pluralization and formatting
+- 🧩 **ICU message format** support and extended for complex and nested formatting
 - ⚛️ **React components injections** out of the box with typed chunks and variables
 - 🚀 Supports **SSR**, **RSC** and **Static Rendering** with [Next.js](https://nextjs.org/), serverless friendly
 - 🔄 **On-demand locale loading** for lazy per-language chunks of just a few KB
@@ -48,11 +48,11 @@ Zero external dependencies · TypeScript ≥ 5 · Node 18+, Bun, Deno, Edge & br
 ## Demo
 
 ```jsx
-export default function Component() {
+export default function Page() {
   const { t } = useTranslation("homepage");
 
   return (
-    <>
+    <main>
       <h1>{t.title}</h1>
       <span>{t("welcome", { user: "Ivan" })}</span>
       <span>{t.summary({ count: 4 })}</span>
@@ -64,13 +64,13 @@ export default function Component() {
       <p>{t.page1.section[0].article1.title}</p>
       <p>{t("page1.section.0").article1("title")}</p>
       <p>{t.account(UserVariables).options.change}</p>
-    </>
+    </main>
   );
 }
 ```
 
 <details>
-<summary>View demo JSON source</summary>
+<summary>View JSON source</summary>
 
 ```jsonc
 // en.json
@@ -119,6 +119,6 @@ export default function Component() {
 
 ## Support
 
-If you find this project useful, [consider supporting its development ☕](https://github.com/sponsors/nivandres) or [leave a ⭐ on the Github Repo.](https://github.com/nivandres/intl-t) Also, if you need direct support or help, please don't hesitate to contact me.
+If you find this project useful, [consider supporting its development ☕](https://github.com/sponsors/nivandres) or [leave a ⭐ on the Github Repo.](https://github.com/nivandres/intl-t) Also, if you need direct support or help, please don't hesitate to contact.
 
 [![Donate via Github Sponsors](https://img.shields.io/github/sponsors/nivandres?label=Sponsors&color=hotpink&logo=github)](https://github.com/sponsors/nivandres) [![Star on Github](https://img.shields.io/github/stars/nivandres/intl-t)](https://github.com/nivandres/intl-t)
