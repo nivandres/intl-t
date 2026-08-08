@@ -20,7 +20,13 @@ export interface State<L extends Locale = Locale> {
 
 export const isClient = "window" in globalThis;
 export const hydration = "process" in globalThis;
-export const enabledEval = "eval" in globalThis;
+export const enabledEval = (() => {
+  try {
+    return Boolean(new Function());
+  } catch {
+    return false;
+  }
+})();
 
 let localeOptions: Intl.ResolvedDateTimeFormatOptions;
 let locale: Locale;
