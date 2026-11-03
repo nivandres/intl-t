@@ -29,6 +29,22 @@ inject("{a} plus {b} {(a+b), (typeof # != 'number') {is not a number. #} <0 {is 
 // nested injections
 ```
 
+### Security: message templates are trusted code
+
+The extended syntax above (`{(a+b)}`, comparison guards, nested conditions) is evaluated. **Treat
+message templates as code, not data** — the same trust you give the source files that import them.
+Do **not** feed attacker-controlled strings (CMS entries, user-submitted or third-party translation
+files) in as *templates*; a crafted template can run arbitrary expressions. Interpolated **values**
+(`inject(template, values)`) are safe to take from users.
+
+Expression evaluation can be turned off where it isn't needed (for example on a server rendering
+untrusted content). Set the `INTL_T_DISABLED_EVAL` environment variable, or pass `enabledEval: false`
+in the format options. It is also disabled automatically under runtimes that forbid code generation
+from strings (strict CSP, some edge runtimes), where the tree degrades gracefully to plain lookups.
+
+Variable injection is also hardened against denial-of-service via malformed templates: the parser
+runs in linear time and caps any single `{…}` fragment at `MAX_FRAGMENT_LENGTH` characters.
+
 ## React Injection
 
 To use the [React Chunk Injection](/docs/react#react-component-injection) function, import it from `intl-t/react`.

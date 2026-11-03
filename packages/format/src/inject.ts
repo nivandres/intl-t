@@ -17,9 +17,16 @@ export function nested(content: string) {
   return null;
 }
 
-export const variableRegex = /{{?(\w+|(?:\(.*?\)|[=+!><\-&|%*/?:#\w]|{\w+}|".*?"|'.*?')+)\s*(?:[,.;]+\s*(\w+)\s*)?(?:[,.;]+(.*))?}}?/s;
+// Hardened against catastrophic backtracking (CWE-1333 / GHSA-rgx2-wxxf-mhq9):
+// every alternative in the repeated group starts with a distinct character and matches an
+// atomic, non-overlapping token, so a fragment never splits exponentially many ways.
+export const variableRegex =
+  /{{?(\w+|(?:\((?:[^()]|\([^()]*\))*\)|[=+!><\-&|%*/?:#\w]|{\w+}|"[^"]*"|'[^']*')+)\s*(?:[,.;]+\s*(\w+)\s*)?(?:[,.;]+(.*))?}}?/s;
 export const instructionsRegex =
-  /(?:(?<t1>(?<k1>\w+))|(?<kn1>'|")(?<k2>.*?)(?<!`)\k<kn1>|(?<k3>(?:[=+!><\-/&|%*/?:]*(?:#|\(.*?\)|\w+|{\w+}|(?<kn2>'|").*?(?<!`)\k<kn2>|\[.*?\]|\/.*?\/w*))+))(?:[\s=>]|:(?!:\w))*(?:(?<=[\s:=>])(?<t_1>(?<v1>[\w#+-]+))(?=$|[,\s;])|(?<vn1>'|")(?<v2>.*?)(?<!`)\k<vn1>|(?<v3>{.*(?<!`)(?<vn2>})))|:?:?(?<t2>(?<k4>\w+))(?:[\\/](?<t_2>(?<v4>[\w.,+-]+))|\((?:(?<t_3>(?<v5>\w+))|(?<vn3>'|")(?<v6>.*?)(?<!`)\k<vn3>)\))?/s;
+  /(?:(?<t1>(?<k1>\w+))|(?<kn1>'|")(?<k2>.*?)(?<!`)\k<kn1>|(?<k3>(?:[=+!><\-&|%*?:]*(?:#|\([^()]*\)|\w|{\w+}|(?<kn2>'|").*?(?<!`)\k<kn2>|\[[^\]]*\]|\/[^/]*\/w*))+))(?:[\s=>]|:(?!:\w))*(?:(?<=[\s:=>])(?<t_1>(?<v1>[\w#+-]+))(?=$|[,\s;])|(?<vn1>'|")(?<v2>.*?)(?<!`)\k<vn1>|(?<v3>{.*(?<!`)(?<vn2>})))|:?:?(?<t2>(?<k4>\w+))(?:[\\/](?<t_2>(?<v4>[\w.,+-]+))|\((?:(?<t_3>(?<v5>\w+))|(?<vn3>'|")(?<v6>.*?)(?<!`)\k<vn3>)\))?/s;
+// Second layer: a single {…} fragment longer than this is treated as literal text instead of
+// being parsed, bounding worst-case regex work regardless of future pattern edits.
+export const MAX_FRAGMENT_LENGTH = 1e4;
 const instructionRegex = /{(.*)}/s;
 
 export function instructionsMatch(content: string) {
@@ -57,9 +64,16 @@ export function injectVariables<T extends string, V extends Values>(
     evaluator = ev,
   } = formatOptions as InjectOptions;
   let match: RegExpMatchArray | null | undefined;
+  let fragment: ReturnType<typeof nested>;
   const matches = new Set();
   let cursor = 0;
-  while ((match = nested(content.slice(cursor))?.value.match(variableRegex))) {
+  while ((fragment = nested(content.slice(cursor)))) {
+    if (fragment.value.length > MAX_FRAGMENT_LENGTH) {
+      // Over-long fragment: leave it as literal text and advance past it.
+      cursor += fragment.offset + 1;
+      continue;
+    }
+    if (!(match = fragment.value.match(variableRegex))) break;
     let [target, key = fallback as string, action = "", instruction = action] = match;
     if (matches.has(target)) {
       cursor += content.slice(cursor).indexOf(target) + target.length;
