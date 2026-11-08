@@ -27,6 +27,15 @@ export const instructionsRegex =
 // Second layer: a single {…} fragment longer than this is treated as literal text instead of
 // being parsed, bounding worst-case regex work regardless of future pattern edits.
 export const MAX_FRAGMENT_LENGTH = 1e4;
+
+// Values are data, never template syntax. Each inserted value is escaped with the template escape
+// character (`) so no parser reads braces, `#`, markup, quotes or backticks from it, and only the
+// outermost call unescapes. Callers that parse the output further (option branches, React chunk
+// injection) pass KEEP_ESCAPES and unescape once they are done.
+export const KEEP_ESCAPES = Symbol.for("intl-t.inject.keep-escapes");
+const escapeValue = (value: unknown) => String(value).replace(/[`{}#<>"']/g, "`$&");
+export const unescapeContent = (content: string) => content.replace(/`(.)/g, "$1");
+const own = (object: object, key: string) => Object.prototype.hasOwnProperty.call(object, key);
 const instructionRegex = /{(.*)}/s;
 
 export function instructionsMatch(content: string) {
@@ -81,12 +90,11 @@ export function injectVariables<T extends string, V extends Values>(
     }
     matches.add(target);
     if (fallback) key = key.replace(/#+/g, fallback);
-    let v;
+    let v: any;
     if (!key.match(/^\w+$/)) {
       const k = key.match(/\w+/)?.[0] ?? fallback;
-      [...key.matchAll(/{(\w+)}|(\w+)/g)].forEach(
-        ([i, _, v = _]) => v in variables && (key = key.replace(i, JSON.stringify(variables[v]))),
-      );
+      // single pass: an inserted JSON value is never scanned again
+      key = key.replace(/{(\w+)}|(\w+)/g, (m, ref, word = ref) => (own(variables, word) ? JSON.stringify(variables[word]) : m));
       v = evaluator?.(key, enabledEval);
       key = k;
     } else v = variables[key];
@@ -112,10 +120,10 @@ export function injectVariables<T extends string, V extends Values>(
         value = `<${key} ${instruction}/>`;
         break;
       case Array.isArray(v):
-        value = format.list(v as string[], options, locale);
+        value = escapeValue(format.list(v as string[], options, locale));
         break;
       case /^(time)?(relativ[eoa]|remain(ing)?)s?(time?)?$/im.test(action):
-        value = format.relative(v, options, locale);
+        value = escapeValue(format.relative(v, options, locale));
         break;
       case v instanceof Date ||
         (/^(time|now|hou?ra?|tiempo|today|date|fecha)s?$/im.test(action) &&
@@ -128,7 +136,7 @@ export function injectVariables<T extends string, V extends Values>(
         else if (!options.timeStyle && !/^(date|fecha|today)s?$/im.test(action) && /^(time|now|tiempo|hou?ra?)s?$/im.test(action))
           options.timeStyle = options.style || "short";
         else options.dateStyle ??= options.style;
-        value = format.date(v, options, locale);
+        value = escapeValue(format.date(v, options, locale));
         break;
       default:
         for (let { name, val } of instructions) {
@@ -140,8 +148,8 @@ export function injectVariables<T extends string, V extends Values>(
                   /\/.+\/\w*$/.test(name) && (name += ".test(String(#))"),
                   (name = name.replace(/(?<=[|&])(?=[=<>])/g, "#")),
                   /^[^\w#"'/({`[\]]/.test(name) ? (name = `#${name}`) : null,
-                  (name = name.replaceAll("#", JSON.stringify(v))),
-                  [...name.matchAll(/{(\w+)}/g)].forEach(([i, v]) => (name = name.replace(i, JSON.stringify(variables[v])))),
+                  // single pass: an inserted JSON value is never scanned again
+                  (name = name.replace(/#|{(\w+)}/g, (_, ref) => JSON.stringify(ref === undefined ? v : variables[ref]))),
                   evaluator?.(name))
                 : name == v) ||
               /^(ot(her|r[ao])|alway)s?$/im.test(name) ||
@@ -185,13 +193,14 @@ export function injectVariables<T extends string, V extends Values>(
           )
             v = format.number(v, options, locale);
         }
-        value?.includes("{") && (value = injectVariables(value as T, variables, options));
+        value?.includes("{") && (value = injectVariables(value as T, variables, { ...options, [KEEP_ESCAPES]: true }));
         break;
     }
-    value = value?.replace(/(?<!`)#/g, String(v)) ?? v;
+    value = value?.replace(/(?<!`)#/g, () => escapeValue(v)) ?? escapeValue(v);
     content = content.replaceAll(target, () => String(value)) as T;
   }
-  return content.replace(/`(.)/g, "$1") as Content<T>;
+  if ((formatOptions as Record<symbol, unknown> | undefined)?.[KEEP_ESCAPES]) return content as Content<T>;
+  return unescapeContent(content) as Content<T>;
 }
 
 export { injectVariables as inject };

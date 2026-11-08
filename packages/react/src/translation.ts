@@ -1,12 +1,14 @@
 import { createTranslation as ct, Translation as T, TranslationNode } from "@intl-t/core";
-import { injectVariables as iv } from "@intl-t/format/inject";
+import { injectVariables as iv, KEEP_ESCAPES } from "@intl-t/format/inject";
 import { getLocale, setLocale } from "@intl-t/react/client";
 import { TranslationProvider, useTranslation } from "@intl-t/react/context";
-import { injectReactChunks as ir } from "@intl-t/react/inject";
+import { injectEscapedReactChunks } from "@intl-t/react/inject";
 import { patch } from "@intl-t/react/patch";
 import type { TranslationFC } from "@intl-t/react/types";
 
-export const injectVariables = ((str: string, ...args: any[]) => ir(iv(str, ...args), ...args)) as typeof iv;
+// Values stay escaped through injectVariables so their markup is rendered as text, never as tags.
+export const injectVariables = ((str: string, variables?: any, options?: any) =>
+  injectEscapedReactChunks(iv(str, variables, { ...options, [KEEP_ESCAPES]: true }), variables)) as typeof iv;
 
 let wired = false;
 export function wire() {

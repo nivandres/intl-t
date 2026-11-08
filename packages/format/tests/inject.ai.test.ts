@@ -89,11 +89,10 @@ describe("inject — emoji and brace-bearing content", () => {
     expect(injectVariables("go {🚀}!", { "🚀": "up" })).toBe("go {🚀}!");
   });
 
-  it("keeps braces from a value literal when no matching variable exists, but cascades when one does", () => {
+  it("keeps braces from a value literal, even when they name another variable", () => {
     expect(injectVariables("v={v}", { v: "{x}" })).toBe("v={x}");
-    // KNOWN: sequential replacement re-interpolates placeholders introduced by earlier values.
-    // Frozen as-is; user-provided values naming another variable will cascade (see roadmap).
-    expect(injectVariables("v={v}", { v: "{x}", x: "cascaded" })).toBe("v=cascaded");
+    // values are data: a value naming another variable no longer cascades into it
+    expect(injectVariables("v={v}", { v: "{x}", x: "cascaded" })).toBe("v={x}");
   });
 });
 

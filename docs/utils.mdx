@@ -34,8 +34,12 @@ inject("{a} plus {b} {(a+b), (typeof # != 'number') {is not a number. #} <0 {is 
 The extended syntax above (`{(a+b)}`, comparison guards, nested conditions) is evaluated. **Treat
 message templates as code, not data** — the same trust you give the source files that import them.
 Do **not** feed attacker-controlled strings (CMS entries, user-submitted or third-party translation
-files) in as *templates*; a crafted template can run arbitrary expressions. Interpolated **values**
-(`inject(template, values)`) are safe to take from users.
+files) in as *templates*; a crafted template can run arbitrary expressions.
+
+Interpolated **values** (`inject(template, values)`) are data and safe to take from users. They are
+inserted literally: braces, `#`, quotes or markup inside a value are never parsed as placeholders,
+options, expressions or React tags. To write one of those characters literally in a *template*,
+escape it with a backtick (`` `{ ``, `` `# ``, `` `< ``).
 
 Expression evaluation can be turned off where it isn't needed (for example on a server rendering
 untrusted content). Set the `INTL_T_DISABLED_EVAL` environment variable, or pass `enabledEval: false`
