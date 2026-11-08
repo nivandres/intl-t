@@ -3,7 +3,6 @@
 // invokes the wired react TranslationProvider — identity is asserted in translation.ai.test.tsx).
 // Rendering the raw exported TranslationProvider with a `t` prop is not expressible in the type
 // system today: generic inference over the whole translation instance explodes (TS2589).
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { type Locale } from "@intl-t/core";
 import { LOCALE_CLIENT_KEY } from "@intl-t/react";
 import "@testing-library/jest-dom";
@@ -15,14 +14,10 @@ import { setClientLocale } from "../src/client";
 import { TranslationContext, useTranslation } from "../src/context";
 import { useLocale, type LocaleState } from "../src/hooks";
 import { createTranslation as ct, TranslationNode } from "../src/translation";
+import { useDom } from "./dom";
 import messages from "./fixtures/messages.json";
 
-const domSetupKey = Symbol.for("intl-t.react.test.dom-setup");
-
-if (!(globalThis as Record<PropertyKey, unknown>)[domSetupKey]) {
-  GlobalRegistrator.register();
-  (globalThis as Record<PropertyKey, unknown>)[domSetupKey] = true;
-}
+useDom();
 
 function createReactTranslation() {
   return ct({

@@ -1,5 +1,4 @@
 // AI generated test
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { getT, setLocale as setCoreLocale, type Locale, type Translation } from "@intl-t/core";
 import "@testing-library/jest-dom";
 import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
@@ -8,14 +7,10 @@ import { createElement } from "react";
 import { getClientLocale, setClientLocale, LOCALE_CLIENT_KEY } from "../src/client";
 import { useLocale, type LocaleState } from "../src/hooks";
 import { createTranslation as ct, TranslationNode } from "../src/translation";
+import { useDom } from "./dom";
 import messages from "./fixtures/messages.json";
 
-const domSetupKey = Symbol.for("intl-t.react.test.dom-setup");
-
-if (!(globalThis as Record<PropertyKey, unknown>)[domSetupKey]) {
-  GlobalRegistrator.register();
-  (globalThis as Record<PropertyKey, unknown>)[domSetupKey] = true;
-}
+useDom();
 
 function createReactTranslation() {
   return ct({
