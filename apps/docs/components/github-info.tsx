@@ -47,8 +47,12 @@ export async function GithubInfo({
   repo: string;
   token?: string;
 }) {
-  const { stars } = await getRepoStarsAndForks(owner, repo, token);
-  const humanizedStars = humanizeNumber(stars);
+  // A failed or rate-limited GitHub API call must not fail the build; hide the count instead.
+  const stars = await getRepoStarsAndForks(owner, repo, token ?? process.env.GITHUB_TOKEN).then(
+    data => data.stars,
+    () => null,
+  );
+  const humanizedStars = stars == null ? null : humanizeNumber(stars);
 
   return (
     <a
@@ -68,10 +72,12 @@ export async function GithubInfo({
         </svg>
         {owner}/{repo}
       </p>
-      <p className="flex text-xs items-center gap-1 text-fd-muted-foreground">
-        <Star className="size-3" />
-        {humanizedStars}
-      </p>
+      {humanizedStars != null && (
+        <p className="flex text-xs items-center gap-1 text-fd-muted-foreground">
+          <Star className="size-3" />
+          {humanizedStars}
+        </p>
+      )}
     </a>
   );
 }

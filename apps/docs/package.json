@@ -10,6 +10,7 @@
   "author": "Ivan Vargas <nivnnd@gmail.com>",
   "scripts": {
     "build": "next build --turbo",
+    "build:static": "NEXT_OUTPUT=export next build --turbo && node scripts/export-extras.mjs",
     "dev": "next dev --turbo",
     "start": "next start",
     "typecheck": "tsc --noEmit",
