@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
       - name: Install deps
@@ -36,7 +36,8 @@ jobs:
         run: bun run lint
       - name: Typecheck
         run: bun run typecheck
-      - name: Test
-        run: bun test
+      # Build before testing: some suites import the published `dist/` entry points in a subprocess.
       - name: Build
         run: bun run build
+      - name: Test
+        run: bun test

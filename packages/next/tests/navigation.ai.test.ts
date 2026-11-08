@@ -1,20 +1,12 @@
 // AI generated test
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { cleanup, render } from "@testing-library/react";
 import { afterAll, afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import { createElement } from "react";
 import { createNavigation } from "../src/navigation";
 import { TranslationNode } from "../src/translation";
+import { useDom } from "./dom";
 
-const domSetupKey = Symbol.for("intl-t.react.test.dom-setup");
-// next/server relies on the runtime fetch primitives, which happy-dom would replace
-const nativeFetchPrimitives = { fetch, Headers, Request, Response, URL, URLSearchParams };
-
-if (!(globalThis as Record<PropertyKey, unknown>)[domSetupKey]) {
-  GlobalRegistrator.register();
-  (globalThis as Record<PropertyKey, unknown>)[domSetupKey] = true;
-  Object.assign(globalThis, nativeFetchPrimitives);
-}
+useDom();
 
 const navigationSnapshot = { ...(await import("next/navigation")) };
 

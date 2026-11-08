@@ -1,5 +1,4 @@
 // AI generated test
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import React, { type ReactNode } from "react";
@@ -7,13 +6,9 @@ import { getLocale as clientGetLocale, setLocale as clientSetLocale } from "../s
 import { TranslationProvider, useTranslation } from "../src/context";
 import { useLocale } from "../src/hooks";
 import { createTranslation, TranslationNode } from "../src/translation";
+import { useDom } from "./dom";
 
-const domSetupKey = Symbol.for("intl-t.react.test.dom-setup");
-
-if (!(globalThis as Record<PropertyKey, unknown>)[domSetupKey]) {
-  GlobalRegistrator.register();
-  (globalThis as Record<PropertyKey, unknown>)[domSetupKey] = true;
-}
+useDom();
 
 beforeEach(() => {
   localStorage.clear();

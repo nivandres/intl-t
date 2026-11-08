@@ -1,18 +1,10 @@
 // AI generated test
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { LOCALE_CLIENT_KEY } from "@intl-t/react";
 import { afterAll, afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import { getClientLocationLocale, getLocaleFromClient, setClientLocationLocale, setLocaleFromClient } from "../src/client";
+import { useDom } from "./dom";
 
-const domSetupKey = Symbol.for("intl-t.react.test.dom-setup");
-// next/server relies on the runtime fetch primitives, which happy-dom would replace
-const nativeFetchPrimitives = { fetch, Headers, Request, Response, URL, URLSearchParams };
-
-if (!(globalThis as Record<PropertyKey, unknown>)[domSetupKey]) {
-  GlobalRegistrator.register();
-  (globalThis as Record<PropertyKey, unknown>)[domSetupKey] = true;
-  Object.assign(globalThis, nativeFetchPrimitives);
-}
+useDom();
 
 // the default happy-dom URL is about:blank, where location-based helpers cannot resolve paths
 const happyDOM: { setURL(url: string): void } = Reflect.get(window, "happyDOM");

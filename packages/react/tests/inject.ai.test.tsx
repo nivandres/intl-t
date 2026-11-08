@@ -1,18 +1,13 @@
 // AI generated test
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import "@testing-library/jest-dom";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { Fragment } from "react";
 import { Chunk, injectReactChunk, injectReactChunks } from "../src/inject";
 import { TranslationNode } from "../src/translation";
+import { useDom } from "./dom";
 
-const domSetupKey = Symbol.for("intl-t.react.test.dom-setup");
-
-if (!(globalThis as Record<PropertyKey, unknown>)[domSetupKey]) {
-  GlobalRegistrator.register();
-  (globalThis as Record<PropertyKey, unknown>)[domSetupKey] = true;
-}
+useDom();
 
 beforeEach(() => {
   document.body.innerHTML = "";
