@@ -10,3 +10,4 @@ desktop.ini
 dist
 node_modules
 next-env.d.ts
+.release
