@@ -73,6 +73,13 @@ t.homepage.title;
 - Open pull requests against `main`.
 - Before submitting code changes, run: `bun run format:check`, `bun run lint`, `bun run typecheck`, `bun run build`, `bun test`
 - CI in `.github/workflows/main.yml` runs the same checks for code changes.
+
+## Releasing
+
+- Bump the `version` of the root `package.json` and every `packages/*/package.json` to the same value.
+- Optionally add notes at `.github/release-notes/v<version>.md`.
+- Merge the bump to `main`, then run the **Release** workflow (`.github/workflows/release.yml`). It runs the checks, packs and verifies every tarball (`bun scripts/release.ts pack`), publishes the missing ones to npm with provenance, tags, and creates the GitHub release.
+- Do not publish from a local machine: `bun.lock` is gitignored, and a stale lockfile once shipped wrong internal dependency versions.
 - If you update roadmap items or larger feature plans, also update `docs/contributing.mdx`:
   - the roadmap bullet list
   - the progress table
