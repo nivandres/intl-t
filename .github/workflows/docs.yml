@@ -1,0 +1,63 @@
+name: Docs
+# Builds the docs site as a static export and deploys it to GitHub Pages.
+# Deploys only when Settings → Pages → Source is "GitHub Actions"; otherwise it just validates the build.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "apps/docs/**"
+      - "packages/**"
+      - ".github/workflows/docs.yml"
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.pages.outputs.deploy }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Install deps
+        run: bun install
+      - name: Build packages
+        run: bun run build
+      - name: Build static docs
+        working-directory: apps/docs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: bun run build:static
+      - name: Check Pages source
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          source=$(gh api "repos/${{ github.repository }}/pages" --jq .build_type 2>/dev/null || echo none)
+          echo "Pages build type: $source"
+          if [ "$source" = "workflow" ]; then echo "deploy=true" >> "$GITHUB_OUTPUT"; else echo "deploy=false" >> "$GITHUB_OUTPUT"; fi
+      - name: Upload Pages artifact
+        if: steps.pages.outputs.deploy == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/docs/out
+  deploy:
+    needs: build
+    if: needs.build.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -14,5 +14,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
 }
 
 export function generateStaticParams() {
-  return source.generateParams();
+  const params = source.generateParams();
+  // A static export can't hold both the file `llms.mdx` and the folder `llms.mdx/`.
+  return process.env.NEXT_OUTPUT === "export" ? params.filter(({ slug }) => slug.length > 0) : params;
 }
