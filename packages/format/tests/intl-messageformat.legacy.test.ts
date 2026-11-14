@@ -12,11 +12,14 @@ function parse(value: string): string {
 class IntlMessageFormat {
   constructor(
     public value: string,
+    public locale?: string | string[],
     // oxlint-disable-next-line no-unused-vars
     ...args: any[]
   ) {}
   format(values?: Values) {
-    return iv(this.value, values);
+    // like IntlMessageFormat, the locale given to the constructor drives plural rules
+    const locale = Array.isArray(this.locale) ? this.locale[0] : this.locale;
+    return iv(this.value, values, locale ? { locale } : {});
   }
 }
 
