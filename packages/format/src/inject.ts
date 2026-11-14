@@ -36,6 +36,24 @@ export const KEEP_ESCAPES = Symbol.for("intl-t.inject.keep-escapes");
 const escapeValue = (value: unknown) => String(value).replace(/[`{}#<>"']/g, "`$&");
 export const unescapeContent = (content: string) => content.replace(/`(.)/g, "$1");
 const own = (object: object, key: string) => Object.prototype.hasOwnProperty.call(object, key);
+
+// ICU `plural` / `selectordinal` select CLDR categories with Intl.PluralRules (cached per locale and type).
+const CLDR_CATEGORY = /^(zero|one|two|few|many|other)$/;
+const EXACT = /^=\s*(-?\d+(?:\.\d+)?)$/;
+const pluralRules = new Map<string, Intl.PluralRules>();
+function pluralCategory(n: number, locale: string | undefined, type: Intl.PluralRuleType) {
+  const id = `${locale}|${type}`;
+  let rules = pluralRules.get(id);
+  if (!rules) {
+    try {
+      rules = new Intl.PluralRules(locale, { type });
+    } catch {
+      rules = new Intl.PluralRules(undefined, { type });
+    }
+    pluralRules.set(id, rules);
+  }
+  return rules.select(n);
+}
 const instructionRegex = /{(.*)}/s;
 
 export function instructionsMatch(content: string) {
@@ -107,6 +125,7 @@ export function injectVariables<T extends string, V extends Values>(
         continue;
       }
     }
+    const icuType = /^(plural|selectordinal|ordinal)$/i.exec(action.trim())?.[1].toLowerCase();
     const options = { ...formatOptions } as any;
     const instructions = instructionsMatch(instruction).map(({ groups = {} }) => {
       const { k: name, v: val, t, t_ } = groups;
@@ -138,49 +157,64 @@ export function injectVariables<T extends string, V extends Values>(
         else options.dateStyle ??= options.style;
         value = escapeValue(format.date(v, options, locale));
         break;
-      default:
-        for (let { name, val } of instructions) {
-          try {
-            if (
-              v == name.match(/^=?(?<k>'|")(.*)(?<!`)\k<k>$/)?.[2] ||
-              (/[^\w\s]/.test(name)
-                ? ((name = name.replace(/(?<![=<>&|!])([=&|])(?![=&|])/g, "$1$1")),
-                  /\/.+\/\w*$/.test(name) && (name += ".test(String(#))"),
-                  (name = name.replace(/(?<=[|&])(?=[=<>])/g, "#")),
-                  /^[^\w#"'/({`[\]]/.test(name) ? (name = `#${name}`) : null,
-                  // single pass: an inserted JSON value is never scanned again
-                  (name = name.replace(/#|{(\w+)}/g, (_, ref) => JSON.stringify(ref === undefined ? v : variables[ref]))),
-                  evaluator?.(name))
-                : name == v) ||
-              /^(ot(her|r[ao])|alway)s?$/im.test(name) ||
-              (v ? /^(yea?[hs]?|y[ue]p|true?|s[íi].?|[sytv])$/im.test(name) : /^(no.?|false?|[nf])$/im.test(name)) ||
-              (typeof v === "number" || !isNaN(v)
-                ? (v == 0 && /^([zc]ero|draw|tie|tabl[ea])s?$/i.test(name)) ||
-                  (action.includes("ordinal") &&
-                    String(v).match(
-                      /^(one|uno)s?$/i.test(name)
-                        ? /(?<!1)1$/
-                        : /^(two|do[zs]e?n?)s?$/i.test(name)
-                          ? /2$/
-                          : /^(thre+|tre)s?$/i.test(name)
-                            ? /3$/
-                            : (null as unknown as string),
-                    )) ||
-                  (v == 1 && /^(one|[ui]nit|uno)s?$/i.test(name)) ||
-                  (v == 2 && /^(two|pai?r|du(ale?|o)|do[sz]e?n?)s?$/i.test(name)) ||
-                  (v == 3 && /^(thre+|tre|trio?)s?$/i.test(name)) ||
-                  (v > 4 && v < Infinity && /^(many|a? *lot|much[ao]?)s?$/i.test(name)) ||
-                  (v > 1 && v < 4 && /^(few|a? *little|poc[ao]|paucal)s?$/i.test(name)) ||
-                  (v < 5 && /^(paucal|vario|alguno|cuanto)s?$/i.test(name)) ||
-                  (v > 0 && /^(surplu|debit|profit|worth)s?$/i.test(name)) ||
-                  (v < 0 && /^(deficit|lose?|de(bt|uda?)|credito?)s?$/i.test(name))
-                : false)
-            ) {
-              value = val;
-              break;
-            }
-          } catch {}
+      default: {
+        // ICU semantics for typed plural/selectordinal: exact `=N` (on n), then the CLDR category of
+        // n - offset, then extended intl-t guards, then `other`. `zero` also matches n = 0 (intl-t extension).
+        const n = typeof v === "number" ? v : typeof v === "string" && v.trim() ? Number(v) : NaN;
+        const icu = icuType && Number.isFinite(n);
+        if (icu) {
+          const category = pluralCategory(n - (Number(options.offset) || 0), locale, icuType === "plural" ? "cardinal" : "ordinal");
+          const exact = instructions.find(({ name }) => Number(EXACT.exec(name)?.[1]) === n);
+          const zero = n === 0 ? instructions.find(({ name }) => name === "zero") : undefined;
+          const match = category === "other" ? undefined : instructions.find(({ name }) => name === category);
+          value = (exact ?? zero ?? match)?.val;
         }
+        if (value === undefined)
+          for (let { name, val } of instructions) {
+            if (icu && CLDR_CATEGORY.test(name)) continue;
+            try {
+              if (
+                v == name.match(/^=?(?<k>'|")(.*)(?<!`)\k<k>$/)?.[2] ||
+                (EXACT.test(name) && Number(EXACT.exec(name)![1]) === Number(v)) ||
+                (/[^\w\s]/.test(name)
+                  ? ((name = name.replace(/(?<![=<>&|!])([=&|])(?![=&|])/g, "$1$1")),
+                    /\/.+\/\w*$/.test(name) && (name += ".test(String(#))"),
+                    (name = name.replace(/(?<=[|&])(?=[=<>])/g, "#")),
+                    /^[^\w#"'/({`[\]]/.test(name) ? (name = `#${name}`) : null,
+                    // single pass: an inserted JSON value is never scanned again
+                    (name = name.replace(/#|{(\w+)}/g, (_, ref) => JSON.stringify(ref === undefined ? v : variables[ref]))),
+                    evaluator?.(name, enabledEval))
+                  : name == v) ||
+                /^(ot(her|r[ao])|alway)s?$/im.test(name) ||
+                (v ? /^(yea?[hs]?|y[ue]p|true?|s[íi].?|[sytv])$/im.test(name) : /^(no.?|false?|[nf])$/im.test(name)) ||
+                (typeof v === "number" || !isNaN(v)
+                  ? (v == 0 && /^([zc]ero|draw|tie|tabl[ea])s?$/i.test(name)) ||
+                    (action.includes("ordinal") &&
+                      String(v).match(
+                        /^(one|uno)s?$/i.test(name)
+                          ? /(?<!1)1$/
+                          : /^(two|do[zs]e?n?)s?$/i.test(name)
+                            ? /(?<!1)2$/
+                            : /^(thre+|tre)s?$/i.test(name)
+                              ? /(?<!1)3$/
+                              : (null as unknown as string),
+                      )) ||
+                    (v == 1 && /^(one|[ui]nit|uno)s?$/i.test(name)) ||
+                    (v == 2 && /^(two|pai?r|du(ale?|o)|do[sz]e?n?)s?$/i.test(name)) ||
+                    (v == 3 && /^(thre+|tre|trio?)s?$/i.test(name)) ||
+                    (v > 4 && v < Infinity && /^(many|a? *lot|much[ao]?)s?$/i.test(name)) ||
+                    (v > 1 && v < 4 && /^(few|a? *little|poc[ao]|paucal)s?$/i.test(name)) ||
+                    (v < 5 && /^(paucal|vario|alguno|cuanto)s?$/i.test(name)) ||
+                    (v > 0 && /^(surplu|debit|profit|worth)s?$/i.test(name)) ||
+                    (v < 0 && /^(deficit|lose?|de(bt|uda?)|credito?)s?$/i.test(name))
+                  : false)
+              ) {
+                value = val;
+                break;
+              }
+            } catch {}
+          }
+        if (icu && value === undefined) value = instructions.find(({ name }) => name === "other")?.val;
         if (typeof v === "number") {
           if (options.offset) v -= options.offset;
           if (options.scale) v *= options.scale;
@@ -195,6 +229,7 @@ export function injectVariables<T extends string, V extends Values>(
         }
         value?.includes("{") && (value = injectVariables(value as T, variables, { ...options, [KEEP_ESCAPES]: true }));
         break;
+      }
     }
     value = value?.replace(/(?<!`)#/g, () => escapeValue(v)) ?? escapeValue(v);
     content = content.replaceAll(target, () => String(value)) as T;

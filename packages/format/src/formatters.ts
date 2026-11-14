@@ -59,7 +59,7 @@ export function relative(value: Date | number = 0, options: RelativeTimeFormatOp
         .reverse()
         .find(
           ([k, v]) => Math.abs(value as number) >= v && ((value = Math.trunc((value as number) / v)), (unit = k as keyof typeof unitMap)),
-        ) || (unit = "seconds");
+        ) || ((value = Math.trunc((value as number) / unitMap.seconds)), (unit = "seconds"));
   } else unit ??= "days";
   return new Intl.RelativeTimeFormat(locale, options).format(value, unit!);
 }

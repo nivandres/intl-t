@@ -193,6 +193,24 @@ console.log(t("items", { count: 1 })); // Output: You have 1 item.
 console.log(t("items", { count: 5 })); // Output: You have 5 items.
 ```
 
+`plural` and `selectordinal` follow the ICU rules for the current locale, through `Intl.PluralRules`:
+
+1. An exact match (`=0`, `=1`, …) is compared with the number itself.
+2. Otherwise the CLDR category (`zero`, `one`, `two`, `few`, `many`) of `count - offset` is used.
+3. Otherwise `other`.
+
+`#` prints `count - offset`. As an intl-t extension, `zero` also matches `0` in every locale, and guards such as `>1&<10` still work inside these messages.
+
+```ts
+{
+  files: "{count, plural, one {# plik} few {# pliki} many {# plików} other {# pliku}}", // pl
+  place: "{n, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}", // en
+}
+
+t("files", { count: 22 }); // 22 pliki
+t("place", { n: 23 }); // 23rd
+```
+
 #### Date and Number Formatting
 
 ```ts
